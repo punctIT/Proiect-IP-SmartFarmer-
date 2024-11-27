@@ -7,6 +7,6 @@ int main()
 // int gd = DETECT, gm;
 // initgraph(&gd, &gm, "");
   initwindow(800,600);
-  bar(44,200,200,200);
+  bar(1,10,200,200);
   getch(); return 0;
 }
