@@ -3,6 +3,7 @@
 #include <graphics.h>
 #include <cstring>
 #include <fstream>
+#include <cstdio> //pentru Remove
 using namespace std;
 
 char GameBoard[7][9];
@@ -11,51 +12,58 @@ int length = 9, width = 7;
 struct GamePieces
 {
     int x, y;
-    struct
-    {
-        int n;
-        pair<int, int> coordonate[7]; // coordonatele in maticea de marcare, first- x , second y
-        char symbol = '5';
-    } GB;
+    int GB[7][9];
 
 } Fence;
+
 void readFence(GamePieces &fence, string FileName)
 {
     ifstream fin(FileName);
-    fin >> fence.GB.n;
-    for (int i = 1; i <= fence.GB.n; i++)
-        fin >> fence.GB.coordonate[i].first >> fence.GB.coordonate[i].second;
+    for (int i = 0; i < width; i++)
+        for (int q = 0; q < length; q++)
+            fin>>fence.GB[i][q];
 }
+
 bool VerifyFencePosition(GamePieces fence, int x, int y)
 {
-    for (int i = 1; i <= fence.GB.n; i++)
-        if (strchr("01234", GameBoard[fence.GB.coordonate[i].first + y][fence.GB.coordonate[i].second + x]) == NULL)
-            return false;
+     for(int i=0;i<width;i++)
+        for(int q=0;q<length;q++)
+            if(fence.GB[i][q]&&strchr("01234",GameBoard[i][q])==NULL)
+                return false;
     return true;
 }
+
 void addFance(GamePieces fence)
 {
-    if (!VerifyFencePosition(fence, 0, 0))
-    {
-        cout << "erroare" << endl;
-        return;
-    }
-    for (int i = 1; i <= fence.GB.n; i++)
-        GameBoard[fence.GB.coordonate[i].first][fence.GB.coordonate[i].second]++;
+    if(!VerifyFencePosition(fence,0,0))
+        {
+            cout<<"erroare";
+            return;
+        }
+    for(int i=0;i<width;i++)
+        for(int q=0;q<length;q++)
+            GameBoard[i][q]+=fence.GB[i][q];
 }
-void moveFence(GamePieces &fence, int x, int y) // x coloana , y linia
+void moveFence(GamePieces &fence, int x, int y) // x coloana , y linia(indicele , cu cat sa se mute)
 {
     if (!VerifyFencePosition(fence, x, y))
     {
         cout << "erroare1" << endl;
         return;
     }
-    for (int i = 1; i <= fence.GB.n; i++)
+    GamePieces auxMatrix={0};
+    for (int i = 0; i < width; i++)
     {
-        GameBoard[fence.GB.coordonate[i].first][fence.GB.coordonate[i].second]--;
-        fence.GB.coordonate[i].first += y;
-        fence.GB.coordonate[i].second += x;
+        for (int q = 0; q < length; q++)
+           if(fence.GB[i][q])
+           {
+                GameBoard[i][q]--;
+                //GameBoard[i+y][q+x]++;
+                fence.GB[i][q]=0;
+                auxMatrix.GB[i+y][q+x]=1;
+           }           
     }
+    fence=auxMatrix;
     addFance(fence);
 }
 void DrawGameBoardMatrix()
@@ -67,61 +75,76 @@ void DrawGameBoardMatrix()
         cout << endl;
     }
 }
-void readGameBoard()
+void readGameBoard(string FileName)
 {
-    ifstream fin("GameBoards/GameBoard.txt");
+    ifstream fin(FileName);
     for (int i = 0; i < width; i++)
         for (int q = 0; q < length; q++)
             fin >> GameBoard[i][q];
 }
 
 // Partea de Grafica
-int LeftBorder, UpBorder, gbWidth, gbHeight, gbSideLength;
-void DrawInBoardGame(int x, int y,int color)
+
+int LeftBorder, UpBorder, gbWidth, gbHeight, gbSideLength,DownBorder,RightBorder;
+void DrawInBoardGame(int x, int y, int color)
 {
-   // circle(LeftBorder+ gbSideLength * (x - 1) + gbSideLength/ 2, UpBorder + gbSideLength * (y - 1) +gbSideLength / 2, 10);
-    setfillstyle(SOLID_FILL,color);
-    floodfill(LeftBorder+ gbSideLength * (x - 1) + gbSideLength/ 2, UpBorder + gbSideLength * (y - 1) +gbSideLength / 2,15);
-    
+    // circle(LeftBorder+ gbSideLength * (x - 1) + gbSideLength/ 2, UpBorder + gbSideLength * (y - 1) +gbSideLength / 2, 10);
+    setfillstyle(SOLID_FILL, color);
+    floodfill(LeftBorder + gbSideLength * (x - 1) + gbSideLength / 2, UpBorder + gbSideLength * (y - 1) + gbSideLength / 2, 15);
 }
 void DrawBoardGame()
 {
     gbWidth = 400;
     gbHeight = 400;
     gbSideLength = gbWidth / 5;
-    UpBorder = 10;
-    LeftBorder = 10;
+    UpBorder = 50;
+    LeftBorder = 50;
+    RightBorder=50;
     for (int i = 1; i <= length; i++)
         for (int j = 1; j <= width; j++)
             rectangle(LeftBorder + gbSideLength * (i - 1), UpBorder + gbSideLength * (j - 1), LeftBorder + gbSideLength * i, UpBorder + gbSideLength * j);
-     for (int i = 0; i < width; i++)
+    for (int i = 0; i < width; i++)
         for (int q = 0; q < length; q++)
-            if(GameBoard[i][q]=='#')
-            {
-                DrawInBoardGame(q+1,i+1,2);
-            }
-            else if(GameBoard[i][q]=='*')
-            {
-                DrawInBoardGame(q+1,i+1,3);
-            }
-            else {
-                DrawInBoardGame(q+1,i+1,10);
-            }
-            
-    
+            if (GameBoard[i][q] == '#')
+                DrawInBoardGame(q + 1, i + 1, 1);
+            else
+                DrawInBoardGame(q + 1, i + 1, GameBoard[i][q] - '0');
+
 }
 
+POINT MouseCoordonates()//RETURNEAZA coodonatele in matrice, unde se afla mouseul
+{
+    POINT  GB;
+    if(ismouseclick(WM_LBUTTONDOWN))
+    {
+        Beep(250,600);
+        clearmouseclick(WM_LBUTTONDOWN);
+        int x=mousex();
+        int y=mousey();
+        GB.y=(x-LeftBorder)/gbSideLength;
+        GB.x=(y-UpBorder)/gbSideLength;
+        ofstream fout("GameBoards/coordonate.txt", ios_base::app);
+        fout<<GB.x<<" "<<GB.y<<endl;
+    }
+    return GB;
+}
 int main()
 {
 
-     readGameBoard();
-     readFence(Fence,"GameBoards/Piesa1.txt");
-//   DrawGameBoard();
+    readGameBoard("GameBoards/GameBoard.txt");
+    readFence(Fence, "GameBoards/Piesa1.txt");
+    addFance(Fence);
+    moveFence(Fence,2,2);
 
-    initwindow(800, 600);
+    initwindow(1400, 700);
     DrawBoardGame();
+    while(true){
+        MouseCoordonates();
+    }
+        
     getch();
     closegraph();
+
     return 0;
-    ;
+    
 }
