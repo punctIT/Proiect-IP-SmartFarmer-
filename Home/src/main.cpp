@@ -21,28 +21,28 @@ void readFence(GamePieces &fence, string FileName)
     ifstream fin(FileName);
     for (int i = 0; i < width; i++)
         for (int q = 0; q < length; q++)
-            fin>>fence.GB[i][q];
+            fin >> fence.GB[i][q];
 }
 
 bool VerifyFencePosition(GamePieces fence, int x, int y)
 {
-     for(int i=0;i<width;i++)
-        for(int q=0;q<length;q++)
-            if(fence.GB[i][q]&&strchr("01234",GameBoard[i][q])==NULL)
+    for (int i = 0; i < width; i++)
+        for (int q = 0; q < length; q++)
+            if (fence.GB[i][q] && strchr("01234", GameBoard[i][q]) == NULL)
                 return false;
     return true;
 }
 
 void addFance(GamePieces fence)
 {
-    if(!VerifyFencePosition(fence,0,0))
-        {
-            cout<<"erroare";
-            return;
-        }
-    for(int i=0;i<width;i++)
-        for(int q=0;q<length;q++)
-            GameBoard[i][q]+=fence.GB[i][q];
+    if (!VerifyFencePosition(fence, 0, 0))
+    {
+        cout << "erroare";
+        return;
+    }
+    for (int i = 0; i < width; i++)
+        for (int q = 0; q < length; q++)
+            GameBoard[i][q] += fence.GB[i][q];
 }
 void moveFence(GamePieces &fence, int x, int y) // x coloana , y linia(indicele , cu cat sa se mute)
 {
@@ -51,19 +51,19 @@ void moveFence(GamePieces &fence, int x, int y) // x coloana , y linia(indicele 
         cout << "erroare1" << endl;
         return;
     }
-    GamePieces auxMatrix={0};
+    GamePieces auxMatrix = {0};
     for (int i = 0; i < width; i++)
     {
         for (int q = 0; q < length; q++)
-           if(fence.GB[i][q])
-           {
+            if (fence.GB[i][q])
+            {
                 GameBoard[i][q]--;
-                //GameBoard[i+y][q+x]++;
-                fence.GB[i][q]=0;
-                auxMatrix.GB[i+y][q+x]=1;
-           }           
+                // GameBoard[i+y][q+x]++;
+                fence.GB[i][q] = 0;
+                auxMatrix.GB[i + y][q + x] = 1;
+            }
     }
-    fence=auxMatrix;
+    fence = auxMatrix;
     addFance(fence);
 }
 void DrawGameBoardMatrix()
@@ -85,7 +85,7 @@ void readGameBoard(string FileName)
 
 // Partea de Grafica
 
-int LeftBorder, UpBorder, gbWidth, gbHeight, gbSideLength,DownBorder,RightBorder;
+int LeftBorder, UpBorder, gbWidth, gbHeight, gbSideLength, DownBorder, RightBorder;
 void DrawInBoardGame(int x, int y, int color)
 {
     // circle(LeftBorder+ gbSideLength * (x - 1) + gbSideLength/ 2, UpBorder + gbSideLength * (y - 1) +gbSideLength / 2, 10);
@@ -99,7 +99,7 @@ void DrawBoardGame()
     gbSideLength = gbWidth / 5;
     UpBorder = 50;
     LeftBorder = 50;
-    RightBorder=50;
+    RightBorder = 50;
     for (int i = 1; i <= length; i++)
         for (int j = 1; j <= width; j++)
             rectangle(LeftBorder + gbSideLength * (i - 1), UpBorder + gbSideLength * (j - 1), LeftBorder + gbSideLength * i, UpBorder + gbSideLength * j);
@@ -109,22 +109,41 @@ void DrawBoardGame()
                 DrawInBoardGame(q + 1, i + 1, 1);
             else
                 DrawInBoardGame(q + 1, i + 1, GameBoard[i][q] - '0');
-
 }
 
-POINT MouseCoordonates()//RETURNEAZA coodonatele in matrice, unde se afla mouseul
+void drawFence(GamePieces fence, int x, int y, int side)
 {
-    POINT  GB;
-    if(ismouseclick(WM_LBUTTONDOWN))
+
+      for (int i = 0; i < width; i++){
+      //  ofstream fout("GameBoards/coordonate.txt", ios_base::app);
+        for (int q = 0; q < length; q++){
+            
+          //  fout<<fence.GB[i][q]<<" ";
+            if (fence.GB[i][q])
+            {
+                x+=side*(q);
+                y+=side*(i);
+                rectangle(x, y, x + side, y + side);
+                y-=side*(i);
+                x-=side*(q);
+            }
+        }
+    }
+}
+
+POINT MouseCoordonates() // RETURNEAZA coodonatele in matrice, unde se afla mouseul
+{
+    POINT GB;
+    if (ismouseclick(WM_LBUTTONDOWN))
     {
-        Beep(250,600);
+        Beep(250, 600);
         clearmouseclick(WM_LBUTTONDOWN);
-        int x=mousex();
-        int y=mousey();
-        GB.y=(x-LeftBorder)/gbSideLength;
-        GB.x=(y-UpBorder)/gbSideLength;
+        int x = mousex();
+        int y = mousey();
+        GB.y = (x - LeftBorder) / gbSideLength;
+        GB.x = (y - UpBorder) / gbSideLength;
         ofstream fout("GameBoards/coordonate.txt", ios_base::app);
-        fout<<GB.x<<" "<<GB.y<<endl;
+        fout << GB.x << " " << GB.y << endl;
     }
     return GB;
 }
@@ -132,19 +151,21 @@ int main()
 {
 
     readGameBoard("GameBoards/GameBoard.txt");
-    readFence(Fence, "GameBoards/Piesa1.txt");
+    readFence(Fence, "GameBoards/Piesa3.txt");
     addFance(Fence);
-    moveFence(Fence,2,2);
+    moveFence(Fence, 2, 2);
 
     initwindow(1400, 700);
     DrawBoardGame();
-    while(true){
+    cleardevice();
+     drawFence(Fence, 0, 0, gbSideLength);
+    while (true)
+    {
         MouseCoordonates();
     }
-        
+
     getch();
     closegraph();
 
     return 0;
-    
 }
