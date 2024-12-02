@@ -94,9 +94,10 @@ void DrawInBoardGame(int x, int y, int color)
 }
 void DrawBoardGame()
 {
-    gbWidth = 400;
+    
+    gbSideLength = 80;
+    gbWidth = gbSideLength*length;
     gbHeight = 400;
-    gbSideLength = gbWidth / 5;
     UpBorder = 50;
     LeftBorder = 50;
     RightBorder = 50;
@@ -113,19 +114,64 @@ void DrawBoardGame()
 
 void drawFence(GamePieces fence, int x, int y, int side)
 {
-
-      for (int i = 0; i < width; i++){
-      //  ofstream fout("GameBoards/coordonate.txt", ios_base::app);
-        for (int q = 0; q < length; q++){
-            
-          //  fout<<fence.GB[i][q]<<" ";
+    int ZeroLineNumber = 0, ZeroColumnNumber = 0;
+    for (int i = 0; i < width; i++)
+    {
+        bool ok = true;
+        for (int q = 0; q < length; q++)
             if (fence.GB[i][q])
             {
-                x+=side*(q);
-                y+=side*(i);
+                ok = false;
+                break;
+            }
+        if (ok)
+            ZeroLineNumber++;
+        else
+            break;
+    }
+    for (int i = 0; i < length; i++)
+    {
+        bool ok = true;
+        for (int q = 0; q < width; q++)
+            if (fence.GB[q][i])
+            {
+                ok = false;
+                break;
+            }
+        if (ok)
+            ZeroColumnNumber++;
+        else
+            break;
+    }
+    for (int i = 0; i < width; i++)
+        for (int q = 0; q < length; q++)
+            fence.GB[i][q] = fence.GB[i + ZeroLineNumber][q + ZeroColumnNumber];
+    for (int i = width - ZeroLineNumber; i < width; i++)
+        for (int q = 0; q < length; q++)
+            fence.GB[i][q] = 0;
+    for(int i=length-ZeroColumnNumber;i<length;i++)
+        for(int q=0;q<width;q++)
+            fence.GB[q][i]=0;
+    /*
+    ofstream fout("GameBoards/coordonate.txt", ios_base::app);
+    for(int i=0;i<width;i++)
+    {
+        for(int q=0;q<length;q++)
+            fout<<fence.GB[i][q]<< " ";
+        fout<<endl;
+    }
+    */
+    for (int i = 0; i < width; i++){
+        //  ofstream fout("GameBoards/coordonate.txt", ios_base::app);
+        for (int q = 0; q < length; q++){
+            //  fout<<fence.GB[i][q]<<" ";
+            if (fence.GB[i][q])
+            {
+                x += side * (q);
+                y += side * (i);
                 rectangle(x, y, x + side, y + side);
-                y-=side*(i);
-                x-=side*(q);
+                y -= side * (i);
+                x -= side * (q);
             }
         }
     }
@@ -157,8 +203,8 @@ int main()
 
     initwindow(1400, 700);
     DrawBoardGame();
-    cleardevice();
-     drawFence(Fence, 0, 0, gbSideLength);
+   
+    drawFence(Fence,LeftBorder+gbWidth+LeftBorder , UpBorder, gbSideLength);
     while (true)
     {
         MouseCoordonates();
