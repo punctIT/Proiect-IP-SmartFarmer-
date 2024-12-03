@@ -11,15 +11,15 @@ int length = 9, width = 7;
 
 struct GamePieces
 {
-    int x, y;
-    bool dragging;           // daca e in  starea de drag
-    bool isPlaced;
     POINT UpLeft, DownRight; // coordonatele piesei
-    int GB[7][9];            // matricea caracteristica a piesei 7x9
+    int x, y;
+    bool dragging; // daca e in  starea de drag
+    bool isPlaced;
+    int GB[7][9]; // matricea caracteristica a piesei 7x9
 
 } Fence[4];
 
-void readFence(GamePieces &fence, string FileName)
+void ReadFence(GamePieces &fence, string FileName)
 {
     ifstream fin(FileName);
     for (int i = 0; i < width; i++)
@@ -29,21 +29,14 @@ void readFence(GamePieces &fence, string FileName)
 
 bool VerifyFencePosition(GamePieces fence, int x, int y)
 {
-    int c=0;
     for (int i = 0; i < width; i++)
-        for (int q = 0; q < length; q++){
+        for (int q = 0; q < length; q++)
             if (fence.GB[i][q] && strchr("01234", GameBoard[i][q]) == NULL)
-            {
                 return false;
-            }
-        }
-    if(c>=2)
-        return false;
-                
     return true;
 }
 
-void addFance(GamePieces fence)
+void AddFence(GamePieces fence)
 {
     if (!VerifyFencePosition(fence, 0, 0))
     {
@@ -54,44 +47,43 @@ void addFance(GamePieces fence)
         for (int q = 0; q < length; q++)
             GameBoard[i][q] += fence.GB[i][q];
 }
-void removeFance(GamePieces fence)
+void RemoveFence(GamePieces fence)
 {
     for (int i = 0; i < width; i++)
         for (int q = 0; q < length; q++)
-            if(fence.GB[i][q])
-            {
-                if(GameBoard[i][q]!='0')
+            if (fence.GB[i][q])
+                if (GameBoard[i][q] != '0')
                     GameBoard[i][q]--;
-                else GameBoard[i][q]='0';
-            }
+                else
+                    GameBoard[i][q] = '0';
 }
-void Normalizare(GamePieces& fence)
+void NormalizeFence(GamePieces &fence) // pe scurt , aduce gardul in colt sus, elementele de 1 cat mai aproape de (0,0) in matrice , util la afisare
 {
     int ZeroLineNumber = 0, ZeroColumnNumber = 0;
     for (int i = 0; i < width; i++) // numara nr de lini vide
     {
-        bool ok = true;
+        bool IsFullOfZero = true;
         for (int q = 0; q < length; q++)
             if (fence.GB[i][q])
             {
-                ok = false;
+                IsFullOfZero = false;
                 break;
             }
-        if (ok)
+        if (IsFullOfZero)
             ZeroLineNumber++;
         else
             break;
     }
     for (int i = 0; i < length; i++) // coloane vide
     {
-        bool ok = true;
+        bool IsFullOfZero = true;
         for (int q = 0; q < width; q++)
             if (fence.GB[q][i])
             {
-                ok = false;
+                IsFullOfZero = false;
                 break;
             }
-        if (ok)
+        if (IsFullOfZero)
             ZeroColumnNumber++;
         else
             break;
@@ -106,23 +98,23 @@ void Normalizare(GamePieces& fence)
         for (int q = 0; q < width; q++)
             fence.GB[q][i] = 0;
 }
-void moveFence(GamePieces &fence, int x, int y) // x coloana , y linia(indicele , cu cat sa se mute)
+void MoveFence(GamePieces &fence, int x, int y) // x coloana , y linia(indicele , cu cat sa se mute)
 {
-    Normalizare(fence);
-    for(int e=1;e<=y;e++)
-        for(int i=0;i<width;i++){
-            for(int q=length-1;q>0;q--)
-                fence.GB[i][q]=fence.GB[i][q-1];
-            fence.GB[i][0]=0;
+    NormalizeFence(fence);
+    for (int e = 1; e <= y; e++)
+        for (int i = 0; i < width; i++)
+        {
+            for (int q = length - 1; q > 0; q--)
+                fence.GB[i][q] = fence.GB[i][q - 1];
+            fence.GB[i][0] = 0;
         }
-    for(int e=1;e<=x;e++)
-        for(int i=0;i<length;i++){
-            for(int q=width-1;q>0;q--)
-                fence.GB[q][i]=fence.GB[q-1][i];
-            fence.GB[0][i]=0;
+    for (int e = 1; e <= x; e++)
+        for (int i = 0; i < length; i++)
+        {
+            for (int q = width - 1; q > 0; q--)
+                fence.GB[q][i] = fence.GB[q - 1][i];
+            fence.GB[0][i] = 0;
         }
-    
-    
 }
 void DrawGameBoardMatrix()
 {
@@ -133,7 +125,7 @@ void DrawGameBoardMatrix()
         cout << endl;
     }
 }
-void readGameBoard(string FileName)
+void ReadGameBoard(string FileName)
 {
     ifstream fin(FileName);
     for (int i = 0; i < width; i++)
@@ -170,50 +162,36 @@ void DrawBoardGame()
                 DrawInBoardGame(q + 1, i + 1, GameBoard[i][q] - '0');
 }
 
-void drawFence(GamePieces &f, int x, int y, int side)
+void drawFence(GamePieces &fenceToDraw, int x, int y, int side)
 {
     int ZeroLineNumber = 0, ZeroColumnNumber = 0;
-    GamePieces fence = f;
-    Normalizare(fence);
-    /*
-    ofstream fout("GameBoards/coordonate.txt", ios_base::app);
-    for(int i=0;i<width;i++)
-    {
-        for(int q=0;q<length;q++)
-            fout<<fence.GB[i][q]<< " ";
-        fout<<endl;
-    }
-    */
+    GamePieces fence = fenceToDraw;
+    NormalizeFence(fence);
+    //  ofstream fout("GameBoards/coordonate.txt", ios_base::app);
     for (int i = 0; i < width; i++) // partea de desenare
-    {
-        //  ofstream fout("GameBoards/coordonate.txt", ios_base::app);
         for (int q = 0; q < length; q++)
-        {
-            //  fout<<fence.GB[i][q]<<" ";
             if (fence.GB[i][q])
             {
                 x += side * (q);
                 y += side * (i);
 
                 setcolor(GREEN);
-                rectangle(x, y, x + side, y + side); 
+                rectangle(x, y, x + side, y + side);
                 setcolor(WHITE);
 
                 y -= side * (i);
                 x -= side * (q);
             }
-        }
-    }
     // salvarea noii pozitii a piesei;
-    f.UpLeft.x = x;
-    f.UpLeft.y = y;
+    fenceToDraw.UpLeft.x = x;
+    fenceToDraw.UpLeft.y = y;
+    int LastX,LastY;
     for (int i = 0; i < width; i++)
         for (int q = 0; q < length; q++)
             if (fence.GB[i][q])
-            {
-                f.DownRight.x = f.UpLeft.x + side * q + side;
-                f.DownRight.y = f.UpLeft.y + side * i + side;
-            }
+                LastX=i, LastY=q;
+    fenceToDraw.DownRight.x = fenceToDraw.UpLeft.x + side * LastY + side;
+    fenceToDraw.DownRight.y = fenceToDraw.UpLeft.y + side * LastX + side;
     /*
     ofstream fout("GameBoards/coordonate.txt", ios_base::app);
     fout<<f.UpLeft.x<<" "<<f.UpLeft.y<<endl;
@@ -224,23 +202,23 @@ void drawFence(GamePieces &f, int x, int y, int side)
 int page = 0;
 POINT MouseDraggingPiece(GamePieces &Fence)
 {
-    POINT GB,InitialPosition;
-
+    POINT GB, InitialPositionOfFence;
     setactivepage(page);
     setvisualpage(1 - page);
     setfillstyle(SOLID_FILL, BLACK);
     bar(0, 0, getmaxx(), getmaxy());
+
     if (ismouseclick(WM_LBUTTONDOWN))
     {
-
-        clearmouseclick(WM_LBUTTONDOWN);
         POINT mouse;
+        clearmouseclick(WM_LBUTTONDOWN);
         GetCursorPos(&mouse);
-        if (mouse.x >= Fence.UpLeft.x && mouse.x <= Fence.DownRight.x && mouse.y >= Fence.UpLeft.y && mouse.y <= Fence.DownRight.y){
-             Fence.dragging = 1;
-             InitialPosition=Fence.UpLeft;
+        if (mouse.x >= Fence.UpLeft.x && mouse.x <= Fence.DownRight.x && mouse.y >= Fence.UpLeft.y && mouse.y <= Fence.DownRight.y)
+        {
+            Fence.dragging = 1;
+            InitialPositionOfFence = Fence.UpLeft;
         }
-           
+
         GB.y = (mouse.x - LeftBorder) / gbSideLength;
         GB.x = (mouse.y - UpBorder) / gbSideLength;
         // ofstream fout("GameBoards/coordonate.txt", ios_base::app);
@@ -249,8 +227,8 @@ POINT MouseDraggingPiece(GamePieces &Fence)
     if (Fence.dragging)
     {
         POINT mouse;
-        if(Fence.isPlaced)
-            removeFance(Fence),Fence.isPlaced=false;
+        if (Fence.isPlaced)
+            RemoveFence(Fence), Fence.isPlaced = false;
         GetCursorPos(&mouse);
         Fence.UpLeft.x = mouse.x - 40;
         Fence.UpLeft.y = mouse.y - 40;
@@ -260,38 +238,35 @@ POINT MouseDraggingPiece(GamePieces &Fence)
             clearmouseclick(WM_RBUTTONDOWN);
             GB.y = (mouse.x - LeftBorder) / gbSideLength;
             GB.x = (mouse.y - UpBorder) / gbSideLength;
-            if(GB.x<=length&&GB.y<=width)
+            if (GB.x <= length && GB.y <= width)
             {
-                Normalizare(Fence);
-                moveFence(Fence,GB.x,GB.y);
-                if(VerifyFencePosition(Fence,GB.x,GB.y))
+                NormalizeFence(Fence);
+                MoveFence(Fence, GB.x, GB.y);
+                if (VerifyFencePosition(Fence, GB.x, GB.y))
                 {
-                    addFance(Fence);
+                    AddFence(Fence);
                     DrawGameBoardMatrix();
-                    cout<<endl; 
-                    Fence.UpLeft.x=GB.y*gbSideLength+LeftBorder;
-                    Fence.UpLeft.y=GB.x*gbSideLength+UpBorder;
-                    Fence.isPlaced=true;
-                }
-                else{
-                    Fence.UpLeft=InitialPosition;
 
-                }   
+                    Fence.UpLeft.x = GB.y * gbSideLength + LeftBorder;
+                    Fence.UpLeft.y = GB.x * gbSideLength + UpBorder;
+                    Fence.isPlaced = true;
+                }
+                else
+                {
+                    Fence.UpLeft = InitialPositionOfFence;
+                }
             }
-           
-           /*
-            ofstream fout("GameBoards/coordonate.txt", ios_base::app);
-            fout << GB.x << " " << GB.y << endl;
-            */ 
-           
+            else
+            {
+            }
+
         }
     }
     DrawBoardGame();
-    for(int i=1;i<=3;i++)
-       if(!::Fence[i].dragging)
-        drawFence(::Fence[i],::Fence[i].UpLeft.x, ::Fence[i].UpLeft.y, gbSideLength);
-       
 
+    for (int i = 1; i <= 3; i++)
+        if (!::Fence[i].dragging)
+            drawFence(::Fence[i], ::Fence[i].UpLeft.x, ::Fence[i].UpLeft.y, gbSideLength);
     drawFence(Fence, Fence.UpLeft.x, Fence.UpLeft.y, 80);
 
     page = 1 - page;
@@ -302,18 +277,20 @@ POINT MouseDraggingPiece(GamePieces &Fence)
 int main()
 {
 
-    readGameBoard("GameBoards/GameBoard.txt");
-    readFence(Fence[3], "GameBoards/Piesa3.txt");
-    readFence (Fence[1], "GameBoards/Piesa1.txt");
-   // addFance(LFence);
-   // addFance(FiveFence);
-    moveFence(Fence[1], 1, 1);
+    ReadGameBoard("GameBoards/GameBoard.txt");
+    ReadFence(Fence[3], "GameBoards/Piesa3.txt");
+    ReadFence(Fence[1], "GameBoards/Piesa1.txt");
+    ReadFence(Fence[2], "GameBoards/Piesa2.txt");
+    // addFance(LFence);
+    // addFance(FiveFence);
+    MoveFence(Fence[1], 1, 1);
 
     initwindow(1400, 700);
     DrawBoardGame();
 
-    drawFence( Fence[1], LeftBorder + gbWidth + LeftBorder, UpBorder, gbSideLength);
-    drawFence( Fence[3], LeftBorder + gbWidth + LeftBorder, UpBorder + gbSideLength * 3, gbSideLength);
+    drawFence(Fence[1], LeftBorder + gbWidth + LeftBorder, UpBorder, gbSideLength);
+    drawFence(Fence[3], LeftBorder + gbWidth + LeftBorder, UpBorder + gbSideLength * 2, gbSideLength);
+    drawFence(Fence[2], LeftBorder + gbWidth + LeftBorder, UpBorder + gbSideLength * 5, gbSideLength);
 
     while (true)
     {
@@ -323,9 +300,13 @@ int main()
         {
             MouseDraggingPiece(Fence[1]);
         }
-        if (mouse.x >= Fence[3].UpLeft.x && mouse.x <= Fence[3].DownRight.x && mouse.y >=Fence[3].UpLeft.y && mouse.y <=Fence[3].DownRight.y || Fence[3].dragging)
+        if (mouse.x >= Fence[3].UpLeft.x && mouse.x <= Fence[3].DownRight.x && mouse.y >= Fence[3].UpLeft.y && mouse.y <= Fence[3].DownRight.y || Fence[3].dragging)
         {
             MouseDraggingPiece(Fence[3]);
+        }
+        if (mouse.x >= Fence[2].UpLeft.x && mouse.x <= Fence[2].DownRight.x && mouse.y >= Fence[2].UpLeft.y && mouse.y <= Fence[2].DownRight.y || Fence[2].dragging)
+        {
+            MouseDraggingPiece(Fence[2]);
         }
     }
 
