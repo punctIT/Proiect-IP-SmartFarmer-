@@ -211,7 +211,7 @@ void drawFence(GamePieces &f, int x, int y, int side)
 int page = 0;
 POINT MouseDraggingPiece(GamePieces &Fence)
 {
-    POINT GB;
+    POINT GB,InitialPosition;
 
     setactivepage(page);
     setvisualpage(1 - page);
@@ -223,8 +223,11 @@ POINT MouseDraggingPiece(GamePieces &Fence)
         clearmouseclick(WM_LBUTTONDOWN);
         POINT mouse;
         GetCursorPos(&mouse);
-        if (mouse.x >= Fence.UpLeft.x && mouse.x <= Fence.DownRight.x && mouse.y >= Fence.UpLeft.y && mouse.y <= Fence.DownRight.y)
-            Fence.dragging = 1;
+        if (mouse.x >= Fence.UpLeft.x && mouse.x <= Fence.DownRight.x && mouse.y >= Fence.UpLeft.y && mouse.y <= Fence.DownRight.y){
+             Fence.dragging = 1;
+             InitialPosition=Fence.UpLeft;
+        }
+           
         GB.y = (mouse.x - LeftBorder) / gbSideLength;
         GB.x = (mouse.y - UpBorder) / gbSideLength;
         // ofstream fout("GameBoards/coordonate.txt", ios_base::app);
@@ -249,7 +252,12 @@ POINT MouseDraggingPiece(GamePieces &Fence)
                 if(VerifyFencePosition(Fence,GB.x,GB.y))
                 {
                     addFance(Fence);
+                    Fence.UpLeft.x=GB.y*gbSideLength+LeftBorder;
+                    Fence.UpLeft.y=GB.x*gbSideLength+UpBorder;
                 }
+                else{
+                    Fence.UpLeft=InitialPosition;
+                }   
             }
            
             
