@@ -13,6 +13,7 @@ struct GamePieces
 {
     int x, y;
     bool dragging;           // daca e in  starea de drag
+    bool isPlaced;
     POINT UpLeft, DownRight; // coordonatele piesei
     int GB[7][9];            // matricea caracteristica a piesei 7x9
 
@@ -28,10 +29,17 @@ void readFence(GamePieces &fence, string FileName)
 
 bool VerifyFencePosition(GamePieces fence, int x, int y)
 {
+    int c=0;
     for (int i = 0; i < width; i++)
-        for (int q = 0; q < length; q++)
+        for (int q = 0; q < length; q++){
             if (fence.GB[i][q] && strchr("01234", GameBoard[i][q]) == NULL)
+            {
                 return false;
+            }
+        }
+    if(c>=2)
+        return false;
+                
     return true;
 }
 
@@ -50,7 +58,12 @@ void removeFance(GamePieces fence)
 {
     for (int i = 0; i < width; i++)
         for (int q = 0; q < length; q++)
-            GameBoard[i][q] -= fence.GB[i][q];
+            if(fence.GB[i][q])
+            {
+                if(GameBoard[i][q]!='0')
+                    GameBoard[i][q]--;
+                else GameBoard[i][q]='0';
+            }
 }
 void Normalizare(GamePieces& fence)
 {
@@ -183,8 +196,8 @@ void drawFence(GamePieces &f, int x, int y, int side)
                 y += side * (i);
 
                 setcolor(GREEN);
-                rectangle(x, y, x + side, y + side);
-                 setcolor(WHITE);
+                rectangle(x, y, x + side, y + side); 
+                setcolor(WHITE);
 
                 y -= side * (i);
                 x -= side * (q);
@@ -236,6 +249,8 @@ POINT MouseDraggingPiece(GamePieces &Fence)
     if (Fence.dragging)
     {
         POINT mouse;
+        if(Fence.isPlaced)
+            removeFance(Fence),Fence.isPlaced=false;
         GetCursorPos(&mouse);
         Fence.UpLeft.x = mouse.x - 40;
         Fence.UpLeft.y = mouse.y - 40;
@@ -252,17 +267,23 @@ POINT MouseDraggingPiece(GamePieces &Fence)
                 if(VerifyFencePosition(Fence,GB.x,GB.y))
                 {
                     addFance(Fence);
+                    DrawGameBoardMatrix();
+                    cout<<endl; 
                     Fence.UpLeft.x=GB.y*gbSideLength+LeftBorder;
                     Fence.UpLeft.y=GB.x*gbSideLength+UpBorder;
+                    Fence.isPlaced=true;
                 }
                 else{
                     Fence.UpLeft=InitialPosition;
+
                 }   
             }
            
-            
+           /*
             ofstream fout("GameBoards/coordonate.txt", ios_base::app);
             fout << GB.x << " " << GB.y << endl;
+            */ 
+           
         }
     }
     DrawBoardGame();
