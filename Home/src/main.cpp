@@ -1,20 +1,20 @@
 #include <iostream>
-#include <winbgim.h>
 #include <graphics.h>
 #include <cstring>
 #include <fstream>
 #include <cstdio> //pentru Remove
 using namespace std;
 
-char GameBoard[7][9];
+char GameBoard[72][9];
 int length = 9, width = 7;
 
 struct GamePieces
 {
-    POINT UpLeft, DownRight; // coordonatele piesei
+    POINT UpLeft, DownRight,InitialPositionOfFence; // coordonatele piesei
     int x, y;
     bool dragging; // daca e in  starea de drag
     bool isPlaced;
+    int Side;
     int GB[7][9]; // matricea caracteristica a piesei 7x9
 
 } Fence[4];
@@ -39,8 +39,8 @@ void ReadFence(GamePieces &fence, string FileName)
 
 bool VerifyFencePosition(GamePieces fence)
 {
-    for (int i = 0; i < width; i++)
-        for (int q = 0; q < length; q++)
+    for (int i = 0; i <= width; i++)
+        for (int q = 0; q <= length; q++)
             if (fence.GB[i][q] && strchr("01234", GameBoard[i][q]) == NULL)
                 return false;
     return true;
@@ -125,6 +125,26 @@ void MoveFence(GamePieces &fence, int x, int y) // x coloana , y linia(indicele 
                 fence.GB[q][i] = fence.GB[q - 1][i];
             fence.GB[0][i] = 0;
         }
+}
+void RotateFence(GamePieces &fence)
+{
+    NormalizeFence(fence);
+    GamePieces newFence=fence;
+    for(int i=0;i<width;i++)
+    {
+        for(int q=0;q<width;q++)
+        {
+            newFence.GB[i][q]=fence.GB[q][i];
+        }
+    }
+     for(int i=0;i<width;i++)
+    {
+        for(int q=width;q<length;q++)
+        {
+            newFence.GB[i][q]=0;
+        }
+    }
+    fence=newFence;
 }
 void DrawGameBoardMatrix()
 {
@@ -211,9 +231,10 @@ void drawFence(GamePieces &fenceToDraw, int x, int y, int side)
 }
 
 int page = 0;
+
 POINT MouseDraggingPiece(GamePieces &Fence)
 {
-    POINT GB, InitialPositionOfFence;
+    POINT GB;
     setactivepage(page);
     setvisualpage(1 - page);
     setfillstyle(SOLID_FILL, BLACK);
@@ -227,11 +248,10 @@ POINT MouseDraggingPiece(GamePieces &Fence)
         if (mouse.x >= Fence.UpLeft.x && mouse.x <= Fence.DownRight.x && mouse.y >= Fence.UpLeft.y && mouse.y <= Fence.DownRight.y)
         {
             Fence.dragging = 1;
-            InitialPositionOfFence = Fence.UpLeft;
+         //   if(Fence.Side*2<=gbSideLength)
+                // Fence.Side*=2;
         }
 
-        GB.y = (mouse.x - LeftBorder) / gbSideLength;
-        GB.x = (mouse.y - UpBorder) / gbSideLength;
         // ofstream fout("GameBoards/coordonate.txt", ios_base::app);
         // fout << GB.x << " " << GB.y << endl;
     }
@@ -240,7 +260,9 @@ POINT MouseDraggingPiece(GamePieces &Fence)
     {
         POINT mouse;
         if(IsKeyPressed('r'))
-            cout<<1;
+           {
+                RotateFence(Fence);
+           }
         if (Fence.isPlaced)
             RemoveFence(Fence), Fence.isPlaced = false;
         GetCursorPos(&mouse);
@@ -249,17 +271,19 @@ POINT MouseDraggingPiece(GamePieces &Fence)
         if (ismouseclick(WM_RBUTTONDOWN))
         {
             Fence.dragging = 0;
+            //Fence.Side/=2;
             clearmouseclick(WM_RBUTTONDOWN);
             GB.y = (mouse.x - LeftBorder) / gbSideLength;
             GB.x = (mouse.y - UpBorder) / gbSideLength;
             if (GB.x <= length && GB.y <= width)
             {
                 NormalizeFence(Fence);
-                MoveFence(Fence, GB.x, GB.y);
-                if (VerifyFencePosition(Fence))
+                GamePieces newFence=Fence;
+                MoveFence(newFence, GB.x, GB.y);
+                if (VerifyFencePosition(newFence))
                 {
+                    MoveFence(Fence, GB.x, GB.y);
                     AddFence(Fence);
-                    DrawGameBoardMatrix();
 
                     Fence.UpLeft.x = GB.y * gbSideLength + LeftBorder;
                     Fence.UpLeft.y = GB.x * gbSideLength + UpBorder;
@@ -267,7 +291,8 @@ POINT MouseDraggingPiece(GamePieces &Fence)
                 }
                 else
                 {
-                    Fence.UpLeft = InitialPositionOfFence;
+                    Fence.UpLeft = Fence.InitialPositionOfFence;
+                    MouseDraggingPiece(Fence);
                 }
             }
             else
@@ -279,8 +304,8 @@ POINT MouseDraggingPiece(GamePieces &Fence)
 
     for (int i = 1; i <= 3; i++)
         if (!::Fence[i].dragging)
-            drawFence(::Fence[i], ::Fence[i].UpLeft.x, ::Fence[i].UpLeft.y, gbSideLength);
-    drawFence(Fence, Fence.UpLeft.x, Fence.UpLeft.y, 80);
+            drawFence(::Fence[i], ::Fence[i].UpLeft.x, ::Fence[i].UpLeft.y, ::Fence[i].Side);
+    drawFence(Fence, Fence.UpLeft.x, Fence.UpLeft.y, Fence.Side);
 
     page = 1 - page;
     delay(10);
@@ -294,33 +319,41 @@ int main()
     ReadFence(Fence[3], "GameBoards/Piesa3.txt");
     ReadFence(Fence[1], "GameBoards/Piesa1.txt");
     ReadFence(Fence[2], "GameBoards/Piesa2.txt");
-    // addFance(LFence);
-    // addFance(FiveFence);
-    MoveFence(Fence[1], 1, 1);
-
+    
     initwindow(1400, 700);
     DrawBoardGame();
 
-    drawFence(Fence[1], LeftBorder + gbWidth + LeftBorder, UpBorder, gbSideLength);
-    drawFence(Fence[3], LeftBorder + gbWidth + LeftBorder, UpBorder + gbSideLength * 2, gbSideLength);
-    drawFence(Fence[2], LeftBorder + gbWidth + LeftBorder, UpBorder + gbSideLength * 5, gbSideLength);
+    Fence[0].UpLeft.x=Fence[0].UpLeft.y=0;
+    Fence[0].DownRight.x=getmaxx();Fence[0].DownRight.y=getmaxy();
+    Fence[1].InitialPositionOfFence.x=LeftBorder + gbWidth + LeftBorder;
+    Fence[1].InitialPositionOfFence.y=UpBorder;
+    Fence[2].InitialPositionOfFence.x=LeftBorder + gbWidth + LeftBorder;
+    Fence[2].InitialPositionOfFence.y=UpBorder + gbSideLength * 2;
+    Fence[3].InitialPositionOfFence.x=LeftBorder + gbWidth + LeftBorder;
+    Fence[3].InitialPositionOfFence.y=UpBorder + gbSideLength * 5;
+
+    for(int i=1;i<=3;i++)
+    {
+         Fence[i].Side=gbSideLength;
+        drawFence(Fence[i], Fence[i].InitialPositionOfFence.x, Fence[i].InitialPositionOfFence.y, Fence[i].Side);
+       
+    }
+
 
     while (true)
     {
+        bool SomethingHappend=false;
         POINT mouse;
         GetCursorPos(&mouse);
-        if (mouse.x >= Fence[1].UpLeft.x && mouse.x <= Fence[1].DownRight.x && mouse.y >= Fence[1].UpLeft.y && mouse.y <= Fence[1].DownRight.y || Fence[1].dragging)
-        {
-            MouseDraggingPiece(Fence[1]);
-        }
-        if (mouse.x >= Fence[3].UpLeft.x && mouse.x <= Fence[3].DownRight.x && mouse.y >= Fence[3].UpLeft.y && mouse.y <= Fence[3].DownRight.y || Fence[3].dragging)
-        {
-            MouseDraggingPiece(Fence[3]);
-        }
-        if (mouse.x >= Fence[2].UpLeft.x && mouse.x <= Fence[2].DownRight.x && mouse.y >= Fence[2].UpLeft.y && mouse.y <= Fence[2].DownRight.y || Fence[2].dragging)
-        {
-            MouseDraggingPiece(Fence[2]);
-        }
+        for(int i=1;i<=3;i++)
+            if (mouse.x >= Fence[i].UpLeft.x && mouse.x <= Fence[i].DownRight.x && mouse.y >= Fence[i].UpLeft.y && mouse.y <= Fence[i].DownRight.y || Fence[i].dragging)
+            {
+                MouseDraggingPiece(Fence[i]);
+                SomethingHappend=true;
+            }
+        if(!SomethingHappend)
+            MouseDraggingPiece(Fence[0]);
+        
     }
 
     getch();
