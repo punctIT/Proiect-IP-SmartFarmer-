@@ -320,7 +320,7 @@ int main()
     ReadFence(Fence[1], "GameBoards/Piesa1.txt");
     ReadFence(Fence[2], "GameBoards/Piesa2.txt");
     
-    initwindow(1400, 700);
+    initwindow(GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN),"",-3,-3);
     DrawBoardGame();
 
     Fence[0].UpLeft.x=Fence[0].UpLeft.y=0;
@@ -342,6 +342,10 @@ int main()
 
     while (true)
     {
+        if(IsKeyPressed('q'))
+        {
+            return 0;
+        }
         bool SomethingHappend=false;
         POINT mouse;
         GetCursorPos(&mouse);
