@@ -19,6 +19,16 @@ struct GamePieces
 
 } Fence[4];
 
+bool IsKeyPressed(char key) {
+    if (kbhit()) { 
+        char pressed = getch(); 
+        if (pressed == key) {
+            return true;
+        }
+    }
+    return false; 
+}
+
 void ReadFence(GamePieces &fence, string FileName)
 {
     ifstream fin(FileName);
@@ -27,7 +37,7 @@ void ReadFence(GamePieces &fence, string FileName)
             fin >> fence.GB[i][q];
 }
 
-bool VerifyFencePosition(GamePieces fence, int x, int y)
+bool VerifyFencePosition(GamePieces fence)
 {
     for (int i = 0; i < width; i++)
         for (int q = 0; q < length; q++)
@@ -38,7 +48,7 @@ bool VerifyFencePosition(GamePieces fence, int x, int y)
 
 void AddFence(GamePieces fence)
 {
-    if (!VerifyFencePosition(fence, 0, 0))
+    if (!VerifyFencePosition(fence))
     {
         cout << "erroare";
         return;
@@ -185,11 +195,11 @@ void drawFence(GamePieces &fenceToDraw, int x, int y, int side)
     // salvarea noii pozitii a piesei;
     fenceToDraw.UpLeft.x = x;
     fenceToDraw.UpLeft.y = y;
-    int LastX,LastY;
+    int LastX, LastY;
     for (int i = 0; i < width; i++)
         for (int q = 0; q < length; q++)
             if (fence.GB[i][q])
-                LastX=i, LastY=q;
+                LastX = i, LastY = q;
     fenceToDraw.DownRight.x = fenceToDraw.UpLeft.x + side * LastY + side;
     fenceToDraw.DownRight.y = fenceToDraw.UpLeft.y + side * LastX + side;
     /*
@@ -199,6 +209,7 @@ void drawFence(GamePieces &fenceToDraw, int x, int y, int side)
     fout<<endl;
     */
 }
+
 int page = 0;
 POINT MouseDraggingPiece(GamePieces &Fence)
 {
@@ -224,9 +235,12 @@ POINT MouseDraggingPiece(GamePieces &Fence)
         // ofstream fout("GameBoards/coordonate.txt", ios_base::app);
         // fout << GB.x << " " << GB.y << endl;
     }
+    
     if (Fence.dragging)
     {
         POINT mouse;
+        if(IsKeyPressed('r'))
+            cout<<1;
         if (Fence.isPlaced)
             RemoveFence(Fence), Fence.isPlaced = false;
         GetCursorPos(&mouse);
@@ -242,7 +256,7 @@ POINT MouseDraggingPiece(GamePieces &Fence)
             {
                 NormalizeFence(Fence);
                 MoveFence(Fence, GB.x, GB.y);
-                if (VerifyFencePosition(Fence, GB.x, GB.y))
+                if (VerifyFencePosition(Fence))
                 {
                     AddFence(Fence);
                     DrawGameBoardMatrix();
@@ -259,7 +273,6 @@ POINT MouseDraggingPiece(GamePieces &Fence)
             else
             {
             }
-
         }
     }
     DrawBoardGame();
