@@ -185,8 +185,8 @@ void DrawBoardGame()
     gbSideLength = 80;
     gbWidth = gbSideLength * length;
     gbHeight = 400;
-    UpBorder = 50;
-    LeftBorder = 50;
+    UpBorder =  0.17*GetSystemMetrics(SM_CYSCREEN);
+    LeftBorder =  0.1* GetSystemMetrics(SM_CXSCREEN);
     RightBorder = 50;
     for (int i = 1; i <= length; i++)
         for (int j = 1; j <= width; j++)
@@ -252,54 +252,53 @@ POINT MouseDraggingPiece(GamePieces &Fence)
         POINT mouse;
         clearmouseclick(WM_LBUTTONDOWN);
         GetCursorPos(&mouse);
-        if (mouse.x >= Fence.UpLeft.x && mouse.x <= Fence.DownRight.x && mouse.y >= Fence.UpLeft.y && mouse.y <= Fence.DownRight.y)
+        if (mouse.x >= Fence.UpLeft.x && mouse.x <= Fence.DownRight.x && mouse.y >= Fence.UpLeft.y && mouse.y <= Fence.DownRight.y) // daca se afla in interiorul piesei
         {
             Fence.dragging = 1;
-            //   if(Fence.Side*2<=gbSideLength)
-            //   Fence.Side*=2;
+            Fence.Side = gbSideLength; // devine de dimenisune normala
         }
-
-        // ofstream fout("GameBoards/coordonate.txt", ios_base::app);
-        // fout << GB.x << " " << GB.y << endl;
     }
 
     if (Fence.dragging)
     {
         POINT mouse;
+
         if (IsKeyPressed('r'))
         {
             RotateFence(Fence);
-            Fence.isRotated = (Fence.isRotated + 1) % 2;
+            Fence.isRotated = (Fence.isRotated + 1) % 2; // alterneaza intre 0 si 1 ( un bool pentru lenesi)
         }
-        if (Fence.isPlaced)
+        if (Fence.isPlaced) // aici verifica daca piesa e plasata cumva , si se muta
             RemoveFence(Fence), Fence.isPlaced = false;
         GetCursorPos(&mouse);
-        Fence.UpLeft.x = mouse.x - 40;
+        Fence.UpLeft.x = mouse.x - 40; // mutarea efectiva dupa mouse
         Fence.UpLeft.y = mouse.y - 40;
-        if (ismouseclick(WM_RBUTTONDOWN))
+        if (ismouseclick(WM_RBUTTONDOWN)) // plasarea piesiei jos , cu click dreapta
         {
             Fence.dragging = 0;
-            // Fence.Side/=2;
+            Fence.Side = gbSideLength / 2;
             clearmouseclick(WM_RBUTTONDOWN);
             GB.y = (mouse.x - LeftBorder) / gbSideLength;
-            GB.x = (mouse.y - UpBorder) / gbSideLength;
-            if (GB.x <= length && GB.y <= width)
+            GB.x = (mouse.y - UpBorder) / gbSideLength; // afla coordonatele pe grid
+            if (GB.x <= length && GB.y <= width)        // verifica daca se afla in matricea GameBoard
             {
-                NormalizeFence(Fence);
+                NormalizeFence(Fence); // normalizarea e pentru mutarea piesei, trebuie adusa in colt , iar dupa mutata  la x si y
                 GamePieces newFence = Fence;
-                MoveFence(newFence, GB.x, GB.y);
+                MoveFence(newFence, GB.x, GB.y); // mutarea in grid, mutarea fictiva, matrice auxiara
                 if (VerifyFencePosition(newFence))
                 {
-                    MoveFence(Fence, GB.x, GB.y);
+                    MoveFence(Fence, GB.x, GB.y); // adaucare mutare
                     AddFence(Fence);
 
-                    Fence.UpLeft.x = GB.y * gbSideLength + LeftBorder;
+                    Fence.UpLeft.x = GB.y * gbSideLength + LeftBorder; // calculatre coordonate noi
                     Fence.UpLeft.y = GB.x * gbSideLength + UpBorder;
                     Fence.isPlaced = true;
+                    Fence.Side = gbSideLength; // aducerea la marimea normala
                 }
                 else
                 {
                     Fence.UpLeft = Fence.InitialPositionOfFence;
+                    Fence.Side = gbSideLength / 2;
                     if (Fence.isRotated)
                     {
                         Fence.isRotated = 0;
@@ -311,6 +310,7 @@ POINT MouseDraggingPiece(GamePieces &Fence)
             else
             {
                 Fence.UpLeft = Fence.InitialPositionOfFence;
+                Fence.Side = gbSideLength / 2;
                 if (Fence.isRotated)
                 {
                     Fence.isRotated = 0;
@@ -324,8 +324,8 @@ POINT MouseDraggingPiece(GamePieces &Fence)
 
     for (int i = 1; i <= 3; i++)
         if (!::Fence[i].dragging)
-            DrawFence(::Fence[i], ::Fence[i].UpLeft.x, ::Fence[i].UpLeft.y, ::Fence[i].Side);
-    DrawFence(Fence, Fence.UpLeft.x, Fence.UpLeft.y, Fence.Side);
+            DrawFence(::Fence[i], ::Fence[i].UpLeft.x, ::Fence[i].UpLeft.y, ::Fence[i].Side); // cele care nu sunt in dragging trebuie afisate
+    DrawFence(Fence, Fence.UpLeft.x, Fence.UpLeft.y, Fence.Side);                             // se evita efectul de palpaiala , libraria GRAPHICS.H e naspa.
 
     page = 1 - page;
     delay(10);
@@ -355,7 +355,7 @@ int main()
 
     for (int i = 1; i <= 3; i++)
     {
-        Fence[i].Side = gbSideLength;
+        Fence[i].Side = gbSideLength * (0.5);
         DrawFence(Fence[i], Fence[i].InitialPositionOfFence.x, Fence[i].InitialPositionOfFence.y, Fence[i].Side);
     }
 
