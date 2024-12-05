@@ -141,7 +141,7 @@ void CopyMatrix(int a[7][9], int b[7][9])
 void RotateFence(GamePieces &fence)
 {
     NormalizeFence(fence);
-    POINT initalPosition = fence.InitialPositionOfFence;
+    
     int newFence[7][9];
     CopyMatrix(newFence, fence.GB);
     for (int i = 0; i < width; i++)
@@ -169,6 +169,80 @@ void ReadGameBoard(string FileName)
             fin >> GameBoard[i][q];
 }
 
+
+
+int CountAnimalInBoard(char Animal)
+{
+    int cnt = 0;
+    for (int i = 1; i <= width; i++)
+        for (int j = 1; j <= length; j++)
+            if (GameBoard[i][j] == Animal)
+                cnt++;
+    return cnt;
+}
+
+bool AnimalsAreFenced()
+{
+    char CopyGameBoard[7][9];
+    for (int i = 0; i <= width; i++)
+        for (int j = 0; j <= length; j++)
+            CopyGameBoard[i][j] = GameBoard[i][j];
+    for (int i = 1; i < width; i++)
+    {
+        for (int j = 1; j < length; j++)
+        {
+            if (strchr("*0CPHS", CopyGameBoard[i][j])) //C pentru cow, P pentru pig, etc
+            {
+                char Animal = CopyGameBoard[i][j];
+                int CountAnimal = 1;
+                //bool Water = 0;
+
+                // algoritm fill
+                int iDir[4] = {0, 0, -1, 1}, jDir[4] = {-1, 1, 0, 0};
+                int left = 0, right = 0;
+                struct Queue{
+                    int row, column;
+                }Q[length*width];
+                Q[0].row = i;
+                Q[0].column = j;
+                CopyGameBoard[i][j] = '1';
+                while (left <= right)
+                {
+                    int row = Q[left].row, column = Q[left].column;
+                    for(int k = 0; k < 4; k++)
+                    {
+                        int iNext = row + iDir[k];
+                        int jNext = column + jDir[k];
+                        if (strchr("*0CPHS", CopyGameBoard[iNext][jNext]))
+                        {
+                            if (CopyGameBoard[iNext][jNext] != '0' && CopyGameBoard[iNext][jNext] != '*')
+                            {
+                                if (Animal == '0' || Animal == '*')
+                                    Animal = CopyGameBoard[iNext][jNext];
+                                else
+                                    if (CopyGameBoard[iNext][jNext] == Animal)
+                                        CountAnimal++;
+                                    else
+                                        return 0; //daca sunt mai multe animale de tipuri diferite atunci nu e pus bine gardul
+                            }
+                            CopyGameBoard[iNext][jNext] = '1';
+                            right++;
+                            Q[right].row = iNext;
+                            Q[right].column = jNext;
+                        }
+                    }
+                    left++;
+                }
+                if (CountAnimal != CountAnimalInBoard(Animal))
+                    return 0; //nu sunt toate animalele de tipul asta in acelasi tarc
+            }
+        }
+    }
+    return 1;
+}
+
+
+
 // Partea de Grafica
 
 int LeftBorder, UpBorder, gbWidth, gbHeight, gbSideLength, DownBorder, RightBorder;
@@ -192,11 +266,28 @@ void DrawBoardGame()
         for (int j = 1; j <= width; j++)
             rectangle(LeftBorder + gbSideLength * (i - 1), UpBorder + gbSideLength * (j - 1), LeftBorder + gbSideLength * i, UpBorder + gbSideLength * j);
     for (int i = 0; i < width; i++)
-        for (int q = 0; q < length; q++)
-            if (GameBoard[i][q] == '#')
+        for (int q = 0; q < length; q++){
+            if (GameBoard[i][q] == '#'||strchr("12345",GameBoard[i][q]))
                 DrawInBoardGame(q + 1, i + 1, 1);
+            else if(GameBoard[i][q]=='C')//CPHS
+            {
+                DrawInBoardGame(q + 1, i + 1,4);
+            }
+            else if(GameBoard[i][q]=='P')
+            {
+                  DrawInBoardGame(q + 1, i + 1,13);
+            }
+            else if(GameBoard[i][q]=='H')
+            {
+                 DrawInBoardGame(q + 1, i + 1,6);
+            }
+            else if(GameBoard[i][q]=='S')
+            {
+                DrawInBoardGame(q + 1, i + 1,9);
+            }
             else
                 DrawInBoardGame(q + 1, i + 1, GameBoard[i][q] - '0');
+        }
 }
 
 void DrawFence(GamePieces &fenceToDraw, int x, int y, int side)
@@ -262,7 +353,6 @@ POINT MouseDraggingPiece(GamePieces &Fence)
     if (Fence.dragging)
     {
         POINT mouse;
-
         if (IsKeyPressed('r'))
         {
             RotateFence(Fence);
@@ -277,6 +367,7 @@ POINT MouseDraggingPiece(GamePieces &Fence)
         {
             Fence.dragging = 0;
             Fence.Side = gbSideLength / 2;
+         
             clearmouseclick(WM_RBUTTONDOWN);
             GB.y = (mouse.x - LeftBorder) / gbSideLength;
             GB.x = (mouse.y - UpBorder) / gbSideLength; // afla coordonatele pe grid
@@ -287,7 +378,7 @@ POINT MouseDraggingPiece(GamePieces &Fence)
                 MoveFence(newFence, GB.x, GB.y); // mutarea in grid, mutarea fictiva, matrice auxiara
                 if (VerifyFencePosition(newFence))
                 {
-                    MoveFence(Fence, GB.x, GB.y); // adaucare mutare
+                    MoveFence(Fence, GB.x, GB.y); 
                     AddFence(Fence);
 
                     Fence.UpLeft.x = GB.y * gbSideLength + LeftBorder; // calculatre coordonate noi
@@ -318,6 +409,7 @@ POINT MouseDraggingPiece(GamePieces &Fence)
                 }
                 MouseDraggingPiece(Fence);
             }
+            
         }
     }
     DrawBoardGame();
@@ -335,7 +427,7 @@ POINT MouseDraggingPiece(GamePieces &Fence)
 int main()
 {
 
-    ReadGameBoard("GameBoards/GameBoard.txt");
+    ReadGameBoard("GameBoards/GameBoard1.txt");
     ReadFence(Fence[3], "GameBoards/Piesa3.txt");
     ReadFence(Fence[1], "GameBoards/Piesa1.txt");
     ReadFence(Fence[2], "GameBoards/Piesa2.txt");
@@ -373,6 +465,12 @@ int main()
             }
         if (!SomethingHappend)
             MouseDraggingPiece(Fence[0]);
+        if(AnimalsAreFenced())
+        {
+            cleardevice();
+            setcolor(WHITE); // Setează culoarea textului
+            outtextxy(200, 200, "FINAL");
+        }
     }
 
     getch();
