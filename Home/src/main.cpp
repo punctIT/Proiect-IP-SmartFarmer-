@@ -2,7 +2,9 @@
 #include <graphics.h>
 #include <cstring>
 #include <fstream>
-#include <cstdio> //pentru Remove
+#include <cstdio>
+#include <algorithm>
+
 using namespace std;
 
 char GameBoard[72][9];
@@ -15,6 +17,7 @@ struct GamePieces
     bool dragging; // daca e in  starea de drag
     bool isPlaced;
     int Side;
+    int isRotated;
     int GB[7][9]; // matricea caracteristica a piesei 7x9
 
 } Fence[4];
@@ -129,20 +132,25 @@ void MoveFence(GamePieces &fence, int x, int y) // x coloana , y linia(indicele 
             fence.GB[0][i] = 0;
         }
 }
+void CopyMatrix(int a[7][9], int b[7][9])
+{
+    for (int i = 0; i < width; i++)
+        for (int q = 0; q < length; q++)
+            a[i][q] = b[i][q];
+}
 void RotateFence(GamePieces &fence)
 {
     NormalizeFence(fence);
-    POINT initalPosition=fence.InitialPositionOfFence;
-    GamePieces newFence = fence;
-    
+    POINT initalPosition = fence.InitialPositionOfFence;
+    int newFence[7][9];
+    CopyMatrix(newFence, fence.GB);
     for (int i = 0; i < width; i++)
-        for (int q = 0; q < width+1; q++)
-            newFence.GB[width - q - 1][i] = fence.GB[i][q];
+        for (int q = 0; q < width + 1; q++)
+            newFence[width - q - 1][i] = fence.GB[i][q];
     for (int i = 0; i < width; i++)
         for (int q = width; q < length; q++)
-            newFence.GB[i][q] = 0;
-    fence = newFence;
-    fence.InitialPositionOfFence=initalPosition;
+            newFence[i][q] = 0;
+    CopyMatrix(fence.GB, newFence);
 }
 void DrawGameBoardMatrix()
 {
@@ -248,7 +256,7 @@ POINT MouseDraggingPiece(GamePieces &Fence)
         {
             Fence.dragging = 1;
             //   if(Fence.Side*2<=gbSideLength)
-            // Fence.Side*=2;
+            //   Fence.Side*=2;
         }
 
         // ofstream fout("GameBoards/coordonate.txt", ios_base::app);
@@ -261,6 +269,7 @@ POINT MouseDraggingPiece(GamePieces &Fence)
         if (IsKeyPressed('r'))
         {
             RotateFence(Fence);
+            Fence.isRotated = (Fence.isRotated + 1) % 2;
         }
         if (Fence.isPlaced)
             RemoveFence(Fence), Fence.isPlaced = false;
@@ -291,11 +300,23 @@ POINT MouseDraggingPiece(GamePieces &Fence)
                 else
                 {
                     Fence.UpLeft = Fence.InitialPositionOfFence;
+                    if (Fence.isRotated)
+                    {
+                        Fence.isRotated = 0;
+                        RotateFence(Fence);
+                    }
                     MouseDraggingPiece(Fence);
                 }
             }
             else
             {
+                Fence.UpLeft = Fence.InitialPositionOfFence;
+                if (Fence.isRotated)
+                {
+                    Fence.isRotated = 0;
+                    RotateFence(Fence);
+                }
+                MouseDraggingPiece(Fence);
             }
         }
     }
