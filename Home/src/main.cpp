@@ -10,17 +10,11 @@ using namespace std;
 char GameBoard[10][10];
 int length = 9, width = 7;
 
-bool globalDragging=false;
+bool globalDragging=false;//evita palpairea si luarea simultata a mai multor piese
 
-void *BackgroundBuffer;
-void *HorseBuffer;
-void *CowBuffer;
-void *SheepBuffer;
-void *PigBuffer;
-void *FenceBuffer;
-void *GrassBuffer;
-void *EmptyAnimalBuffer;
-void *MiniFenceBuffer;
+void *BackgroundBuffer,*HorseBuffer,*CowBuffer,*SheepBuffer,*PigBuffer,*FenceBuffer,*GrassBuffer,*EmptyAnimalBuffer,*MiniFenceBuffer;
+
+
 struct GamePieces
 {
     POINT UpLeft, DownRight, InitialPositionOfFence; // coordonatele piesei
@@ -378,7 +372,6 @@ POINT MouseDraggingPiece(GamePieces &Fence)
         GetCursorPos(&mouse);
         GB.y = (mouse.x - LeftBorder) / gbSideLength;
         GB.x = (mouse.y - UpBorder) / gbSideLength; 
-        cout<<GB.x<<" "<<GB.y<<" "<<endl;
         if (mouse.x >= Fence.UpLeft.x && mouse.x <= Fence.DownRight.x && mouse.y >= Fence.UpLeft.y && mouse.y <= Fence.DownRight.y) // daca se afla in interiorul piesei
         {
             Fence.dragging = 1;
