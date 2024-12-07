@@ -16,6 +16,8 @@ void *HorseBuffer;
 void *CowBuffer;
 void *SheepBuffer;
 void *PigBuffer;
+void *FenceBuffer;
+void *GrassBuffer;
 
 struct GamePieces
 {
@@ -249,7 +251,7 @@ bool AnimalsAreFenced()
 
 // Partea de Grafica
 
-int LeftBorder, UpBorder, gbWidth, gbHeight, gbSideLength, DownBorder, RightBorder;
+int LeftBorder, UpBorder, gbWidth, gbHeight, gbSideLength = 80, DownBorder, RightBorder;
 void Button1()
 {
     cout << 1;
@@ -270,7 +272,6 @@ void DrawInBoardGame(int x, int y, int color)
 void DrawBoardGame()
 {
 
-    gbSideLength = 80;
     gbWidth = gbSideLength * length;
     gbHeight = 400;
     UpBorder = 0.17 * GetSystemMetrics(SM_CYSCREEN);
@@ -286,28 +287,28 @@ void DrawBoardGame()
             int y=UpBorder+i*gbSideLength;
            
             if (GameBoard[i][q] == '#' || strchr("12345", GameBoard[i][q]))
-                DrawInBoardGame(q + 1, i + 1, 1);
+            {
+                //DrawInBoardGame(q + 1, i + 1, 1);
+                putimage(x,y,FenceBuffer,COPY_PUT);
+            }
             else if (GameBoard[i][q] == 'C') // CPHS
             {
-                DrawInBoardGame(q + 1, i + 1, 4);
+                putimage(x,y,CowBuffer,COPY_PUT);
             }
             else if (GameBoard[i][q] == 'P')
             {
-                DrawInBoardGame(q + 1, i + 1, 13);
+                putimage(x,y,PigBuffer,COPY_PUT);
             }
             else if (GameBoard[i][q] == 'H')
             {   
-                x++;
-                y++;
-                //readimagefile("Images/horse.bmp",x,y,x+gbSideLength-4,y+gbSideLength-4);
-                DrawInBoardGame(q + 1, i + 1, 6);
+                putimage(x,y,HorseBuffer,COPY_PUT);
             }
             else if (GameBoard[i][q] == 'S')
             {
-                DrawInBoardGame(q + 1, i + 1, 9);
+               putimage(x,y,SheepBuffer,COPY_PUT);
             }
             else
-                DrawInBoardGame(q + 1, i + 1, GameBoard[i][q] - '0');
+                putimage(x,y,GrassBuffer,COPY_PUT);
              
         }
 }
@@ -493,15 +494,41 @@ void DrawLevel(string GameBoardFileName)
         }
     }
 }
+void UploadImages()
+{
+    readimagefile("Images/background.jpg",0,0,getmaxx(),getmaxy());
+    BackgroundBuffer=malloc(imagesize(0,0,getmaxx(),getmaxy()));
+    getimage(0,0,getmaxx(),getmaxy(),BackgroundBuffer);
+    readimagefile("Images/horse.jpg",1,1,gbSideLength-1,gbSideLength-1);
+    HorseBuffer=malloc(imagesize(1,1,gbSideLength-1,gbSideLength-1));
+    getimage(1,1,gbSideLength-1,gbSideLength-1, HorseBuffer);
+    readimagefile("Images/cow.jpg",1,1,gbSideLength-1,gbSideLength-1);
+    CowBuffer=malloc(imagesize(1,1,gbSideLength-1,gbSideLength-1));
+    getimage(1,1,gbSideLength-1,gbSideLength-1, CowBuffer);
+    readimagefile("Images/sheep.jpg",1,1,gbSideLength-1,gbSideLength-1);
+    SheepBuffer=malloc(imagesize(1,1,gbSideLength-1,gbSideLength-1));
+    getimage(1,1,gbSideLength-1,gbSideLength-1, SheepBuffer);
+    readimagefile("Images/pig.jpg",1,1,gbSideLength-1,gbSideLength-1);
+    PigBuffer=malloc(imagesize(1,1,gbSideLength-1,gbSideLength-1));
+    getimage(1,1,gbSideLength-1,gbSideLength-1, PigBuffer);
+    readimagefile("Images/pig.jpg",1,1,gbSideLength-1,gbSideLength-1);
+    PigBuffer=malloc(imagesize(1,1,gbSideLength-1,gbSideLength-1));
+    getimage(1,1,gbSideLength-1,gbSideLength-1, PigBuffer);
+    readimagefile("Images/grass.jpg",1,1,gbSideLength-1,gbSideLength-1);
+    GrassBuffer=malloc(imagesize(1,1,gbSideLength-1,gbSideLength-1));
+    getimage(1,1,gbSideLength-1,gbSideLength-1,  GrassBuffer);
+    readimagefile("Images/fence.jpg",1,1,gbSideLength-1,gbSideLength-1);
+    FenceBuffer=malloc(imagesize(1,1,gbSideLength-1,gbSideLength-1));
+    getimage(1,1,gbSideLength-1,gbSideLength-1,  FenceBuffer);
+    cleardevice();
+}
 int main()
 {
 
     initwindow(GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN), "", -3, -3);
-    readimagefile("Images/background.jpg",0,0,getmaxx(),getmaxy());
-    BackgroundBuffer=malloc(imagesize(0,0,getmaxx(),getmaxy()));
-    getimage(0,0,getmaxx(),getmaxy(),BackgroundBuffer);
-    DrawLevel("GameBoards/GameBoard.txt");
-
+    UploadImages();
+    DrawLevel("GameBoards/GameBoard1.txt");
+   
     
     getch();
     closegraph();
