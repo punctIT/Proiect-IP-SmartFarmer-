@@ -18,7 +18,8 @@ void *SheepBuffer;
 void *PigBuffer;
 void *FenceBuffer;
 void *GrassBuffer;
-
+void *EmptyAnimalBuffer;
+void *MiniFenceBuffer;
 struct GamePieces
 {
     POINT UpLeft, DownRight, InitialPositionOfFence; // coordonatele piesei
@@ -307,6 +308,10 @@ void DrawBoardGame()
             {
                putimage(x,y,SheepBuffer,COPY_PUT);
             }
+            else if(GameBoard[i][q]=='*')
+            {
+                putimage(x,y,EmptyAnimalBuffer,COPY_PUT);
+            }
             else
                 putimage(x,y,GrassBuffer,COPY_PUT);
              
@@ -326,9 +331,12 @@ void DrawFence(GamePieces &fenceToDraw, int x, int y, int side)
                 x += side * (q);
                 y += side * (i);
 
-                setcolor(GREEN);
-                rectangle(x, y, x + side, y + side);
                 setcolor(WHITE);
+                rectangle(x, y, x + side, y + side);
+                if(side!=gbSideLength)
+                    putimage(x,y,MiniFenceBuffer,COPY_PUT);
+                else putimage(x,y,FenceBuffer,COPY_PUT);
+        
 
                 y -= side * (i);
                 x -= side * (q);
@@ -520,6 +528,13 @@ void UploadImages()
     readimagefile("Images/fence.jpg",1,1,gbSideLength-1,gbSideLength-1);
     FenceBuffer=malloc(imagesize(1,1,gbSideLength-1,gbSideLength-1));
     getimage(1,1,gbSideLength-1,gbSideLength-1,  FenceBuffer);
+    readimagefile("Images/Rock.jpg",1,1,gbSideLength-1,gbSideLength-1);
+    EmptyAnimalBuffer=malloc(imagesize(1,1,gbSideLength-1,gbSideLength-1));
+    getimage(1,1,gbSideLength-1,gbSideLength-1,  EmptyAnimalBuffer);
+    readimagefile("Images/fence.jpg",1,1,(gbSideLength-1)/2,(gbSideLength-1)/2);
+    MiniFenceBuffer=malloc(imagesize(1,1,(gbSideLength-1)/2,(gbSideLength-1)/2));
+    getimage(1,1,(gbSideLength-1)/2,(gbSideLength-1)/2,  MiniFenceBuffer);
+
     cleardevice();
 }
 int main()
