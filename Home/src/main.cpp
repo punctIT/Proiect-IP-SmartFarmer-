@@ -9,7 +9,8 @@ using namespace std;
 
 char GameBoard[10][10];
 int length = 9, width = 7;
-bool GameIsFinised = false;
+
+bool globalDragging=false;
 
 void *BackgroundBuffer;
 void *HorseBuffer;
@@ -378,6 +379,7 @@ POINT MouseDraggingPiece(GamePieces &Fence)
         if (mouse.x >= Fence.UpLeft.x && mouse.x <= Fence.DownRight.x && mouse.y >= Fence.UpLeft.y && mouse.y <= Fence.DownRight.y) // daca se afla in interiorul piesei
         {
             Fence.dragging = 1;
+            globalDragging=1;//se foloseste pentru a elimina efectul de palpaiala a piesei
             Fence.Side = gbSideLength; // devine de dimenisune normala
         }
     }
@@ -398,6 +400,7 @@ POINT MouseDraggingPiece(GamePieces &Fence)
         if (ismouseclick(WM_RBUTTONDOWN)) // plasarea piesiei jos , cu click dreapta
         {
             Fence.dragging = 0;
+            globalDragging=0;
             Fence.Side = gbSideLength / 2;
 
             clearmouseclick(WM_RBUTTONDOWN);
@@ -488,7 +491,8 @@ void DrawLevel(string GameBoardFileName)
         for (int i = 1; i <= 3; i++)
             if (mouse.x >= Fence[i].UpLeft.x && mouse.x <= Fence[i].DownRight.x && mouse.y >= Fence[i].UpLeft.y && mouse.y <= Fence[i].DownRight.y || Fence[i].dragging)
             {
-                MouseDraggingPiece(Fence[i]);
+                if(Fence[i].dragging||!globalDragging)//doar daca nu e nici o pisa in starea de dragging , sau doar una
+                    MouseDraggingPiece(Fence[i]);
                 SomethingHappend = true;
             }
         if (!SomethingHappend)
@@ -504,6 +508,7 @@ void DrawLevel(string GameBoardFileName)
 }
 void UploadImages()
 {
+   // setvisualpage(1);//evita efectul de incarcare a imagililor, nu apare fiecare pe rand , apare negru si dupa toate odata
     readimagefile("Images/background.jpg",0,0,getmaxx(),getmaxy());
     BackgroundBuffer=malloc(imagesize(0,0,getmaxx(),getmaxy()));
     getimage(0,0,getmaxx(),getmaxy(),BackgroundBuffer);
@@ -534,8 +539,8 @@ void UploadImages()
     readimagefile("Images/fence.jpg",1,1,(gbSideLength-1)/2,(gbSideLength-1)/2);
     MiniFenceBuffer=malloc(imagesize(1,1,(gbSideLength-1)/2,(gbSideLength-1)/2));
     getimage(1,1,(gbSideLength-1)/2,(gbSideLength-1)/2,  MiniFenceBuffer);
-
     cleardevice();
+   
 }
 int main()
 {
