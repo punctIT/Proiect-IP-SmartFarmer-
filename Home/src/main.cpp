@@ -7,8 +7,15 @@
 
 using namespace std;
 
-char GameBoard[72][9];
+char GameBoard[10][10];
 int length = 9, width = 7;
+bool GameIsFinised = false;
+
+void *BackgroundBuffer;
+void *HorseBuffer;
+void *CowBuffer;
+void *SheepBuffer;
+void *PigBuffer;
 
 struct GamePieces
 {
@@ -19,6 +26,7 @@ struct GamePieces
     int Side;
     int isRotated;
     int GB[7][9]; // matricea caracteristica a piesei 7x9
+
 
 } Fence[4];
 
@@ -141,7 +149,7 @@ void CopyMatrix(int a[7][9], int b[7][9])
 void RotateFence(GamePieces &fence)
 {
     NormalizeFence(fence);
-    
+
     int newFence[7][9];
     CopyMatrix(newFence, fence.GB);
     for (int i = 0; i < width; i++)
@@ -169,8 +177,6 @@ void ReadGameBoard(string FileName)
             fin >> GameBoard[i][q];
 }
 
-
-
 int CountAnimalInBoard(char Animal)
 {
     int cnt = 0;
@@ -191,25 +197,26 @@ bool AnimalsAreFenced()
     {
         for (int j = 1; j < length; j++)
         {
-            if (strchr("*0CPHS", CopyGameBoard[i][j])) //C pentru cow, P pentru pig, etc
+            if (strchr("*0CPHS", CopyGameBoard[i][j])) // C pentru cow, P pentru pig, etc
             {
                 char Animal = CopyGameBoard[i][j];
                 int CountAnimal = 1;
-                //bool Water = 0;
+                // bool Water = 0;
 
                 // algoritm fill
                 int iDir[4] = {0, 0, -1, 1}, jDir[4] = {-1, 1, 0, 0};
                 int left = 0, right = 0;
-                struct Queue{
+                struct Queue
+                {
                     int row, column;
-                }Q[length*width];
+                } Q[length * width];
                 Q[0].row = i;
                 Q[0].column = j;
                 CopyGameBoard[i][j] = '1';
                 while (left <= right)
                 {
                     int row = Q[left].row, column = Q[left].column;
-                    for(int k = 0; k < 4; k++)
+                    for (int k = 0; k < 4; k++)
                     {
                         int iNext = row + iDir[k];
                         int jNext = column + jDir[k];
@@ -219,11 +226,10 @@ bool AnimalsAreFenced()
                             {
                                 if (Animal == '0' || Animal == '*')
                                     Animal = CopyGameBoard[iNext][jNext];
+                                else if (CopyGameBoard[iNext][jNext] == Animal)
+                                    CountAnimal++;
                                 else
-                                    if (CopyGameBoard[iNext][jNext] == Animal)
-                                        CountAnimal++;
-                                    else
-                                        return 0; //daca sunt mai multe animale de tipuri diferite atunci nu e pus bine gardul
+                                    return 0; // daca sunt mai multe animale de tipuri diferite atunci nu e pus bine gardul
                             }
                             CopyGameBoard[iNext][jNext] = '1';
                             right++;
@@ -234,18 +240,26 @@ bool AnimalsAreFenced()
                     left++;
                 }
                 if (CountAnimal != CountAnimalInBoard(Animal))
-                    return 0; //nu sunt toate animalele de tipul asta in acelasi tarc
+                    return 0; // nu sunt toate animalele de tipul asta in acelasi tarc
             }
         }
     }
     return 1;
 }
 
-
-
 // Partea de Grafica
 
 int LeftBorder, UpBorder, gbWidth, gbHeight, gbSideLength, DownBorder, RightBorder;
+void Button1()
+{
+    cout << 1;
+}
+void DrawButton(int x, int y, void FunctieButon())
+{
+
+    FunctieButon();
+}
+
 void DrawInBoardGame(int x, int y, int color)
 {
     // circle(LeftBorder+ gbSideLength * (x - 1) + gbSideLength/ 2, UpBorder + gbSideLength * (y - 1) +gbSideLength / 2, 10);
@@ -259,34 +273,42 @@ void DrawBoardGame()
     gbSideLength = 80;
     gbWidth = gbSideLength * length;
     gbHeight = 400;
-    UpBorder =  0.17*GetSystemMetrics(SM_CYSCREEN);
-    LeftBorder =  0.1* GetSystemMetrics(SM_CXSCREEN);
+    UpBorder = 0.17 * GetSystemMetrics(SM_CYSCREEN);
+    LeftBorder = 0.1 * GetSystemMetrics(SM_CXSCREEN);
     RightBorder = 50;
     for (int i = 1; i <= length; i++)
         for (int j = 1; j <= width; j++)
             rectangle(LeftBorder + gbSideLength * (i - 1), UpBorder + gbSideLength * (j - 1), LeftBorder + gbSideLength * i, UpBorder + gbSideLength * j);
     for (int i = 0; i < width; i++)
-        for (int q = 0; q < length; q++){
-            if (GameBoard[i][q] == '#'||strchr("12345",GameBoard[i][q]))
+        for (int q = 0; q < length; q++)
+        {
+            int x=LeftBorder+q*gbSideLength;
+            int y=UpBorder+i*gbSideLength;
+           
+            if (GameBoard[i][q] == '#' || strchr("12345", GameBoard[i][q]))
                 DrawInBoardGame(q + 1, i + 1, 1);
-            else if(GameBoard[i][q]=='C')//CPHS
+            else if (GameBoard[i][q] == 'C') // CPHS
             {
-                DrawInBoardGame(q + 1, i + 1,4);
+                DrawInBoardGame(q + 1, i + 1, 4);
             }
-            else if(GameBoard[i][q]=='P')
+            else if (GameBoard[i][q] == 'P')
             {
-                  DrawInBoardGame(q + 1, i + 1,13);
+                DrawInBoardGame(q + 1, i + 1, 13);
             }
-            else if(GameBoard[i][q]=='H')
-            {
-                 DrawInBoardGame(q + 1, i + 1,6);
+            else if (GameBoard[i][q] == 'H')
+            {   
+                x++;
+                y++;
+                //readimagefile("Images/horse.bmp",x,y,x+gbSideLength-4,y+gbSideLength-4);
+                DrawInBoardGame(q + 1, i + 1, 6);
             }
-            else if(GameBoard[i][q]=='S')
+            else if (GameBoard[i][q] == 'S')
             {
-                DrawInBoardGame(q + 1, i + 1,9);
+                DrawInBoardGame(q + 1, i + 1, 9);
             }
             else
                 DrawInBoardGame(q + 1, i + 1, GameBoard[i][q] - '0');
+             
         }
 }
 
@@ -336,8 +358,9 @@ POINT MouseDraggingPiece(GamePieces &Fence)
     setactivepage(page);
     setvisualpage(1 - page);
     setfillstyle(SOLID_FILL, BLACK);
-    bar(0, 0, getmaxx(), getmaxy());
-
+    
+     //bar(0, 0, getmaxx(), getmaxy());
+    bar(0,0,getmaxx(),UpBorder);
     if (ismouseclick(WM_LBUTTONDOWN))
     {
         POINT mouse;
@@ -367,7 +390,7 @@ POINT MouseDraggingPiece(GamePieces &Fence)
         {
             Fence.dragging = 0;
             Fence.Side = gbSideLength / 2;
-         
+
             clearmouseclick(WM_RBUTTONDOWN);
             GB.y = (mouse.x - LeftBorder) / gbSideLength;
             GB.x = (mouse.y - UpBorder) / gbSideLength; // afla coordonatele pe grid
@@ -378,7 +401,7 @@ POINT MouseDraggingPiece(GamePieces &Fence)
                 MoveFence(newFence, GB.x, GB.y); // mutarea in grid, mutarea fictiva, matrice auxiara
                 if (VerifyFencePosition(newFence))
                 {
-                    MoveFence(Fence, GB.x, GB.y); 
+                    MoveFence(Fence, GB.x, GB.y);
                     AddFence(Fence);
 
                     Fence.UpLeft.x = GB.y * gbSideLength + LeftBorder; // calculatre coordonate noi
@@ -409,9 +432,9 @@ POINT MouseDraggingPiece(GamePieces &Fence)
                 }
                 MouseDraggingPiece(Fence);
             }
-            
         }
     }
+    putimage(0,0,BackgroundBuffer,COPY_PUT);
     DrawBoardGame();
 
     for (int i = 1; i <= 3; i++)
@@ -423,18 +446,14 @@ POINT MouseDraggingPiece(GamePieces &Fence)
     delay(10);
     return GB;
 }
-
-int main()
+void DrawLevel(string GameBoardFileName)
 {
-
-    ReadGameBoard("GameBoards/GameBoard1.txt");
+    ReadGameBoard(GameBoardFileName);
     ReadFence(Fence[3], "GameBoards/Piesa3.txt");
     ReadFence(Fence[1], "GameBoards/Piesa1.txt");
     ReadFence(Fence[2], "GameBoards/Piesa2.txt");
 
-    initwindow(GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN), "", -3, -3);
     DrawBoardGame();
-
     Fence[0].UpLeft.x = Fence[0].UpLeft.y = 0;
     Fence[0].DownRight.x = getmaxx();
     Fence[0].DownRight.y = getmaxy();
@@ -465,14 +484,25 @@ int main()
             }
         if (!SomethingHappend)
             MouseDraggingPiece(Fence[0]);
-        if(AnimalsAreFenced())
+        if (AnimalsAreFenced())
         {
             cleardevice();
             setcolor(WHITE); // Setează culoarea textului
-            outtextxy(200, 200, "FINAL");
+            char text[] = "FINAL";
+            outtextxy(200, 200, text);
         }
     }
+}
+int main()
+{
 
+    initwindow(GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN), "", -3, -3);
+    readimagefile("Images/background.jpg",0,0,getmaxx(),getmaxy());
+    BackgroundBuffer=malloc(imagesize(0,0,getmaxx(),getmaxy()));
+    getimage(0,0,getmaxx(),getmaxy(),BackgroundBuffer);
+    DrawLevel("GameBoards/GameBoard.txt");
+
+    
     getch();
     closegraph();
 
