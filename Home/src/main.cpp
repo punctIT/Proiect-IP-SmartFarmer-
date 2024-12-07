@@ -376,6 +376,9 @@ POINT MouseDraggingPiece(GamePieces &Fence)
         POINT mouse;
         clearmouseclick(WM_LBUTTONDOWN);
         GetCursorPos(&mouse);
+        GB.y = (mouse.x - LeftBorder) / gbSideLength;
+        GB.x = (mouse.y - UpBorder) / gbSideLength; 
+        cout<<GB.x<<" "<<GB.y<<" "<<endl;
         if (mouse.x >= Fence.UpLeft.x && mouse.x <= Fence.DownRight.x && mouse.y >= Fence.UpLeft.y && mouse.y <= Fence.DownRight.y) // daca se afla in interiorul piesei
         {
             Fence.dragging = 1;
@@ -406,7 +409,7 @@ POINT MouseDraggingPiece(GamePieces &Fence)
             clearmouseclick(WM_RBUTTONDOWN);
             GB.y = (mouse.x - LeftBorder) / gbSideLength;
             GB.x = (mouse.y - UpBorder) / gbSideLength; // afla coordonatele pe grid
-            if (GB.x <= length && GB.y <= width)        // verifica daca se afla in matricea GameBoard
+            if (mouse.x<LeftBorder+gbWidth&&mouse.y<UpBorder+gbHeight&&mouse.x>LeftBorder&&mouse.y>UpBorder)        // verifica daca se afla in matricea GameBoard
             {
                 NormalizeFence(Fence); // normalizarea e pentru mutarea piesei, trebuie adusa in colt , iar dupa mutata  la x si y
                 GamePieces newFence = Fence;
@@ -415,7 +418,6 @@ POINT MouseDraggingPiece(GamePieces &Fence)
                 {
                     MoveFence(Fence, GB.x, GB.y);
                     AddFence(Fence);
-
                     Fence.UpLeft.x = GB.y * gbSideLength + LeftBorder; // calculatre coordonate noi
                     Fence.UpLeft.y = GB.x * gbSideLength + UpBorder;
                     Fence.isPlaced = true;
