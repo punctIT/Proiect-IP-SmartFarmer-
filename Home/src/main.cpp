@@ -411,6 +411,10 @@ POINT MouseDraggingPiece(GamePieces &Fence)
             RotateFence(Fence);
             Fence.isRotated = (Fence.isRotated + 1) % 2; // alterneaza intre 0 si 1 ( un bool pentru lenesi)
         }
+        if(IsKeyPressed('q'))
+        {
+            exit(0);
+        }
         if (Fence.isPlaced) // aici verifica daca piesa e plasata cumva , si se muta
             RemoveFence(Fence), Fence.isPlaced = false;
         GetCursorPos(&mouse);
