@@ -536,7 +536,7 @@ void DrawLevel(string GameBoardFileName)
 }
 void UploadImages()
 {
-    // setvisualpage(1);//evita efectul de incarcare a imagililor, nu apare fiecare pe rand , apare negru si dupa toate odata
+    setvisualpage(1);//evita efectul de incarcare a imagililor, nu apare fiecare pe rand , apare negru si dupa toate odata
     readimagefile("Images/background.jpg", 0, 0, getmaxx(), getmaxy());
     BackgroundBuffer = malloc(imagesize(0, 0, getmaxx(), getmaxy()));
     getimage(0, 0, getmaxx(), getmaxy(), BackgroundBuffer);
