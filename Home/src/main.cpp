@@ -255,9 +255,11 @@ bool AnimalsAreFenced()
 // Partea de Grafica
 
 int LeftBorder, UpBorder, gbWidth, gbHeight, gbSideLength = 80, DownBorder, RightBorder;
-void ButtonFunctie()
+void ExitButton()
 {
-    cout << 1;
+    cleardevice();
+    closegraph();
+    terminate();
 }
 void ActiveButton(Buttons btn)
 {
@@ -413,7 +415,10 @@ POINT MouseDraggingPiece(GamePieces &Fence)
         }
         if(IsKeyPressed('q'))
         {
-            exit(0);
+            cleardevice();
+            closegraph();
+            terminate();
+            
         }
         if (Fence.isPlaced) // aici verifica daca piesa e plasata cumva , si se muta
             RemoveFence(Fence), Fence.isPlaced = false;
@@ -574,12 +579,11 @@ int main()
 
     initwindow(GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN), "", -3, -3);
     UploadImages();
-    Buttons button = {10, 20, 150, 40, "Submit", ButtonFunctie};
+    Buttons button = {10, 20, 150, 40, "Submit", ExitButton};
     button1 = button;
     DrawLevel("GameBoards/GameBoard1.txt");
 
     getch();
     closegraph();
-
     return 0;
 }
