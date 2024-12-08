@@ -10,10 +10,9 @@ using namespace std;
 char GameBoard[10][10];
 int length = 9, width = 7;
 
-bool globalDragging=false;//evita palpairea si luarea simultata a mai multor piese
+bool globalDragging = false; // evita palpairea si luarea simultata a mai multor piese
 
-void *BackgroundBuffer,*HorseBuffer,*CowBuffer,*SheepBuffer,*PigBuffer,*FenceBuffer,*GrassBuffer,*EmptyAnimalBuffer,*MiniFenceBuffer;
-
+void *BackgroundBuffer, *HorseBuffer, *CowBuffer, *SheepBuffer, *PigBuffer, *FenceBuffer, *GrassBuffer, *EmptyAnimalBuffer, *MiniFenceBuffer;
 
 struct GamePieces
 {
@@ -25,8 +24,16 @@ struct GamePieces
     int isRotated;
     int GB[7][9]; // matricea caracteristica a piesei 7x9
 
-
 } Fence[4];
+
+struct Buttons
+{
+    int x, y;
+    int length, height;
+    string text;
+    void (*Function)();
+
+} button1;
 
 bool IsKeyPressed(char key)
 {
@@ -248,14 +255,31 @@ bool AnimalsAreFenced()
 // Partea de Grafica
 
 int LeftBorder, UpBorder, gbWidth, gbHeight, gbSideLength = 80, DownBorder, RightBorder;
-void Button1()
+void ButtonFunctie()
 {
     cout << 1;
 }
-void DrawButton(int x, int y, void FunctieButon())
+void ActiveButton(Buttons btn)
 {
-
-    FunctieButon();
+    if (ismouseclick(WM_LBUTTONDOWN))
+    {
+        POINT mouse;
+        clearmouseclick(WM_LBUTTONDOWN);
+        GetCursorPos(&mouse);
+        if(mouse.x>btn.x&&mouse.y>btn.y&&mouse.x<btn.x+btn.length&&mouse.y<btn.y+btn.height)
+        {
+            Beep(1000,100);
+            btn.Function();
+        }
+    }
+}
+void DrawButton(Buttons btn)
+{
+    setcolor(WHITE);
+    rectangle(btn.x, btn.y, btn.x + btn.length, btn.y + btn.height);
+    char newText[btn.text.length()];
+    strcpy(newText, btn.text.c_str());
+    outtextxy(btn.x, btn.y, newText);
 }
 
 void DrawInBoardGame(int x, int y, int color)
@@ -279,37 +303,36 @@ void DrawBoardGame()
     for (int i = 0; i < width; i++)
         for (int q = 0; q < length; q++)
         {
-            int x=LeftBorder+q*gbSideLength;
-            int y=UpBorder+i*gbSideLength;
-           
+            int x = LeftBorder + q * gbSideLength;
+            int y = UpBorder + i * gbSideLength;
+
             if (GameBoard[i][q] == '#' || strchr("12345", GameBoard[i][q]))
             {
-                //DrawInBoardGame(q + 1, i + 1, 1);
-                putimage(x,y,FenceBuffer,COPY_PUT);
+                // DrawInBoardGame(q + 1, i + 1, 1);
+                putimage(x, y, FenceBuffer, COPY_PUT);
             }
             else if (GameBoard[i][q] == 'C') // CPHS
             {
-                putimage(x,y,CowBuffer,COPY_PUT);
+                putimage(x, y, CowBuffer, COPY_PUT);
             }
             else if (GameBoard[i][q] == 'P')
             {
-                putimage(x,y,PigBuffer,COPY_PUT);
+                putimage(x, y, PigBuffer, COPY_PUT);
             }
             else if (GameBoard[i][q] == 'H')
-            {   
-                putimage(x,y,HorseBuffer,COPY_PUT);
+            {
+                putimage(x, y, HorseBuffer, COPY_PUT);
             }
             else if (GameBoard[i][q] == 'S')
             {
-               putimage(x,y,SheepBuffer,COPY_PUT);
+                putimage(x, y, SheepBuffer, COPY_PUT);
             }
-            else if(GameBoard[i][q]=='*')
+            else if (GameBoard[i][q] == '*')
             {
-                putimage(x,y,EmptyAnimalBuffer,COPY_PUT);
+                putimage(x, y, EmptyAnimalBuffer, COPY_PUT);
             }
             else
-                putimage(x,y,GrassBuffer,COPY_PUT);
-             
+                putimage(x, y, GrassBuffer, COPY_PUT);
         }
 }
 
@@ -328,10 +351,10 @@ void DrawFence(GamePieces &fenceToDraw, int x, int y, int side)
 
                 setcolor(WHITE);
                 rectangle(x, y, x + side, y + side);
-                if(side!=gbSideLength)
-                    putimage(x,y,MiniFenceBuffer,COPY_PUT);
-                else putimage(x,y,FenceBuffer,COPY_PUT);
-        
+                if (side != gbSideLength)
+                    putimage(x, y, MiniFenceBuffer, COPY_PUT);
+                else
+                    putimage(x, y, FenceBuffer, COPY_PUT);
 
                 y -= side * (i);
                 x -= side * (q);
@@ -362,20 +385,20 @@ POINT MouseDraggingPiece(GamePieces &Fence)
     setactivepage(page);
     setvisualpage(1 - page);
     setfillstyle(SOLID_FILL, BLACK);
-    
-     //bar(0, 0, getmaxx(), getmaxy());
-    bar(0,0,getmaxx(),UpBorder);
+
+    // bar(0, 0, getmaxx(), getmaxy());
+    bar(0, 0, getmaxx(), UpBorder);
     if (ismouseclick(WM_LBUTTONDOWN))
     {
         POINT mouse;
         clearmouseclick(WM_LBUTTONDOWN);
         GetCursorPos(&mouse);
         GB.y = (mouse.x - LeftBorder) / gbSideLength;
-        GB.x = (mouse.y - UpBorder) / gbSideLength; 
+        GB.x = (mouse.y - UpBorder) / gbSideLength;
         if (mouse.x >= Fence.UpLeft.x && mouse.x <= Fence.DownRight.x && mouse.y >= Fence.UpLeft.y && mouse.y <= Fence.DownRight.y) // daca se afla in interiorul piesei
         {
             Fence.dragging = 1;
-            globalDragging=1;//se foloseste pentru a elimina efectul de palpaiala a piesei
+            globalDragging = 1;        // se foloseste pentru a elimina efectul de palpaiala a piesei
             Fence.Side = gbSideLength; // devine de dimenisune normala
         }
     }
@@ -396,13 +419,13 @@ POINT MouseDraggingPiece(GamePieces &Fence)
         if (ismouseclick(WM_RBUTTONDOWN)) // plasarea piesiei jos , cu click dreapta
         {
             Fence.dragging = 0;
-            globalDragging=0;
+            globalDragging = 0;
             Fence.Side = gbSideLength / 2;
 
             clearmouseclick(WM_RBUTTONDOWN);
             GB.y = (mouse.x - LeftBorder) / gbSideLength;
-            GB.x = (mouse.y - UpBorder) / gbSideLength; // afla coordonatele pe grid
-            if (mouse.x<LeftBorder+gbWidth&&mouse.y<UpBorder+gbHeight&&mouse.x>LeftBorder&&mouse.y>UpBorder)        // verifica daca se afla in matricea GameBoard
+            GB.x = (mouse.y - UpBorder) / gbSideLength;                                                                        // afla coordonatele pe grid
+            if (mouse.x < LeftBorder + gbWidth && mouse.y < UpBorder + gbHeight && mouse.x > LeftBorder && mouse.y > UpBorder) // verifica daca se afla in matricea GameBoard
             {
                 NormalizeFence(Fence); // normalizarea e pentru mutarea piesei, trebuie adusa in colt , iar dupa mutata  la x si y
                 GamePieces newFence = Fence;
@@ -441,8 +464,9 @@ POINT MouseDraggingPiece(GamePieces &Fence)
             }
         }
     }
-    putimage(0,0,BackgroundBuffer,COPY_PUT);
+    putimage(0, 0, BackgroundBuffer, COPY_PUT);
     DrawBoardGame();
+    DrawButton(button1);
 
     for (int i = 1; i <= 3; i++)
         if (!::Fence[i].dragging)
@@ -486,12 +510,17 @@ void DrawLevel(string GameBoardFileName)
         for (int i = 1; i <= 3; i++)
             if (mouse.x >= Fence[i].UpLeft.x && mouse.x <= Fence[i].DownRight.x && mouse.y >= Fence[i].UpLeft.y && mouse.y <= Fence[i].DownRight.y || Fence[i].dragging)
             {
-                if(Fence[i].dragging||!globalDragging)//doar daca nu e nici o pisa in starea de dragging , sau doar una
+                if (Fence[i].dragging || !globalDragging) // doar daca nu e nici o pisa in starea de dragging , sau doar una
                     MouseDraggingPiece(Fence[i]);
                 SomethingHappend = true;
             }
         if (!SomethingHappend)
+        {
             MouseDraggingPiece(Fence[0]);
+            ActiveButton(button1);
+                       
+        }
+
         if (AnimalsAreFenced())
         {
             cleardevice();
@@ -503,48 +532,48 @@ void DrawLevel(string GameBoardFileName)
 }
 void UploadImages()
 {
-   // setvisualpage(1);//evita efectul de incarcare a imagililor, nu apare fiecare pe rand , apare negru si dupa toate odata
-    readimagefile("Images/background.jpg",0,0,getmaxx(),getmaxy());
-    BackgroundBuffer=malloc(imagesize(0,0,getmaxx(),getmaxy()));
-    getimage(0,0,getmaxx(),getmaxy(),BackgroundBuffer);
-    readimagefile("Images/horse.jpg",1,1,gbSideLength-1,gbSideLength-1);
-    HorseBuffer=malloc(imagesize(1,1,gbSideLength-1,gbSideLength-1));
-    getimage(1,1,gbSideLength-1,gbSideLength-1, HorseBuffer);
-    readimagefile("Images/cow.jpg",1,1,gbSideLength-1,gbSideLength-1);
-    CowBuffer=malloc(imagesize(1,1,gbSideLength-1,gbSideLength-1));
-    getimage(1,1,gbSideLength-1,gbSideLength-1, CowBuffer);
-    readimagefile("Images/sheep.jpg",1,1,gbSideLength-1,gbSideLength-1);
-    SheepBuffer=malloc(imagesize(1,1,gbSideLength-1,gbSideLength-1));
-    getimage(1,1,gbSideLength-1,gbSideLength-1, SheepBuffer);
-    readimagefile("Images/pig.jpg",1,1,gbSideLength-1,gbSideLength-1);
-    PigBuffer=malloc(imagesize(1,1,gbSideLength-1,gbSideLength-1));
-    getimage(1,1,gbSideLength-1,gbSideLength-1, PigBuffer);
-    readimagefile("Images/pig.jpg",1,1,gbSideLength-1,gbSideLength-1);
-    PigBuffer=malloc(imagesize(1,1,gbSideLength-1,gbSideLength-1));
-    getimage(1,1,gbSideLength-1,gbSideLength-1, PigBuffer);
-    readimagefile("Images/grass.jpg",1,1,gbSideLength-1,gbSideLength-1);
-    GrassBuffer=malloc(imagesize(1,1,gbSideLength-1,gbSideLength-1));
-    getimage(1,1,gbSideLength-1,gbSideLength-1,  GrassBuffer);
-    readimagefile("Images/fence.jpg",1,1,gbSideLength-1,gbSideLength-1);
-    FenceBuffer=malloc(imagesize(1,1,gbSideLength-1,gbSideLength-1));
-    getimage(1,1,gbSideLength-1,gbSideLength-1,  FenceBuffer);
-    readimagefile("Images/Rock.jpg",1,1,gbSideLength-1,gbSideLength-1);
-    EmptyAnimalBuffer=malloc(imagesize(1,1,gbSideLength-1,gbSideLength-1));
-    getimage(1,1,gbSideLength-1,gbSideLength-1,  EmptyAnimalBuffer);
-    readimagefile("Images/fence.jpg",1,1,(gbSideLength-1)/2,(gbSideLength-1)/2);
-    MiniFenceBuffer=malloc(imagesize(1,1,(gbSideLength-1)/2,(gbSideLength-1)/2));
-    getimage(1,1,(gbSideLength-1)/2,(gbSideLength-1)/2,  MiniFenceBuffer);
+    // setvisualpage(1);//evita efectul de incarcare a imagililor, nu apare fiecare pe rand , apare negru si dupa toate odata
+    readimagefile("Images/background.jpg", 0, 0, getmaxx(), getmaxy());
+    BackgroundBuffer = malloc(imagesize(0, 0, getmaxx(), getmaxy()));
+    getimage(0, 0, getmaxx(), getmaxy(), BackgroundBuffer);
+    readimagefile("Images/horse.jpg", 1, 1, gbSideLength - 1, gbSideLength - 1);
+    HorseBuffer = malloc(imagesize(1, 1, gbSideLength - 1, gbSideLength - 1));
+    getimage(1, 1, gbSideLength - 1, gbSideLength - 1, HorseBuffer);
+    readimagefile("Images/cow.jpg", 1, 1, gbSideLength - 1, gbSideLength - 1);
+    CowBuffer = malloc(imagesize(1, 1, gbSideLength - 1, gbSideLength - 1));
+    getimage(1, 1, gbSideLength - 1, gbSideLength - 1, CowBuffer);
+    readimagefile("Images/sheep.jpg", 1, 1, gbSideLength - 1, gbSideLength - 1);
+    SheepBuffer = malloc(imagesize(1, 1, gbSideLength - 1, gbSideLength - 1));
+    getimage(1, 1, gbSideLength - 1, gbSideLength - 1, SheepBuffer);
+    readimagefile("Images/pig.jpg", 1, 1, gbSideLength - 1, gbSideLength - 1);
+    PigBuffer = malloc(imagesize(1, 1, gbSideLength - 1, gbSideLength - 1));
+    getimage(1, 1, gbSideLength - 1, gbSideLength - 1, PigBuffer);
+    readimagefile("Images/pig.jpg", 1, 1, gbSideLength - 1, gbSideLength - 1);
+    PigBuffer = malloc(imagesize(1, 1, gbSideLength - 1, gbSideLength - 1));
+    getimage(1, 1, gbSideLength - 1, gbSideLength - 1, PigBuffer);
+    readimagefile("Images/grass.jpg", 1, 1, gbSideLength - 1, gbSideLength - 1);
+    GrassBuffer = malloc(imagesize(1, 1, gbSideLength - 1, gbSideLength - 1));
+    getimage(1, 1, gbSideLength - 1, gbSideLength - 1, GrassBuffer);
+    readimagefile("Images/fence.jpg", 1, 1, gbSideLength - 1, gbSideLength - 1);
+    FenceBuffer = malloc(imagesize(1, 1, gbSideLength - 1, gbSideLength - 1));
+    getimage(1, 1, gbSideLength - 1, gbSideLength - 1, FenceBuffer);
+    readimagefile("Images/Rock.jpg", 1, 1, gbSideLength - 1, gbSideLength - 1);
+    EmptyAnimalBuffer = malloc(imagesize(1, 1, gbSideLength - 1, gbSideLength - 1));
+    getimage(1, 1, gbSideLength - 1, gbSideLength - 1, EmptyAnimalBuffer);
+    readimagefile("Images/fence.jpg", 1, 1, (gbSideLength - 1) / 2, (gbSideLength - 1) / 2);
+    MiniFenceBuffer = malloc(imagesize(1, 1, (gbSideLength - 1) / 2, (gbSideLength - 1) / 2));
+    getimage(1, 1, (gbSideLength - 1) / 2, (gbSideLength - 1) / 2, MiniFenceBuffer);
     cleardevice();
-   
 }
 int main()
 {
 
     initwindow(GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN), "", -3, -3);
     UploadImages();
+    Buttons button = {10, 20, 150, 40, "Submit", ButtonFunctie};
+    button1 = button;
     DrawLevel("GameBoards/GameBoard1.txt");
-   
-    
+
     getch();
     closegraph();
 
