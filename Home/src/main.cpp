@@ -7,8 +7,10 @@
 
 using namespace std;
 
-char GameBoard[10][10];
-int length = 9, width = 7;
+
+const int length = 9, width = 7;
+
+char GameBoard[width+1][length+1];
 
 bool globalDragging = false; // evita palpairea si luarea simultata a mai multor piese
 
@@ -22,7 +24,7 @@ struct GamePieces
     bool isPlaced;
     int Side;
     int isRotated;
-    int GB[7][9]; // matricea caracteristica a piesei 7x9
+    int GB[width][length]; // matricea caracteristica a piesei 7x9
 
 } Fence[4];
 
@@ -34,6 +36,7 @@ struct Buttons
     void (*Function)();
 
 } button1;
+
 
 bool IsKeyPressed(char key)
 {
@@ -145,7 +148,7 @@ void MoveFence(GamePieces &fence, int x, int y) // x coloana , y linia(indicele 
             fence.GB[0][i] = 0;
         }
 }
-void CopyMatrix(int a[7][9], int b[7][9])
+void CopyMatrix(int a[width][length], int b[width][length])
 {
     for (int i = 0; i < width; i++)
         for (int q = 0; q < length; q++)
@@ -155,7 +158,7 @@ void RotateFence(GamePieces &fence)
 {
     NormalizeFence(fence);
 
-    int newFence[7][9];
+    int newFence[width][length];
     CopyMatrix(newFence, fence.GB);
     for (int i = 0; i < width; i++)
         for (int q = 0; q < width + 1; q++)
@@ -194,7 +197,7 @@ int CountAnimalInBoard(char Animal)
 
 bool AnimalsAreFenced()
 {
-    char CopyGameBoard[7][9];
+    char CopyGameBoard[width][length];
     for (int i = 0; i <= width; i++)
         for (int j = 0; j <= length; j++)
             CopyGameBoard[i][j] = GameBoard[i][j];
@@ -257,9 +260,30 @@ bool AnimalsAreFenced()
 int LeftBorder, UpBorder, gbWidth, gbHeight, gbSideLength = 80, DownBorder, RightBorder;
 void ExitButton()
 {
-    cleardevice();
-    closegraph();
-    terminate();
+   // cleardevice();
+   // closegraph();
+   // terminate();
+}
+
+void DrawButton(Buttons btn,int color)
+{
+    setcolor(color);
+    rectangle(btn.x, btn.y, btn.x + btn.length, btn.y + btn.height);
+    int aux=0;
+    while(aux!=btn.height)
+    {
+        setcolor(color);
+        rectangle(btn.x+aux, btn.y+aux, btn.x + btn.length-aux, btn.y + btn.height-aux);
+        
+        aux++;
+    }
+  
+    char newText[btn.text.length()];
+    strcpy(newText, btn.text.c_str());
+    setbkcolor(color);
+    setcolor(BLACK);
+    outtextxy(btn.x+btn.length/2-btn.text.length()*3, btn.y+btn.height/2-7, newText);
+   // floodfill(btn.x+2,btn.y+2,15);
 }
 void ActiveButton(Buttons btn)
 {
@@ -271,18 +295,12 @@ void ActiveButton(Buttons btn)
         if(mouse.x>btn.x&&mouse.y>btn.y&&mouse.x<btn.x+btn.length&&mouse.y<btn.y+btn.height)
         {
             Beep(1000,100);
+            DrawButton(btn,GREEN);
             btn.Function();
         }
     }
 }
-void DrawButton(Buttons btn)
-{
-    setcolor(WHITE);
-    rectangle(btn.x, btn.y, btn.x + btn.length, btn.y + btn.height);
-    char newText[btn.text.length()];
-    strcpy(newText, btn.text.c_str());
-    outtextxy(btn.x, btn.y, newText);
-}
+
 
 void DrawInBoardGame(int x, int y, int color)
 {
@@ -413,13 +431,6 @@ POINT MouseDraggingPiece(GamePieces &Fence)
             RotateFence(Fence);
             Fence.isRotated = (Fence.isRotated + 1) % 2; // alterneaza intre 0 si 1 ( un bool pentru lenesi)
         }
-        if(IsKeyPressed('q'))
-        {
-            cleardevice();
-            closegraph();
-            terminate();
-            
-        }
         if (Fence.isPlaced) // aici verifica daca piesa e plasata cumva , si se muta
             RemoveFence(Fence), Fence.isPlaced = false;
         GetCursorPos(&mouse);
@@ -443,6 +454,7 @@ POINT MouseDraggingPiece(GamePieces &Fence)
                 {
                     MoveFence(Fence, GB.x, GB.y);
                     AddFence(Fence);
+                    Beep(100,100);
                     Fence.UpLeft.x = GB.y * gbSideLength + LeftBorder; // calculatre coordonate noi
                     Fence.UpLeft.y = GB.x * gbSideLength + UpBorder;
                     Fence.isPlaced = true;
@@ -475,7 +487,7 @@ POINT MouseDraggingPiece(GamePieces &Fence)
     }
     putimage(0, 0, BackgroundBuffer, COPY_PUT);
     DrawBoardGame();
-    DrawButton(button1);
+    DrawButton(button1,WHITE);
 
     for (int i = 1; i <= 3; i++)
         if (!::Fence[i].dragging)
@@ -486,12 +498,17 @@ POINT MouseDraggingPiece(GamePieces &Fence)
     delay(10);
     return GB;
 }
-void DrawLevel(string GameBoardFileName)
+void DrawLevel(string GameBoardFileName,string FilePath)
 {
     ReadGameBoard(GameBoardFileName);
-    ReadFence(Fence[3], "GameBoards/Piesa3.txt");
-    ReadFence(Fence[1], "GameBoards/Piesa1.txt");
-    ReadFence(Fence[2], "GameBoards/Piesa2.txt");
+    for(int i=1;i<=3;i++)
+    {
+        string FilePathAux=FilePath;
+        FilePathAux+="Piesa";
+        FilePathAux+=char(i+'0');
+        FilePathAux+=".txt";
+        ReadFence(Fence[i], FilePathAux);
+    }
 
     DrawBoardGame();
     Fence[0].UpLeft.x = Fence[0].UpLeft.y = 0;
@@ -579,9 +596,9 @@ int main()
 
     initwindow(GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN), "", -3, -3);
     UploadImages();
-    Buttons button = {10, 20, 150, 40, "Submit", ExitButton};
+    Buttons button = {10, 20, 150, 40, "Exit Game ", ExitButton};
     button1 = button;
-    DrawLevel("GameBoards/GameBoard1.txt");
+    DrawLevel("GameBoards/GameBoard1.txt","GameBoards/");
 
     getch();
     closegraph();
