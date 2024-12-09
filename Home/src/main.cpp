@@ -14,7 +14,7 @@ char GameBoard[width + 1][length + 1];
 bool globalDragging = false; // evita palpairea si luarea simultata a mai multor piese
 bool gameIsFinised;
 
-void *BackgroundBuffer, *HorseBuffer, *CowBuffer, *SheepBuffer, *PigBuffer, *FenceBuffer, *GrassBuffer, *EmptyAnimalBuffer, *MiniFenceBuffer;
+void *BackgroundBuffer, *HorseBuffer, *CowBuffer, *SheepBuffer, *PigBuffer, *FenceBuffer, *GrassBuffer, *EmptyAnimalBuffer, *MiniFenceBuffer, *FarmBuffer;
 
 struct GamePieces
 {
@@ -35,7 +35,7 @@ struct Buttons
     string text;
     void (*Function)();
 
-} btnGame[10], btn[10];
+} btnGame[10], btnMenu[10];
 
 bool IsKeyPressed(char key)
 {
@@ -290,11 +290,17 @@ void DrawButton(Buttons btn, int color)
 
 void ActiveButton(Buttons btnGame[])
 {
+    POINT mouse;
+
+    GetCursorPos(&mouse);
+    for (int i = 0; i < 10; i++)
+        if (mouse.x > btnGame[i].x && mouse.y > btnGame[i].y && mouse.x < btnGame[i].x + btnGame[i].length && mouse.y < btnGame[i].y + btnGame[i].height)
+        {
+            DrawButton(btnGame[i], GREEN);
+        }
     if (ismouseclick(WM_LBUTTONDOWN))
     {
-        POINT mouse;
         clearmouseclick(WM_LBUTTONDOWN);
-        GetCursorPos(&mouse);
         for (int i = 0; i < 10; i++)
             if (mouse.x > btnGame[i].x && mouse.y > btnGame[i].y && mouse.x < btnGame[i].x + btnGame[i].length && mouse.y < btnGame[i].y + btnGame[i].height)
             {
@@ -322,12 +328,14 @@ void Initializari()
     Fence[2].InitialPositionOfFence.y = UpBorder + gbSideLength * 2;
     Fence[3].InitialPositionOfFence.x = LeftBorder + gbWidth + LeftBorder;
     Fence[3].InitialPositionOfFence.y = UpBorder + gbSideLength * 5;
-    for(int i=0;i<=3;i++)
-        Fence[i].isPlaced=Fence[i].isRotated=0;
-        
-    btnGame[0] = {10, 20, 150, 40, "Exit Game ", ExitButton};
-    btn[0] = {LeftBorder, UpBorder, 100, 50, "START", StartButton};
-    btnGame[2] = {10, 100, 150, 40, "Back", DrawMenu};
+    for (int i = 0; i <= 3; i++)
+        Fence[i].isPlaced = Fence[i].isRotated = 0;
+
+    btnGame[0] = {0, getmaxy() - 100, 150, 40, "Exit Game ", ExitButton};
+    btnGame[2] = {200, getmaxy() - 100, 150, 40, "Back", DrawMenu};
+
+    btnMenu[0] = {LeftBorder, UpBorder, 100, 50, "START", StartButton};
+    btnMenu[1] = {LeftBorder, UpBorder + 100, 100, 50, "EXIT", ExitButton};
 }
 
 void DrawBoardGame()
@@ -576,7 +584,12 @@ void UploadImages()
     readimagefile("Images/background.jpg", 0, 0, getmaxx(), getmaxy());
     BackgroundBuffer = malloc(imagesize(0, 0, getmaxx(), getmaxy()));
     getimage(0, 0, getmaxx(), getmaxy(), BackgroundBuffer);
+
+    readimagefile("Images/farm.jpg", 0, 0, getmaxx(), getmaxy());
+    FarmBuffer = malloc(imagesize(0, 0, getmaxx(), getmaxy()));
+    getimage(0, 0, getmaxx(), getmaxy(), FarmBuffer);
     cleardevice();
+
     readimagefile("Images/horse.jpg", 1, 1, gbSideLength - 1, gbSideLength - 1);
     HorseBuffer = malloc(imagesize(1, 1, gbSideLength - 1, gbSideLength - 1));
     getimage(1, 1, gbSideLength - 1, gbSideLength - 1, HorseBuffer);
@@ -592,7 +605,7 @@ void UploadImages()
     readimagefile("Images/pig.jpg", 1, 1, gbSideLength - 1, gbSideLength - 1);
     PigBuffer = malloc(imagesize(1, 1, gbSideLength - 1, gbSideLength - 1));
     getimage(1, 1, gbSideLength - 1, gbSideLength - 1, PigBuffer);
-   
+
     readimagefile("Images/grass.jpg", 1, 1, gbSideLength - 1, gbSideLength - 1);
     GrassBuffer = malloc(imagesize(1, 1, gbSideLength - 1, gbSideLength - 1));
     getimage(1, 1, gbSideLength - 1, gbSideLength - 1, GrassBuffer);
@@ -612,21 +625,24 @@ void UploadImages()
     cleardevice();
     setvisualpage(0);
 }
-
+int newWindow;
 void DrawMenu()
 {
-    // putimage(0, 0, BackgroundBuffer, COPY_PUT);
-    initwindow(GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN), "", -3, -3);
     Initializari();
-    DrawButton(btn[0], WHITE);
+    int page1 = 0;
     while (true)
     {
-        ActiveButton(btn);
+        setactivepage(page1);
+        setvisualpage(1 - page1);
+        putimage(0, 0, FarmBuffer, COPY_PUT);
+        DrawButton(btnMenu[0], WHITE);
+        DrawButton(btnMenu[1], WHITE);
+        ActiveButton(btnMenu);
+        page1 = 1-page1;
     }
 }
 int main()
 {
-
     initwindow(GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN), "", -3, -3);
     UploadImages();
     Initializari();
