@@ -7,12 +7,12 @@
 
 using namespace std;
 
-
 const int length = 9, width = 7;
 
-char GameBoard[width+1][length+1];
+char GameBoard[width + 1][length + 1];
 
 bool globalDragging = false; // evita palpairea si luarea simultata a mai multor piese
+bool gameIsFinised;
 
 void *BackgroundBuffer, *HorseBuffer, *CowBuffer, *SheepBuffer, *PigBuffer, *FenceBuffer, *GrassBuffer, *EmptyAnimalBuffer, *MiniFenceBuffer;
 
@@ -35,8 +35,7 @@ struct Buttons
     string text;
     void (*Function)();
 
-} button1;
-
+} btnGame[10], btn[10];
 
 bool IsKeyPressed(char key)
 {
@@ -258,65 +257,81 @@ bool AnimalsAreFenced()
 // Partea de Grafica
 
 int LeftBorder, UpBorder, gbWidth, gbHeight, gbSideLength = 80, DownBorder, RightBorder;
+
 void ExitButton()
 {
-   // cleardevice();
-   // closegraph();
-   // terminate();
+    cleardevice();
+    closegraph();
+    terminate();
 }
 
-void DrawButton(Buttons btn,int color)
+void StartButton();
+void DrawMenu();
+
+void DrawButton(Buttons btn, int color)
 {
     setcolor(color);
     rectangle(btn.x, btn.y, btn.x + btn.length, btn.y + btn.height);
-    int aux=0;
-    while(aux!=btn.height)
+    int aux = 0;
+    while (aux != btn.height)
     {
         setcolor(color);
-        rectangle(btn.x+aux, btn.y+aux, btn.x + btn.length-aux, btn.y + btn.height-aux);
-        
+        rectangle(btn.x + aux, btn.y + aux, btn.x + btn.length - aux, btn.y + btn.height - aux);
+
         aux++;
     }
-  
     char newText[btn.text.length()];
     strcpy(newText, btn.text.c_str());
     setbkcolor(color);
     setcolor(BLACK);
-    outtextxy(btn.x+btn.length/2-btn.text.length()*3, btn.y+btn.height/2-7, newText);
-   // floodfill(btn.x+2,btn.y+2,15);
+    outtextxy(btn.x + btn.length / 2 - btn.text.length() * 3, btn.y + btn.height / 2 - 7, newText);
+    // floodfill(btn.x+2,btn.y+2,15);
 }
-void ActiveButton(Buttons btn)
+
+void ActiveButton(Buttons btnGame[])
 {
     if (ismouseclick(WM_LBUTTONDOWN))
     {
         POINT mouse;
         clearmouseclick(WM_LBUTTONDOWN);
         GetCursorPos(&mouse);
-        if(mouse.x>btn.x&&mouse.y>btn.y&&mouse.x<btn.x+btn.length&&mouse.y<btn.y+btn.height)
-        {
-            Beep(1000,100);
-            DrawButton(btn,GREEN);
-            btn.Function();
-        }
+        for (int i = 0; i < 10; i++)
+            if (mouse.x > btnGame[i].x && mouse.y > btnGame[i].y && mouse.x < btnGame[i].x + btnGame[i].length && mouse.y < btnGame[i].y + btnGame[i].height)
+            {
+                Beep(1000, 100);
+                DrawButton(btnGame[i], GREEN);
+                btnGame[i].Function();
+            }
     }
 }
 
-
-void DrawInBoardGame(int x, int y, int color)
+void Initializari()
 {
-    // circle(LeftBorder+ gbSideLength * (x - 1) + gbSideLength/ 2, UpBorder + gbSideLength * (y - 1) +gbSideLength / 2, 10);
-    setfillstyle(SOLID_FILL, color);
-    floodfill(LeftBorder + gbSideLength * (x - 1) + gbSideLength / 2, UpBorder + gbSideLength * (y - 1) + gbSideLength / 2, 15);
-}
-
-void DrawBoardGame()
-{
-
     gbWidth = gbSideLength * length;
     gbHeight = 400;
     UpBorder = 0.17 * GetSystemMetrics(SM_CYSCREEN);
     LeftBorder = 0.1 * GetSystemMetrics(SM_CXSCREEN);
     RightBorder = 50;
+
+    Fence[0].UpLeft.x = Fence[0].UpLeft.y = 0;
+    Fence[0].DownRight.x = getmaxx();
+    Fence[0].DownRight.y = getmaxy();
+    Fence[1].InitialPositionOfFence.x = LeftBorder + gbWidth + LeftBorder;
+    Fence[1].InitialPositionOfFence.y = UpBorder;
+    Fence[2].InitialPositionOfFence.x = LeftBorder + gbWidth + LeftBorder;
+    Fence[2].InitialPositionOfFence.y = UpBorder + gbSideLength * 2;
+    Fence[3].InitialPositionOfFence.x = LeftBorder + gbWidth + LeftBorder;
+    Fence[3].InitialPositionOfFence.y = UpBorder + gbSideLength * 5;
+    for(int i=0;i<=3;i++)
+        Fence[i].isPlaced=Fence[i].isRotated=0;
+        
+    btnGame[0] = {10, 20, 150, 40, "Exit Game ", ExitButton};
+    btn[0] = {LeftBorder, UpBorder, 100, 50, "START", StartButton};
+    btnGame[2] = {10, 100, 150, 40, "Back", DrawMenu};
+}
+
+void DrawBoardGame()
+{
     for (int i = 1; i <= length; i++)
         for (int j = 1; j <= width; j++)
             rectangle(LeftBorder + gbSideLength * (i - 1), UpBorder + gbSideLength * (j - 1), LeftBorder + gbSideLength * i, UpBorder + gbSideLength * j);
@@ -405,8 +420,6 @@ POINT MouseDraggingPiece(GamePieces &Fence)
     setactivepage(page);
     setvisualpage(1 - page);
     setfillstyle(SOLID_FILL, BLACK);
-
-    // bar(0, 0, getmaxx(), getmaxy());
     bar(0, 0, getmaxx(), UpBorder);
     if (ismouseclick(WM_LBUTTONDOWN))
     {
@@ -454,7 +467,7 @@ POINT MouseDraggingPiece(GamePieces &Fence)
                 {
                     MoveFence(Fence, GB.x, GB.y);
                     AddFence(Fence);
-                    Beep(100,100);
+                    Beep(100, 100);
                     Fence.UpLeft.x = GB.y * gbSideLength + LeftBorder; // calculatre coordonate noi
                     Fence.UpLeft.y = GB.x * gbSideLength + UpBorder;
                     Fence.isPlaced = true;
@@ -487,8 +500,8 @@ POINT MouseDraggingPiece(GamePieces &Fence)
     }
     putimage(0, 0, BackgroundBuffer, COPY_PUT);
     DrawBoardGame();
-    DrawButton(button1,WHITE);
-
+    DrawButton(btnGame[0], WHITE);
+    DrawButton(btnGame[2], WHITE);
     for (int i = 1; i <= 3; i++)
         if (!::Fence[i].dragging)
             DrawFence(::Fence[i], ::Fence[i].UpLeft.x, ::Fence[i].UpLeft.y, ::Fence[i].Side); // cele care nu sunt in dragging trebuie afisate
@@ -498,29 +511,19 @@ POINT MouseDraggingPiece(GamePieces &Fence)
     delay(10);
     return GB;
 }
-void DrawLevel(string GameBoardFileName,string FilePath)
+void DrawLevel(string GameBoardFileName)
 {
     ReadGameBoard(GameBoardFileName);
-    for(int i=1;i<=3;i++)
+    for (int i = 1; i <= 3; i++)
     {
-        string FilePathAux=FilePath;
-        FilePathAux+="Piesa";
-        FilePathAux+=char(i+'0');
-        FilePathAux+=".txt";
+        string FilePathAux = "GameBoards/";
+        FilePathAux += "Piesa";
+        FilePathAux += char(i + '0');
+        FilePathAux += ".txt";
         ReadFence(Fence[i], FilePathAux);
     }
 
     DrawBoardGame();
-    Fence[0].UpLeft.x = Fence[0].UpLeft.y = 0;
-    Fence[0].DownRight.x = getmaxx();
-    Fence[0].DownRight.y = getmaxy();
-    Fence[1].InitialPositionOfFence.x = LeftBorder + gbWidth + LeftBorder;
-    Fence[1].InitialPositionOfFence.y = UpBorder;
-    Fence[2].InitialPositionOfFence.x = LeftBorder + gbWidth + LeftBorder;
-    Fence[2].InitialPositionOfFence.y = UpBorder + gbSideLength * 2;
-    Fence[3].InitialPositionOfFence.x = LeftBorder + gbWidth + LeftBorder;
-    Fence[3].InitialPositionOfFence.y = UpBorder + gbSideLength * 5;
-
     for (int i = 1; i <= 3; i++)
     {
         Fence[i].Side = gbSideLength * (0.5);
@@ -533,72 +536,101 @@ void DrawLevel(string GameBoardFileName,string FilePath)
         bool SomethingHappend = false;
         POINT mouse;
         GetCursorPos(&mouse);
-        for (int i = 1; i <= 3; i++)
-            if (mouse.x >= Fence[i].UpLeft.x && mouse.x <= Fence[i].DownRight.x && mouse.y >= Fence[i].UpLeft.y && mouse.y <= Fence[i].DownRight.y || Fence[i].dragging)
-            {
-                if (Fence[i].dragging || !globalDragging) // doar daca nu e nici o pisa in starea de dragging , sau doar una
-                    MouseDraggingPiece(Fence[i]);
-                SomethingHappend = true;
-            }
+        if (!gameIsFinised)
+            for (int i = 1; i <= 3; i++)
+                if (mouse.x >= Fence[i].UpLeft.x && mouse.x <= Fence[i].DownRight.x && mouse.y >= Fence[i].UpLeft.y && mouse.y <= Fence[i].DownRight.y || Fence[i].dragging)
+                {
+                    if (Fence[i].dragging || !globalDragging) // doar daca nu e nici o pisa in starea de dragging , sau doar una
+                        MouseDraggingPiece(Fence[i]);
+                    SomethingHappend = true;
+                }
         if (!SomethingHappend)
         {
             MouseDraggingPiece(Fence[0]);
-            ActiveButton(button1);
-                       
+            ActiveButton(btnGame);
         }
-
         if (AnimalsAreFenced())
         {
             cleardevice();
-            setcolor(WHITE); // Setează culoarea textului
+            setcolor(BLACK); // Setează culoarea textului
             char text[] = "FINAL";
             outtextxy(200, 200, text);
+            gameIsFinised = true;
+            DrawButton(btnGame[0], WHITE);
+            ActiveButton(btnGame);
         }
     }
 }
+void StartButton()
+{
+    gameIsFinised = false;
+    globalDragging = false;
+    setvisualpage(1);
+    cleardevice();
+    DrawLevel("GameBoards/GameBoard1.txt");
+}
+
 void UploadImages()
 {
-    setvisualpage(1);//evita efectul de incarcare a imagililor, nu apare fiecare pe rand , apare negru si dupa toate odata
+    setvisualpage(0); // evita efectul de incarcare a imagililor, nu apare fiecare pe rand , apare negru si dupa toate odata
     readimagefile("Images/background.jpg", 0, 0, getmaxx(), getmaxy());
     BackgroundBuffer = malloc(imagesize(0, 0, getmaxx(), getmaxy()));
     getimage(0, 0, getmaxx(), getmaxy(), BackgroundBuffer);
+    cleardevice();
     readimagefile("Images/horse.jpg", 1, 1, gbSideLength - 1, gbSideLength - 1);
     HorseBuffer = malloc(imagesize(1, 1, gbSideLength - 1, gbSideLength - 1));
     getimage(1, 1, gbSideLength - 1, gbSideLength - 1, HorseBuffer);
+
     readimagefile("Images/cow.jpg", 1, 1, gbSideLength - 1, gbSideLength - 1);
     CowBuffer = malloc(imagesize(1, 1, gbSideLength - 1, gbSideLength - 1));
     getimage(1, 1, gbSideLength - 1, gbSideLength - 1, CowBuffer);
+
     readimagefile("Images/sheep.jpg", 1, 1, gbSideLength - 1, gbSideLength - 1);
     SheepBuffer = malloc(imagesize(1, 1, gbSideLength - 1, gbSideLength - 1));
     getimage(1, 1, gbSideLength - 1, gbSideLength - 1, SheepBuffer);
+
     readimagefile("Images/pig.jpg", 1, 1, gbSideLength - 1, gbSideLength - 1);
     PigBuffer = malloc(imagesize(1, 1, gbSideLength - 1, gbSideLength - 1));
     getimage(1, 1, gbSideLength - 1, gbSideLength - 1, PigBuffer);
-    readimagefile("Images/pig.jpg", 1, 1, gbSideLength - 1, gbSideLength - 1);
-    PigBuffer = malloc(imagesize(1, 1, gbSideLength - 1, gbSideLength - 1));
-    getimage(1, 1, gbSideLength - 1, gbSideLength - 1, PigBuffer);
+   
     readimagefile("Images/grass.jpg", 1, 1, gbSideLength - 1, gbSideLength - 1);
     GrassBuffer = malloc(imagesize(1, 1, gbSideLength - 1, gbSideLength - 1));
     getimage(1, 1, gbSideLength - 1, gbSideLength - 1, GrassBuffer);
+
     readimagefile("Images/fence.jpg", 1, 1, gbSideLength - 1, gbSideLength - 1);
     FenceBuffer = malloc(imagesize(1, 1, gbSideLength - 1, gbSideLength - 1));
     getimage(1, 1, gbSideLength - 1, gbSideLength - 1, FenceBuffer);
+
     readimagefile("Images/Rock.jpg", 1, 1, gbSideLength - 1, gbSideLength - 1);
     EmptyAnimalBuffer = malloc(imagesize(1, 1, gbSideLength - 1, gbSideLength - 1));
     getimage(1, 1, gbSideLength - 1, gbSideLength - 1, EmptyAnimalBuffer);
+
     readimagefile("Images/fence.jpg", 1, 1, (gbSideLength - 1) / 2, (gbSideLength - 1) / 2);
     MiniFenceBuffer = malloc(imagesize(1, 1, (gbSideLength - 1) / 2, (gbSideLength - 1) / 2));
     getimage(1, 1, (gbSideLength - 1) / 2, (gbSideLength - 1) / 2, MiniFenceBuffer);
+
     cleardevice();
+    setvisualpage(0);
+}
+
+void DrawMenu()
+{
+    // putimage(0, 0, BackgroundBuffer, COPY_PUT);
+    initwindow(GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN), "", -3, -3);
+    Initializari();
+    DrawButton(btn[0], WHITE);
+    while (true)
+    {
+        ActiveButton(btn);
+    }
 }
 int main()
 {
 
     initwindow(GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN), "", -3, -3);
     UploadImages();
-    Buttons button = {10, 20, 150, 40, "Exit Game ", ExitButton};
-    button1 = button;
-    DrawLevel("GameBoards/GameBoard1.txt","GameBoards/");
+    Initializari();
+    DrawMenu();
 
     getch();
     closegraph();
