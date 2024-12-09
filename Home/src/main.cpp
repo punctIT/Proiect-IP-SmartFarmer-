@@ -35,7 +35,7 @@ struct Buttons
     string text;
     void (*Function)();
 
-} btnGame[10], btnMenu[10];
+} btnGame[10], btnMenu[10],BtnLevel[61];
 
 bool IsKeyPressed(char key)
 {
@@ -267,6 +267,7 @@ void ExitButton()
 
 void StartButton();
 void DrawMenu();
+void SelectLevel();
 
 void DrawButton(Buttons btn, int color)
 {
@@ -332,10 +333,14 @@ void Initializari()
         Fence[i].isPlaced = Fence[i].isRotated = 0;
 
     btnGame[0] = {0, getmaxy() - 100, 150, 40, "Exit Game ", ExitButton};
-    btnGame[2] = {200, getmaxy() - 100, 150, 40, "Back", DrawMenu};
+    btnGame[2] = {200, getmaxy() - 100, 150, 40, "Back", SelectLevel};
 
-    btnMenu[0] = {LeftBorder, UpBorder, 100, 50, "START", StartButton};
-    btnMenu[1] = {LeftBorder, UpBorder + 100, 100, 50, "EXIT", ExitButton};
+    btnMenu[0] = {LeftBorder, UpBorder, 150, 50, "SELECT LEVEL", SelectLevel};
+    btnMenu[2] = {LeftBorder, UpBorder + 100, 150, 50, "LEVEL EDITOR", ExitButton};
+    btnMenu[1] = {LeftBorder, UpBorder + 200, 100, 50, "EXIT", ExitButton};
+
+    BtnLevel[1]={LeftBorder, UpBorder, 150, 50, "Level 1", StartButton};
+    BtnLevel[0] = {200, getmaxy() - 100, 150, 40, "Back", DrawMenu};
 }
 
 void DrawBoardGame()
@@ -637,8 +642,24 @@ void DrawMenu()
         putimage(0, 0, FarmBuffer, COPY_PUT);
         DrawButton(btnMenu[0], WHITE);
         DrawButton(btnMenu[1], WHITE);
+        DrawButton(btnMenu[2], WHITE);
         ActiveButton(btnMenu);
-        page1 = 1-page1;
+        page1 = 1 - page1;
+    }
+}
+void SelectLevel()
+{
+    int page1 = 0;
+    cleardevice();
+    while (true)
+    {
+        setactivepage(page1);
+        setvisualpage(1 - page1);
+        putimage(0, 0, FarmBuffer, COPY_PUT);
+        DrawButton(BtnLevel[1], WHITE);
+        DrawButton(BtnLevel[0], WHITE);
+        ActiveButton(BtnLevel);
+        page1 = 1 - page1;
     }
 }
 int main()
