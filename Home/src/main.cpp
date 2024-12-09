@@ -4,6 +4,7 @@
 #include <fstream>
 #include <cstdio>
 #include <algorithm>
+#include <functional>
 
 using namespace std;
 
@@ -33,7 +34,7 @@ struct Buttons
     int x, y;
     int length, height;
     string text;
-    void (*Function)();
+    function<void()> Function; 
 
 } btnGame[10], btnMenu[10],BtnLevel[61];
 
@@ -265,7 +266,7 @@ void ExitButton()
     terminate();
 }
 
-void StartButton();
+void StartLevel(string FileName);
 void DrawMenu();
 void SelectLevel();
 
@@ -338,8 +339,16 @@ void Initializari()
     btnMenu[0] = {LeftBorder, UpBorder, 150, 50, "SELECT LEVEL", SelectLevel};
     btnMenu[2] = {LeftBorder, UpBorder + 100, 150, 50, "LEVEL EDITOR", ExitButton};
     btnMenu[1] = {LeftBorder, UpBorder + 200, 100, 50, "EXIT", ExitButton};
-
-    BtnLevel[1]={LeftBorder, UpBorder, 150, 50, "Level 1", StartButton};
+    for(int i=1;i<=5;i++)
+    {
+        string path="GameBoards/GameBoard";
+        path+=char(i+'0');
+        path+=".txt";
+        string text="Level ";
+        text+=(char)(i+'0');
+        BtnLevel[i] = {LeftBorder+(i-1)*200, UpBorder, 150, 50, text, [path]() {StartLevel(path);}};
+    }
+    
     BtnLevel[0] = {200, getmaxy() - 100, 150, 40, "Back", DrawMenu};
 }
 
@@ -574,13 +583,13 @@ void DrawLevel(string GameBoardFileName)
         }
     }
 }
-void StartButton()
+void StartLevel(string FileName)
 {
     gameIsFinised = false;
     globalDragging = false;
     setvisualpage(1);
     cleardevice();
-    DrawLevel("GameBoards/GameBoard1.txt");
+    DrawLevel(FileName);
 }
 
 void UploadImages()
@@ -656,8 +665,10 @@ void SelectLevel()
         setactivepage(page1);
         setvisualpage(1 - page1);
         putimage(0, 0, FarmBuffer, COPY_PUT);
-        DrawButton(BtnLevel[1], WHITE);
-        DrawButton(BtnLevel[0], WHITE);
+        for(int i=0;i<=5;i++)
+        {
+            DrawButton(BtnLevel[i], WHITE);
+        }
         ActiveButton(BtnLevel);
         page1 = 1 - page1;
     }
