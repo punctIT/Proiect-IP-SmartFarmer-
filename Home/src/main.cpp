@@ -59,12 +59,62 @@ void ReadFence(GamePieces &fence, string FileName)
             fin >> fence.GB[i][q];
 }
 
+bool VerifyFenceExtremities(int i, int j, GamePieces fence)
+{
+    int notExtremities = 0;
+    for (int k = 1; k <= 3; k++)
+        if (Fence[k].isPlaced && Fence[k].GB[i][j])
+        {
+            if (Fence[k].GB[i-1][j] && Fence[k].GB[i+1][j]) //gard vertical
+                notExtremities++;
+            else if (Fence[k].GB[i][j-1] && Fence[k].GB[i][j+1]) //gard orizontal
+                notExtremities++;
+            else if (Fence[k].GB[i][j-1] && Fence[k].GB[i+1][j]) //colt gard L
+                notExtremities++;
+            else if (Fence[k].GB[i+1][j] && Fence[k].GB[i][j+1]) //colt gard L rotit o data
+                notExtremities++;
+            else if (Fence[k].GB[i-1][j] && Fence[k].GB[i][j+1]) //colt gard L rotit de 2 ori
+                notExtremities++;
+            else if (Fence[k].GB[i][j-1] && Fence[k].GB[i-1][j]) //colt gard L rotit de 3 ori
+                notExtremities++;
+        }
+    if (fence.GB[i][j])
+    {
+        if (fence.GB[i-1][j] && fence.GB[i+1][j])
+            notExtremities++;
+        else if (fence.GB[i][j-1] && fence.GB[i][j+1])
+            notExtremities++;
+        else if (fence.GB[i][j-1] && fence.GB[i+1][j]) //colt gard L
+            notExtremities++;
+        else if (fence.GB[i+1][j] && fence.GB[i][j+1]) //colt gard L rotit o data
+            notExtremities++;
+        else if (fence.GB[i-1][j] && fence.GB[i][j+1]) //colt gard L rotit de 2 ori
+            notExtremities++;
+        else if (fence.GB[i][j-1] && fence.GB[i-1][j]) //colt gard L rotit de 3 ori
+            notExtremities++;
+    }
+    if (notExtremities > 1)
+        return false;
+    return true;
+}
+
 bool VerifyFencePosition(GamePieces fence)
 {
+    int overlap = 0;
     for (int i = 0; i <= width; i++)
         for (int q = 0; q <= length; q++)
+        {
             if (fence.GB[i][q] && strchr("01234", GameBoard[i][q]) == NULL)
                 return false;
+            if (i != 0 && q != 0 && i != width && q != length)
+                if (fence.GB[i][q] && VerifyFenceExtremities(i, q, fence) == false)
+                    return false;
+            if (fence.GB[i][q] && i != 0 && q != 0 && i != width && q != length)
+                if (fence.GB[i][q] + (GameBoard[i][q] - '0') > 1)
+                    overlap++;
+        }
+    if (overlap > 1)
+        return false;
     return true;
 }
 
@@ -197,19 +247,26 @@ int CountAnimalInBoard(char Animal)
 
 bool AnimalsAreFenced()
 {
-    char CopyGameBoard[width][length];
+    char CopyGameBoard[7][9];
+    bool LevelHasWater = 0;
     for (int i = 0; i <= width; i++)
         for (int j = 0; j <= length; j++)
+        {
             CopyGameBoard[i][j] = GameBoard[i][j];
+            if (GameBoard[i][j] == 'W')
+                LevelHasWater = 1;
+        }
     for (int i = 1; i < width; i++)
     {
         for (int j = 1; j < length; j++)
         {
-            if (strchr("*0CPHS", CopyGameBoard[i][j])) // C pentru cow, P pentru pig, etc
+            if (strchr("*0CPHSW", CopyGameBoard[i][j])) // C pentru cow, P pentru pig, etc
             {
                 char Animal = CopyGameBoard[i][j];
                 int CountAnimal = 1;
-                // bool Water = 0;
+                bool Water = 0;
+                if (CopyGameBoard[i][j] == 'W')
+                    Water = 1;
 
                 // algoritm fill
                 int iDir[4] = {0, 0, -1, 1}, jDir[4] = {-1, 1, 0, 0};
@@ -228,17 +285,19 @@ bool AnimalsAreFenced()
                     {
                         int iNext = row + iDir[k];
                         int jNext = column + jDir[k];
-                        if (strchr("*0CPHS", CopyGameBoard[iNext][jNext]))
+                        if (strchr("*0CPHSW", CopyGameBoard[iNext][jNext]))
                         {
                             if (CopyGameBoard[iNext][jNext] != '0' && CopyGameBoard[iNext][jNext] != '*')
                             {
-                                if (Animal == '0' || Animal == '*')
+                                if (Animal == '0' || Animal == '*' || Animal == 'W')
                                     Animal = CopyGameBoard[iNext][jNext];
                                 else if (CopyGameBoard[iNext][jNext] == Animal)
                                     CountAnimal++;
                                 else
-                                    return 0; // daca sunt mai multe animale de tipuri diferite atunci nu e pus bine gardul
+                                    return false; // daca sunt mai multe animale de tipuri diferite atunci nu e pus bine gardul
                             }
+                            if (CopyGameBoard[iNext][jNext] == 'W')
+                                Water = 1;
                             CopyGameBoard[iNext][jNext] = '1';
                             right++;
                             Q[right].row = iNext;
@@ -248,13 +307,16 @@ bool AnimalsAreFenced()
                     left++;
                 }
                 if (CountAnimal != CountAnimalInBoard(Animal))
-                    return 0; // nu sunt toate animalele de tipul asta in acelasi tarc
+                    return false; // nu sunt toate animalele de tipul asta in acelasi tarc
+                if (strchr("CPHS", Animal) == NULL)
+                    return false; // tarcul este gol
+                if (Water != LevelHasWater)
+                    return false;
             }
         }
     }
-    return 1;
+    return true;
 }
-
 // Partea de Grafica
 
 int LeftBorder, UpBorder, gbWidth, gbHeight, gbSideLength = 80, DownBorder, RightBorder;
