@@ -14,6 +14,7 @@ char GameBoard[width + 1][length + 1];
 
 bool globalDragging = false; // evita palpairea si luarea simultata a mai multor piese
 bool gameIsFinised;
+bool LevelFinished[60];
 
 void *BackgroundBuffer, *HorseBuffer, *CowBuffer, *SheepBuffer, *PigBuffer, *FenceBuffer, *GrassBuffer, *EmptyAnimalBuffer, *MiniFenceBuffer, *FarmBuffer;
 void *LevelBackgroundBuffer;
@@ -36,7 +37,7 @@ struct Buttons
     string text;
     function<void()> Function; 
 
-} btnGame[10], btnMenu[10],BtnLevel[61];
+} btnGame[10], btnMenu[10],BtnLevel[61],BtnLevelType[3];
 
 bool IsKeyPressed(char key)
 {
@@ -331,57 +332,68 @@ void ExitButton()
 void StartLevel(string FileName);
 void DrawMenu();
 void SelectLevel();
-
-void DrawButton(Buttons btn, int color)
+void LevelType();
+void DrawButton(Buttons btn, int BackColor,int TextColor)
 {
-    setcolor(color);
+    setcolor(BLACK);
     rectangle(btn.x, btn.y, btn.x + btn.length, btn.y + btn.height);
-    int aux = 0;
+    setcolor(BackColor);
+    int aux = 1;
     while (aux != btn.height)
     {
-        setcolor(color);
+        setcolor(BackColor);
         rectangle(btn.x + aux, btn.y + aux, btn.x + btn.length - aux, btn.y + btn.height - aux);
-
         aux++;
     }
-    char newText[btn.text.length()];
-    strcpy(newText, btn.text.c_str());
-    setbkcolor(color);
-    setcolor(BLACK);
-    outtextxy(btn.x + btn.length / 2 - btn.text.length() * 3, btn.y + btn.height / 2 - 7, newText);
+
+    char  c_text[btn.text.length()];
+    strcpy( c_text, btn.text.c_str());
+    setbkcolor(BackColor);
+    setcolor(TextColor);
+   
+    outtextxy((btn.x + btn.length / 2) - textwidth(c_text)/2,( btn.y + btn.height / 2) -textheight(c_text)/2 , c_text);
     // floodfill(btn.x+2,btn.y+2,15);
 }
 
-void ActiveButton(Buttons btnGame[])
+void ActiveButton(Buttons btnGame[],int n)
 {
     POINT mouse;
 
     GetCursorPos(&mouse);
-    for (int i = 0; i < 31; i++)
+    for (int i = 0; i < n ; i++)
         if (mouse.x > btnGame[i].x && mouse.y > btnGame[i].y && mouse.x < btnGame[i].x + btnGame[i].length && mouse.y < btnGame[i].y + btnGame[i].height)
-        {
-            DrawButton(btnGame[i], GREEN);
-        }
+            DrawButton(btnGame[i], GREEN,WHITE);
     if (ismouseclick(WM_LBUTTONDOWN))
     {
         clearmouseclick(WM_LBUTTONDOWN);
-        for (int i = 0; i < 31; i++)
+        for (int i = 0; i < n; i++)
             if (mouse.x > btnGame[i].x && mouse.y > btnGame[i].y && mouse.x < btnGame[i].x + btnGame[i].length && mouse.y < btnGame[i].y + btnGame[i].height)
             {
                 Beep(1000, 100);
-                DrawButton(btnGame[i], GREEN);
+                DrawButton(btnGame[i], GREEN,WHITE);
                 btnGame[i].Function();
             }
     }
 }
 
-void Initializari()
+void initialization()
 {
     gbWidth = gbSideLength * length;
     gbHeight = 400;
     UpBorder = 0.17 * GetSystemMetrics(SM_CYSCREEN);
     LeftBorder = 0.1 * GetSystemMetrics(SM_CXSCREEN);
     RightBorder = 50;
+
+    for (int i = 1; i <= 3; i++)
+    {
+        string FilePathAux = "GameBoards/";
+        FilePathAux += "Piesa";
+        FilePathAux += char(i + '0');
+        FilePathAux += ".txt";
+        ReadFence(Fence[i], FilePathAux);
+        Fence[i].isPlaced = Fence[i].isRotated = 0;
+    }
+
 
     Fence[0].UpLeft.x = Fence[0].UpLeft.y = 0;
     Fence[0].DownRight.x = getmaxx();
@@ -392,15 +404,21 @@ void Initializari()
     Fence[2].InitialPositionOfFence.y = UpBorder + gbSideLength * 2;
     Fence[3].InitialPositionOfFence.x = LeftBorder + gbWidth + LeftBorder;
     Fence[3].InitialPositionOfFence.y = UpBorder + gbSideLength * 5;
-    for (int i = 0; i <= 3; i++)
-        Fence[i].isPlaced = Fence[i].isRotated = 0;
+
 
     btnGame[0] = {0, getmaxy() - 100, 150, 40, "Exit Game ", ExitButton};
     btnGame[2] = {200, getmaxy() - 100, 150, 40, "Back", SelectLevel};
 
-    btnMenu[0] = {LeftBorder, UpBorder, 150, 50, "SELECT LEVEL", SelectLevel};
-    btnMenu[2] = {LeftBorder, UpBorder + 100, 150, 50, "SECRET", ExitButton};
-    btnMenu[1] = {LeftBorder, UpBorder + 200, 100, 50, "EXIT", ExitButton};
+    btnMenu[0] = {LeftBorder, UpBorder, 150, 50, "SELECT LEVEL", LevelType};
+    btnMenu[2] = {LeftBorder, UpBorder + 100, 150, 50, "LEVEL EDITOR", ExitButton};
+    btnMenu[1] = {LeftBorder, UpBorder + 200, 150, 50, "EXIT", ExitButton};
+
+    BtnLevelType[0] = {LeftBorder, UpBorder, 150, 50, "Main Levels", SelectLevel};
+    BtnLevelType[1] = {LeftBorder, UpBorder + 100, 150, 50, "Custom Levels", ExitButton};
+    BtnLevelType[2] = {LeftBorder, UpBorder + 200, 150, 50, "Back", DrawMenu};
+
+    BtnLevel[0] = {200, getmaxy() - 100, 150, 40, "Back",LevelType };
+
     int height=1,width=0;
     for(int i=1;i<=30;i++)
     {
@@ -426,7 +444,7 @@ void Initializari()
     
     }
     
-    BtnLevel[0] = {200, getmaxy() - 100, 150, 40, "Back", DrawMenu};
+    
 }
 
 void DrawBoardGame()
@@ -599,8 +617,8 @@ POINT MouseDraggingPiece(GamePieces &Fence)
     }
     putimage(0, 0, BackgroundBuffer, COPY_PUT);
     DrawBoardGame();
-    DrawButton(btnGame[0], WHITE);
-    DrawButton(btnGame[2], WHITE);
+    DrawButton(btnGame[0], WHITE,BLACK);
+    DrawButton(btnGame[2], WHITE,BLACK);
     for (int i = 1; i <= 3; i++)
         if (!::Fence[i].dragging)
             DrawFence(::Fence[i], ::Fence[i].UpLeft.x, ::Fence[i].UpLeft.y, ::Fence[i].Side); // cele care nu sunt in dragging trebuie afisate
@@ -613,15 +631,7 @@ POINT MouseDraggingPiece(GamePieces &Fence)
 void DrawLevel(string GameBoardFileName)
 {
     ReadGameBoard(GameBoardFileName);
-    for (int i = 1; i <= 3; i++)
-    {
-        string FilePathAux = "GameBoards/";
-        FilePathAux += "Piesa";
-        FilePathAux += char(i + '0');
-        FilePathAux += ".txt";
-        ReadFence(Fence[i], FilePathAux);
-    }
-
+    initialization();
     DrawBoardGame();
     for (int i = 1; i <= 3; i++)
     {
@@ -638,8 +648,8 @@ void DrawLevel(string GameBoardFileName)
             char text[] = "FINAL";
             outtextxy(200, 200, text);
             gameIsFinised = true;
-            DrawButton(btnGame[0], WHITE);
-            ActiveButton(btnGame);
+            DrawButton(btnGame[0], WHITE, BLACK);
+            ActiveButton(btnGame,3);
         }
         bool SomethingHappend = false;
         POINT mouse;
@@ -655,7 +665,7 @@ void DrawLevel(string GameBoardFileName)
         if (!SomethingHappend)
         {
             MouseDraggingPiece(Fence[0]);
-            ActiveButton(btnGame);
+            ActiveButton(btnGame,3);
         }
         
     }
@@ -728,17 +738,17 @@ void UploadImages()
 int newWindow;
 void DrawMenu()
 {
-    Initializari();
+    initialization();
     int page1 = 0;
     while (true)
     {
         setactivepage(page1);
         setvisualpage(1 - page1);
         putimage(0, 0, FarmBuffer, COPY_PUT);
-        DrawButton(btnMenu[0], WHITE);
-        DrawButton(btnMenu[1], WHITE);
-        DrawButton(btnMenu[2], WHITE);
-        ActiveButton(btnMenu);
+        DrawButton(btnMenu[0], WHITE, BLACK);
+        DrawButton(btnMenu[1], WHITE, BLACK);
+        DrawButton(btnMenu[2], WHITE, BLACK);
+        ActiveButton(btnMenu,3);
         page1 = 1 - page1;
     }
 }
@@ -753,17 +763,36 @@ void SelectLevel()
         putimage(0, 0, LevelBackgroundBuffer, COPY_PUT);
         for(int i=0;i<=30;i++)
         {
-            DrawButton(BtnLevel[i], WHITE);
+            DrawButton(BtnLevel[i], WHITE,BLACK);
         }
-        ActiveButton(BtnLevel);
+        ActiveButton(BtnLevel,31);
         page1 = 1 - page1;
     }
+}
+void LevelType()
+{
+    int page1 = 0;
+    cleardevice();
+    while (true)
+    {
+        setactivepage(page1);
+        setvisualpage(1 - page1);
+        putimage(0, 0, FarmBuffer, COPY_PUT);
+        DrawButton(BtnLevelType[0],WHITE,BLACK);
+        DrawButton(BtnLevelType[1],WHITE,BLACK);
+        DrawButton(BtnLevelType[2],WHITE,BLACK);
+        ActiveButton(BtnLevelType,3);
+        page1 = 1 - page1;
+        
+    }
+    
+   
 }
 int main()
 {
     initwindow(GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN), "", -3, -3);
     UploadImages();
-    Initializari();
+    initialization();
     DrawMenu();
 
     getch();
