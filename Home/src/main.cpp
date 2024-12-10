@@ -35,9 +35,9 @@ struct Buttons
     int x, y;
     int length, height;
     string text;
-    function<void()> Function; 
+    function<void()> Function;
 
-} btnGame[10], btnMenu[10],BtnLevel[61],BtnLevelType[3];
+} btnGame[10], btnMenu[10], BtnLevel[61], BtnLevelType[3], BtnEditor[3];
 
 bool IsKeyPressed(char key)
 {
@@ -66,32 +66,32 @@ bool VerifyFenceExtremities(int i, int j, GamePieces fence)
     for (int k = 1; k <= 3; k++)
         if (Fence[k].isPlaced && Fence[k].GB[i][j])
         {
-            if (Fence[k].GB[i-1][j] && Fence[k].GB[i+1][j]) //gard vertical
+            if (Fence[k].GB[i - 1][j] && Fence[k].GB[i + 1][j]) // gard vertical
                 notExtremities++;
-            else if (Fence[k].GB[i][j-1] && Fence[k].GB[i][j+1]) //gard orizontal
+            else if (Fence[k].GB[i][j - 1] && Fence[k].GB[i][j + 1]) // gard orizontal
                 notExtremities++;
-            else if (Fence[k].GB[i][j-1] && Fence[k].GB[i+1][j]) //colt gard L
+            else if (Fence[k].GB[i][j - 1] && Fence[k].GB[i + 1][j]) // colt gard L
                 notExtremities++;
-            else if (Fence[k].GB[i+1][j] && Fence[k].GB[i][j+1]) //colt gard L rotit o data
+            else if (Fence[k].GB[i + 1][j] && Fence[k].GB[i][j + 1]) // colt gard L rotit o data
                 notExtremities++;
-            else if (Fence[k].GB[i-1][j] && Fence[k].GB[i][j+1]) //colt gard L rotit de 2 ori
+            else if (Fence[k].GB[i - 1][j] && Fence[k].GB[i][j + 1]) // colt gard L rotit de 2 ori
                 notExtremities++;
-            else if (Fence[k].GB[i][j-1] && Fence[k].GB[i-1][j]) //colt gard L rotit de 3 ori
+            else if (Fence[k].GB[i][j - 1] && Fence[k].GB[i - 1][j]) // colt gard L rotit de 3 ori
                 notExtremities++;
         }
     if (fence.GB[i][j])
     {
-        if (fence.GB[i-1][j] && fence.GB[i+1][j])
+        if (fence.GB[i - 1][j] && fence.GB[i + 1][j])
             notExtremities++;
-        else if (fence.GB[i][j-1] && fence.GB[i][j+1])
+        else if (fence.GB[i][j - 1] && fence.GB[i][j + 1])
             notExtremities++;
-        else if (fence.GB[i][j-1] && fence.GB[i+1][j]) //colt gard L
+        else if (fence.GB[i][j - 1] && fence.GB[i + 1][j]) // colt gard L
             notExtremities++;
-        else if (fence.GB[i+1][j] && fence.GB[i][j+1]) //colt gard L rotit o data
+        else if (fence.GB[i + 1][j] && fence.GB[i][j + 1]) // colt gard L rotit o data
             notExtremities++;
-        else if (fence.GB[i-1][j] && fence.GB[i][j+1]) //colt gard L rotit de 2 ori
+        else if (fence.GB[i - 1][j] && fence.GB[i][j + 1]) // colt gard L rotit de 2 ori
             notExtremities++;
-        else if (fence.GB[i][j-1] && fence.GB[i-1][j]) //colt gard L rotit de 3 ori
+        else if (fence.GB[i][j - 1] && fence.GB[i - 1][j]) // colt gard L rotit de 3 ori
             notExtremities++;
     }
     if (notExtremities > 1)
@@ -333,7 +333,9 @@ void StartLevel(string FileName);
 void DrawMenu();
 void SelectLevel();
 void LevelType();
-void DrawButton(Buttons btn, int BackColor,int TextColor)
+void LevelEditor();
+
+void DrawButton(Buttons btn, int BackColor, int TextColor)
 {
     setcolor(BLACK);
     rectangle(btn.x, btn.y, btn.x + btn.length, btn.y + btn.height);
@@ -346,23 +348,23 @@ void DrawButton(Buttons btn, int BackColor,int TextColor)
         aux++;
     }
 
-    char  c_text[btn.text.length()];
-    strcpy( c_text, btn.text.c_str());
+    char c_text[btn.text.length()];
+    strcpy(c_text, btn.text.c_str());
     setbkcolor(BackColor);
     setcolor(TextColor);
-   
-    outtextxy((btn.x + btn.length / 2) - textwidth(c_text)/2,( btn.y + btn.height / 2) -textheight(c_text)/2 , c_text);
+
+    outtextxy((btn.x + btn.length / 2) - textwidth(c_text) / 2, (btn.y + btn.height / 2) - textheight(c_text) / 2, c_text);
     // floodfill(btn.x+2,btn.y+2,15);
 }
 
-void ActiveButton(Buttons btnGame[],int n)
+void ActiveButton(Buttons btnGame[], int n)
 {
     POINT mouse;
 
     GetCursorPos(&mouse);
-    for (int i = 0; i < n ; i++)
+    for (int i = 0; i < n; i++)
         if (mouse.x > btnGame[i].x && mouse.y > btnGame[i].y && mouse.x < btnGame[i].x + btnGame[i].length && mouse.y < btnGame[i].y + btnGame[i].height)
-            DrawButton(btnGame[i], GREEN,WHITE);
+            DrawButton(btnGame[i], GREEN, WHITE);
     if (ismouseclick(WM_LBUTTONDOWN))
     {
         clearmouseclick(WM_LBUTTONDOWN);
@@ -370,7 +372,7 @@ void ActiveButton(Buttons btnGame[],int n)
             if (mouse.x > btnGame[i].x && mouse.y > btnGame[i].y && mouse.x < btnGame[i].x + btnGame[i].length && mouse.y < btnGame[i].y + btnGame[i].height)
             {
                 Beep(1000, 100);
-                DrawButton(btnGame[i], GREEN,WHITE);
+                DrawButton(btnGame[i], GREEN, WHITE);
                 btnGame[i].Function();
             }
     }
@@ -394,7 +396,6 @@ void initialization()
         Fence[i].isPlaced = Fence[i].isRotated = 0;
     }
 
-
     Fence[0].UpLeft.x = Fence[0].UpLeft.y = 0;
     Fence[0].DownRight.x = getmaxx();
     Fence[0].DownRight.y = getmaxy();
@@ -405,46 +406,46 @@ void initialization()
     Fence[3].InitialPositionOfFence.x = LeftBorder + gbWidth + LeftBorder;
     Fence[3].InitialPositionOfFence.y = UpBorder + gbSideLength * 5;
 
-
     btnGame[0] = {0, getmaxy() - 100, 150, 40, "Exit Game ", ExitButton};
     btnGame[2] = {200, getmaxy() - 100, 150, 40, "Back", SelectLevel};
 
     btnMenu[0] = {LeftBorder, UpBorder, 150, 50, "SELECT LEVEL", LevelType};
-    btnMenu[2] = {LeftBorder, UpBorder + 100, 150, 50, "LEVEL EDITOR", ExitButton};
+    btnMenu[2] = {LeftBorder, UpBorder + 100, 150, 50, "LEVEL EDITOR", LevelEditor};
     btnMenu[1] = {LeftBorder, UpBorder + 200, 150, 50, "EXIT", ExitButton};
 
     BtnLevelType[0] = {LeftBorder, UpBorder, 150, 50, "Main Levels", SelectLevel};
     BtnLevelType[1] = {LeftBorder, UpBorder + 100, 150, 50, "Custom Levels", ExitButton};
     BtnLevelType[2] = {LeftBorder, UpBorder + 200, 150, 50, "Back", DrawMenu};
 
-    BtnLevel[0] = {200, getmaxy() - 100, 150, 40, "Back",LevelType };
+    BtnLevel[0] = {200, getmaxy() - 100, 150, 40, "Back", LevelType};
+    BtnEditor[0] = {200, getmaxy() - 100, 150, 40, "Back", DrawMenu};
 
-    int height=1,width=0;
-    for(int i=1;i<=30;i++)
+    int height = 1, width = 0;
+    for (int i = 1; i <= 30; i++)
     {
-        string path="GameBoards/GameBoard";
-        if(i<10)
-            path+=char(i+'0');
-        else {
-            path+=char(i/10+'0');
-            path+=char(i%10 +'0');
+        string path = "GameBoards/GameBoard";
+        if (i < 10)
+            path += char(i + '0');
+        else
+        {
+            path += char(i / 10 + '0');
+            path += char(i % 10 + '0');
         }
-        path+=".txt";
-        string text="Level ";
-        if(i<10)
-         text+=(char)(i+'0');
-        else {
-            text+=char(i/10+'0');
-            text+=char(i%10 +'0');
+        path += ".txt";
+        string text = "Level ";
+        if (i < 10)
+            text += (char)(i + '0');
+        else
+        {
+            text += char(i / 10 + '0');
+            text += char(i % 10 + '0');
         }
-        BtnLevel[i] = {LeftBorder+(width)*200, UpBorder+height*80, 150, 50, text, [path]() {StartLevel(path);}};
-        width=i%6;
-        if(i%6==0)
+        BtnLevel[i] = {LeftBorder + (width) * 200, UpBorder + height * 80, 150, 50, text, [path]()
+                       { StartLevel(path); }};
+        width = i % 6;
+        if (i % 6 == 0)
             height++;
-    
     }
-    
-    
 }
 
 void DrawBoardGame()
@@ -617,8 +618,8 @@ POINT MouseDraggingPiece(GamePieces &Fence)
     }
     putimage(0, 0, BackgroundBuffer, COPY_PUT);
     DrawBoardGame();
-    DrawButton(btnGame[0], WHITE,BLACK);
-    DrawButton(btnGame[2], WHITE,BLACK);
+    DrawButton(btnGame[0], WHITE, BLACK);
+    DrawButton(btnGame[2], WHITE, BLACK);
     for (int i = 1; i <= 3; i++)
         if (!::Fence[i].dragging)
             DrawFence(::Fence[i], ::Fence[i].UpLeft.x, ::Fence[i].UpLeft.y, ::Fence[i].Side); // cele care nu sunt in dragging trebuie afisate
@@ -649,7 +650,7 @@ void DrawLevel(string GameBoardFileName)
             outtextxy(200, 200, text);
             gameIsFinised = true;
             DrawButton(btnGame[0], WHITE, BLACK);
-            ActiveButton(btnGame,3);
+            ActiveButton(btnGame, 3);
         }
         bool SomethingHappend = false;
         POINT mouse;
@@ -665,16 +666,15 @@ void DrawLevel(string GameBoardFileName)
         if (!SomethingHappend)
         {
             MouseDraggingPiece(Fence[0]);
-            ActiveButton(btnGame,3);
+            ActiveButton(btnGame, 3);
         }
-        
     }
 }
 void StartLevel(string FileName)
 {
     gameIsFinised = false;
     globalDragging = false;
-    
+
     setvisualpage(1);
     cleardevice();
     DrawLevel(FileName);
@@ -730,8 +730,6 @@ void UploadImages()
     MiniFenceBuffer = malloc(imagesize(1, 1, (gbSideLength - 1) / 2, (gbSideLength - 1) / 2));
     getimage(1, 1, (gbSideLength - 1) / 2, (gbSideLength - 1) / 2, MiniFenceBuffer);
 
-   
-
     cleardevice();
     setvisualpage(0);
 }
@@ -748,7 +746,7 @@ void DrawMenu()
         DrawButton(btnMenu[0], WHITE, BLACK);
         DrawButton(btnMenu[1], WHITE, BLACK);
         DrawButton(btnMenu[2], WHITE, BLACK);
-        ActiveButton(btnMenu,3);
+        ActiveButton(btnMenu, 3);
         page1 = 1 - page1;
     }
 }
@@ -761,11 +759,11 @@ void SelectLevel()
         setactivepage(page1);
         setvisualpage(1 - page1);
         putimage(0, 0, LevelBackgroundBuffer, COPY_PUT);
-        for(int i=0;i<=30;i++)
+        for (int i = 0; i <= 30; i++)
         {
-            DrawButton(BtnLevel[i], WHITE,BLACK);
+            DrawButton(BtnLevel[i], WHITE, BLACK);
         }
-        ActiveButton(BtnLevel,31);
+        ActiveButton(BtnLevel, 31);
         page1 = 1 - page1;
     }
 }
@@ -778,15 +776,78 @@ void LevelType()
         setactivepage(page1);
         setvisualpage(1 - page1);
         putimage(0, 0, FarmBuffer, COPY_PUT);
-        DrawButton(BtnLevelType[0],WHITE,BLACK);
-        DrawButton(BtnLevelType[1],WHITE,BLACK);
-        DrawButton(BtnLevelType[2],WHITE,BLACK);
-        ActiveButton(BtnLevelType,3);
+        DrawButton(BtnLevelType[0], WHITE, BLACK);
+        DrawButton(BtnLevelType[1], WHITE, BLACK);
+        DrawButton(BtnLevelType[2], WHITE, BLACK);
+        ActiveButton(BtnLevelType, 3);
         page1 = 1 - page1;
-        
     }
-    
-   
+}
+
+void LevelEditor()
+{
+    int page1 = 0;
+    cleardevice();
+    while (true)
+    {
+        setactivepage(page1);
+        setvisualpage(1 - page1);
+        putimage(0, 0, FarmBuffer, COPY_PUT);
+        ReadGameBoard("EditorGameBoards/GameBoardEditor.txt");
+        POINT GB;
+        if (ismouseclick(WM_LBUTTONDOWN))
+        {
+            POINT mouse;
+            clearmouseclick(WM_LBUTTONDOWN);
+            GetCursorPos(&mouse);
+            GB.y = (mouse.x - LeftBorder) / gbSideLength;
+            GB.x = (mouse.y - UpBorder) / gbSideLength;
+            // if (mouse.x >= Fence.UpLeft.x && mouse.x <= Fence.DownRight.x && mouse.y >= Fence.UpLeft.y && mouse.y <= Fence.DownRight.y) // daca se afla in interiorul piesei
+            // {
+            //     Fence.dragging = 1;
+            //     globalDragging = 1;        // se foloseste pentru a elimina efectul de palpaiala a piesei
+            //     Fence.Side = gbSideLength; // devine de dimenisune normala
+            // }
+        }
+        /*
+        if (Fence.dragging)
+        {
+            POINT mouse;
+            GetCursorPos(&mouse);
+            Fence.UpLeft.x = mouse.x - 40; // mutarea efectiva dupa mouse
+            Fence.UpLeft.y = mouse.y - 40;
+            if (ismouseclick(WM_RBUTTONDOWN)) // plasarea piesiei jos , cu click dreapta
+            {
+                Fence.dragging = 0;
+                globalDragging = 0;
+                Fence.Side = gbSideLength / 2;
+                clearmouseclick(WM_RBUTTONDOWN);
+                GB.y = (mouse.x - LeftBorder) / gbSideLength;
+                GB.x = (mouse.y - UpBorder) / gbSideLength;                                                                        // afla coordonatele pe grid
+                if (mouse.x < LeftBorder + gbWidth && mouse.y < UpBorder + gbHeight && mouse.x > LeftBorder && mouse.y > UpBorder) // verifica daca se afla in matricea GameBoard
+                {
+                    NormalizeFence(Fence); // normalizarea e pentru mutarea piesei, trebuie adusa in colt , iar dupa mutata  la x si y
+                    GamePieces newFence = Fence;
+                    MoveFence(newFence, GB.x, GB.y); // mutarea in grid, mutarea fictiva, matrice auxiara
+                    
+                    MoveFence(Fence, GB.x, GB.y);
+                        AddFence(Fence);
+                        Beep(100, 100);
+                        Fence.UpLeft.x = GB.y * gbSideLength + LeftBorder; // calculatre coordonate noi
+                        Fence.UpLeft.y = GB.x * gbSideLength + UpBorder;
+                        Fence.isPlaced = true;
+                        Fence.Side = gbSideLength; // aducerea la marimea normala
+                    }
+                }
+            }
+        }
+        */
+       
+        DrawButton(BtnEditor[0],WHITE,BLACK);
+        DrawBoardGame();
+        ActiveButton(BtnEditor,1);
+        page1 = 1 - page1;
+    }
 }
 int main()
 {
