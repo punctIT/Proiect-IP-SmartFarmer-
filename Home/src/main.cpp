@@ -16,7 +16,7 @@ bool globalDragging = false; // evita palpairea si luarea simultata a mai multor
 bool gameIsFinised;
 
 void *BackgroundBuffer, *HorseBuffer, *CowBuffer, *SheepBuffer, *PigBuffer, *FenceBuffer, *GrassBuffer, *EmptyAnimalBuffer, *MiniFenceBuffer, *FarmBuffer;
-
+void *LevelBackgroundBuffer;
 struct GamePieces
 {
     POINT UpLeft, DownRight, InitialPositionOfFence; // coordonatele piesei
@@ -295,7 +295,7 @@ void ActiveButton(Buttons btnGame[])
     POINT mouse;
 
     GetCursorPos(&mouse);
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < 31; i++)
         if (mouse.x > btnGame[i].x && mouse.y > btnGame[i].y && mouse.x < btnGame[i].x + btnGame[i].length && mouse.y < btnGame[i].y + btnGame[i].height)
         {
             DrawButton(btnGame[i], GREEN);
@@ -303,7 +303,7 @@ void ActiveButton(Buttons btnGame[])
     if (ismouseclick(WM_LBUTTONDOWN))
     {
         clearmouseclick(WM_LBUTTONDOWN);
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < 31; i++)
             if (mouse.x > btnGame[i].x && mouse.y > btnGame[i].y && mouse.x < btnGame[i].x + btnGame[i].length && mouse.y < btnGame[i].y + btnGame[i].height)
             {
                 Beep(1000, 100);
@@ -337,16 +337,31 @@ void Initializari()
     btnGame[2] = {200, getmaxy() - 100, 150, 40, "Back", SelectLevel};
 
     btnMenu[0] = {LeftBorder, UpBorder, 150, 50, "SELECT LEVEL", SelectLevel};
-    btnMenu[2] = {LeftBorder, UpBorder + 100, 150, 50, "LEVEL EDITOR", ExitButton};
+    btnMenu[2] = {LeftBorder, UpBorder + 100, 150, 50, "SECRET", ExitButton};
     btnMenu[1] = {LeftBorder, UpBorder + 200, 100, 50, "EXIT", ExitButton};
-    for(int i=1;i<=5;i++)
+    int height=1,width=0;
+    for(int i=1;i<=30;i++)
     {
         string path="GameBoards/GameBoard";
-        path+=char(i+'0');
+        if(i<10)
+            path+=char(i+'0');
+        else {
+            path+=char(i/10+'0');
+            path+=char(i%10 +'0');
+        }
         path+=".txt";
         string text="Level ";
-        text+=(char)(i+'0');
-        BtnLevel[i] = {LeftBorder+(i-1)*200, UpBorder, 150, 50, text, [path]() {StartLevel(path);}};
+        if(i<10)
+         text+=(char)(i+'0');
+        else {
+            text+=char(i/10+'0');
+            text+=char(i%10 +'0');
+        }
+        BtnLevel[i] = {LeftBorder+(width)*200, UpBorder+height*80, 150, 50, text, [path]() {StartLevel(path);}};
+        width=i%6;
+        if(i%6==0)
+            height++;
+    
     }
     
     BtnLevel[0] = {200, getmaxy() - 100, 150, 40, "Back", DrawMenu};
@@ -554,7 +569,16 @@ void DrawLevel(string GameBoardFileName)
 
     while (true)
     {
-
+        if (AnimalsAreFenced())
+        {
+            cleardevice();
+            setcolor(BLACK); // Setează culoarea textului
+            char text[] = "FINAL";
+            outtextxy(200, 200, text);
+            gameIsFinised = true;
+            DrawButton(btnGame[0], WHITE);
+            ActiveButton(btnGame);
+        }
         bool SomethingHappend = false;
         POINT mouse;
         GetCursorPos(&mouse);
@@ -571,25 +595,18 @@ void DrawLevel(string GameBoardFileName)
             MouseDraggingPiece(Fence[0]);
             ActiveButton(btnGame);
         }
-        if (AnimalsAreFenced())
-        {
-            cleardevice();
-            setcolor(BLACK); // Setează culoarea textului
-            char text[] = "FINAL";
-            outtextxy(200, 200, text);
-            gameIsFinised = true;
-            DrawButton(btnGame[0], WHITE);
-            ActiveButton(btnGame);
-        }
+        
     }
 }
 void StartLevel(string FileName)
 {
     gameIsFinised = false;
     globalDragging = false;
+    
     setvisualpage(1);
     cleardevice();
     DrawLevel(FileName);
+    AnimalsAreFenced();
 }
 
 void UploadImages()
@@ -602,6 +619,11 @@ void UploadImages()
     readimagefile("Images/farm.jpg", 0, 0, getmaxx(), getmaxy());
     FarmBuffer = malloc(imagesize(0, 0, getmaxx(), getmaxy()));
     getimage(0, 0, getmaxx(), getmaxy(), FarmBuffer);
+
+    readimagefile("Images/levelBackground.jpg", 0, 0, getmaxx(), getmaxy());
+    LevelBackgroundBuffer = malloc(imagesize(0, 0, getmaxx(), getmaxy()));
+    getimage(0, 0, getmaxx(), getmaxy(), LevelBackgroundBuffer);
+
     cleardevice();
 
     readimagefile("Images/horse.jpg", 1, 1, gbSideLength - 1, gbSideLength - 1);
@@ -636,6 +658,8 @@ void UploadImages()
     MiniFenceBuffer = malloc(imagesize(1, 1, (gbSideLength - 1) / 2, (gbSideLength - 1) / 2));
     getimage(1, 1, (gbSideLength - 1) / 2, (gbSideLength - 1) / 2, MiniFenceBuffer);
 
+   
+
     cleardevice();
     setvisualpage(0);
 }
@@ -664,8 +688,8 @@ void SelectLevel()
     {
         setactivepage(page1);
         setvisualpage(1 - page1);
-        putimage(0, 0, FarmBuffer, COPY_PUT);
-        for(int i=0;i<=5;i++)
+        putimage(0, 0, LevelBackgroundBuffer, COPY_PUT);
+        for(int i=0;i<=30;i++)
         {
             DrawButton(BtnLevel[i], WHITE);
         }
