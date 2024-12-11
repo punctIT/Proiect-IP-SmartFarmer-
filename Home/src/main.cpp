@@ -28,7 +28,7 @@ struct GamePieces
     int isRotated;
     int GB[width][length]; // matricea caracteristica a piesei 7x9
 
-} Fence[4];
+} Fence[4],AnimalsAndOther[5];;
 
 struct Buttons
 {
@@ -380,6 +380,7 @@ void ActiveButton(Buttons btnGame[], int n)
 
 void initialization()
 {
+   
     gbWidth = gbSideLength * length;
     gbHeight = 400;
     UpBorder = 0.17 * GetSystemMetrics(SM_CYSCREEN);
@@ -446,6 +447,14 @@ void initialization()
         if (i % 6 == 0)
             height++;
     }
+
+
+    //editor
+     ReadFence(AnimalsAndOther[0], "EditorGameBoards/Sheep.txt");
+    ReadFence(AnimalsAndOther[1], "EditorGameBoards/Horse.txt");
+    ReadFence(AnimalsAndOther[2], "EditorGameBoards/Pig.txt");
+    ReadFence(AnimalsAndOther[3], "EditorGameBoards/Cow.txt");
+
 }
 
 void DrawBoardGame()
@@ -497,7 +506,7 @@ void DrawFence(GamePieces &fenceToDraw, int x, int y, int side)
     //  ofstream fout("GameBoards/coordonate.txt", ios_base::app);
     for (int i = 0; i < width; i++) // partea de desenare
         for (int q = 0; q < length; q++)
-            if (fence.GB[i][q])
+            if (fence.GB[i][q] != 0)
             {
                 x += side * (q);
                 y += side * (i);
@@ -783,69 +792,123 @@ void LevelType()
         page1 = 1 - page1;
     }
 }
-
+void drawAnimal(GamePieces animal, int x, int y)
+{
+    char a;
+    for (int i = 0; i < width; i++)
+        for (int q = 0; q < length; q++)
+            if (animal.GB[i][q] != 0)
+                a = animal.GB[i][q], q = length, i = width;
+    if (a == 1)
+    {
+        putimage(x, y, SheepBuffer, COPY_PUT);
+    }
+    if (a == 2)
+    {
+        putimage(x, y, HorseBuffer, COPY_PUT);
+    }
+    if (a == 3)
+    {
+        putimage(x, y, PigBuffer, COPY_PUT);
+    }
+    if (a == 4)
+    {
+        putimage(x, y, CowBuffer, COPY_PUT);
+    }
+    if (a == 5)
+    {
+        putimage(x, y, MiniFenceBuffer, COPY_PUT);
+    }
+}
 void LevelEditor()
 {
     int page1 = 0;
-    cleardevice();
+    cleardevice(); 
+    ReadGameBoard("EditorGameBoards/GameBoardEditor.txt");
+
+
+    for (int i = 0; i < 4; i++)
+    {
+        AnimalsAndOther[i].InitialPositionOfFence.x = LeftBorder + gbWidth + LeftBorder;
+        AnimalsAndOther[i].InitialPositionOfFence.y = UpBorder + 100 * i;
+        AnimalsAndOther[i].DownRight.x = AnimalsAndOther[i].InitialPositionOfFence.x + gbSideLength;
+        AnimalsAndOther[i].DownRight.y = AnimalsAndOther[i].InitialPositionOfFence.y + gbSideLength;
+        AnimalsAndOther[i].UpLeft = AnimalsAndOther[i].InitialPositionOfFence;
+        AnimalsAndOther[i].dragging = 0;
+    }
+
+    bool Draging = 0;
     while (true)
     {
         setactivepage(page1);
         setvisualpage(1 - page1);
         putimage(0, 0, FarmBuffer, COPY_PUT);
-        ReadGameBoard("EditorGameBoards/GameBoardEditor.txt");
         POINT GB;
+       
+        bool Something = 0;
+        {
+            POINT mouse;
+            GetCursorPos(&mouse);
+            for (int i = 0; i < 5; i++)
+                if (AnimalsAndOther[i].dragging|| mouse.x >= AnimalsAndOther[i].UpLeft.x && mouse.x <= AnimalsAndOther[i].DownRight.x && mouse.y >= AnimalsAndOther[i].UpLeft.y && mouse.y <= AnimalsAndOther[i].DownRight.y)
+                    Something=1;
+        }
+        
         if (ismouseclick(WM_LBUTTONDOWN))
         {
             POINT mouse;
+            GetCursorPos(&mouse);
             clearmouseclick(WM_LBUTTONDOWN);
-            GetCursorPos(&mouse);
-            GB.y = (mouse.x - LeftBorder) / gbSideLength;
-            GB.x = (mouse.y - UpBorder) / gbSideLength;
-            // if (mouse.x >= Fence.UpLeft.x && mouse.x <= Fence.DownRight.x && mouse.y >= Fence.UpLeft.y && mouse.y <= Fence.DownRight.y) // daca se afla in interiorul piesei
-            // {
-            //     Fence.dragging = 1;
-            //     globalDragging = 1;        // se foloseste pentru a elimina efectul de palpaiala a piesei
-            //     Fence.Side = gbSideLength; // devine de dimenisune normala
-            // }
-        }
-        /*
-        if (Fence.dragging)
-        {
-            POINT mouse;
-            GetCursorPos(&mouse);
-            Fence.UpLeft.x = mouse.x - 40; // mutarea efectiva dupa mouse
-            Fence.UpLeft.y = mouse.y - 40;
-            if (ismouseclick(WM_RBUTTONDOWN)) // plasarea piesiei jos , cu click dreapta
-            {
-                Fence.dragging = 0;
-                globalDragging = 0;
-                Fence.Side = gbSideLength / 2;
-                clearmouseclick(WM_RBUTTONDOWN);
-                GB.y = (mouse.x - LeftBorder) / gbSideLength;
-                GB.x = (mouse.y - UpBorder) / gbSideLength;                                                                        // afla coordonatele pe grid
-                if (mouse.x < LeftBorder + gbWidth && mouse.y < UpBorder + gbHeight && mouse.x > LeftBorder && mouse.y > UpBorder) // verifica daca se afla in matricea GameBoard
+            for (int i = 0; i < 5; i++)
+                if (!Draging && mouse.x >= AnimalsAndOther[i].UpLeft.x && mouse.x <= AnimalsAndOther[i].DownRight.x && mouse.y >= AnimalsAndOther[i].UpLeft.y && mouse.y <= AnimalsAndOther[i].DownRight.y)
                 {
-                    NormalizeFence(Fence); // normalizarea e pentru mutarea piesei, trebuie adusa in colt , iar dupa mutata  la x si y
-                    GamePieces newFence = Fence;
-                    MoveFence(newFence, GB.x, GB.y); // mutarea in grid, mutarea fictiva, matrice auxiara
-                    
-                    MoveFence(Fence, GB.x, GB.y);
-                        AddFence(Fence);
+                    AnimalsAndOther[i].dragging = 1;
+                    Draging = 1;
+                    GB.y = (mouse.x - LeftBorder) / gbSideLength;
+                    GB.x = (mouse.y - UpBorder) / gbSideLength;
+                }
+        }
+        for (int i = 0; i < 4; i++)
+            if (AnimalsAndOther[i].dragging)
+            {
+                POINT mouse;
+                GetCursorPos(&mouse);
+                AnimalsAndOther[i].UpLeft.x = mouse.x - 40; // mutarea efectiva dupa mouse
+                AnimalsAndOther[i].UpLeft.y = mouse.y - 40;
+                AnimalsAndOther[i].DownRight.x =  AnimalsAndOther[i].UpLeft.x + gbSideLength;
+                AnimalsAndOther[i].DownRight.y = AnimalsAndOther[i].UpLeft.y + gbSideLength;
+                if (ismouseclick(WM_RBUTTONDOWN)) // plasarea piesiei jos , cu click dreapta
+                {
+                    AnimalsAndOther[i].dragging = 0;
+                    Draging = 0;
+                    clearmouseclick(WM_RBUTTONDOWN);
+                    GB.y = (mouse.x - LeftBorder) / gbSideLength;
+                    GB.x = (mouse.y - UpBorder) / gbSideLength; // afla coordonatele pe grid
+                    if (mouse.x < LeftBorder + gbWidth && mouse.y < UpBorder + gbHeight && mouse.x > LeftBorder && mouse.y > UpBorder) // verifica daca se afla in matricea GameBoard
+                    {
                         Beep(100, 100);
-                        Fence.UpLeft.x = GB.y * gbSideLength + LeftBorder; // calculatre coordonate noi
-                        Fence.UpLeft.y = GB.x * gbSideLength + UpBorder;
-                        Fence.isPlaced = true;
-                        Fence.Side = gbSideLength; // aducerea la marimea normala
+                        AnimalsAndOther[i].UpLeft.x = GB.y * gbSideLength + LeftBorder; // calculatre coordonate noi
+                        AnimalsAndOther[i].UpLeft.y = GB.x * gbSideLength + UpBorder;
+                        AnimalsAndOther[i].isPlaced = true;
+                        AnimalsAndOther[i].Side = gbSideLength; // aducerea la marimea normala
+                    }
+                    else {
+                        AnimalsAndOther[i].UpLeft=AnimalsAndOther[i].InitialPositionOfFence;
+                        AnimalsAndOther[i].DownRight.x =  AnimalsAndOther[i].UpLeft.x + gbSideLength;
+                        AnimalsAndOther[i].DownRight.y = AnimalsAndOther[i].UpLeft.y + gbSideLength;
                     }
                 }
             }
-        }
-        */
-       
-        DrawButton(BtnEditor[0],WHITE,BLACK);
         DrawBoardGame();
-        ActiveButton(BtnEditor,1);
+        DrawButton(BtnEditor[0], WHITE, BLACK);
+        for (int i = 0; i < 4; i++)
+            if (!AnimalsAndOther[i].dragging)
+                drawAnimal(AnimalsAndOther[i], AnimalsAndOther[i].UpLeft.x, AnimalsAndOther[i].UpLeft.y);
+        for (int i = 0; i < 4; i++)
+            if (AnimalsAndOther[i].dragging)
+                drawAnimal(AnimalsAndOther[i], AnimalsAndOther[i].UpLeft.x, AnimalsAndOther[i].UpLeft.y);
+        if(!Something)
+        ActiveButton(BtnEditor, 1);
         page1 = 1 - page1;
     }
 }
