@@ -17,7 +17,8 @@ bool gameIsFinised;
 bool LevelFinished[60];
 
 void *BackgroundBuffer, *HorseBuffer, *CowBuffer, *SheepBuffer, *PigBuffer, *FenceBuffer, *GrassBuffer, *EmptyAnimalBuffer, *MiniFenceBuffer, *FarmBuffer;
-void *LevelBackgroundBuffer;
+void *LevelBackgroundBuffer,*WaterBuffer;
+
 struct GamePieces
 {
     POINT UpLeft, DownRight, InitialPositionOfFence; // coordonatele piesei
@@ -450,11 +451,11 @@ void initialization()
 
 
     //editor
-     ReadFence(AnimalsAndOther[0], "EditorGameBoards/Sheep.txt");
+    ReadFence(AnimalsAndOther[0], "EditorGameBoards/Sheep.txt");
     ReadFence(AnimalsAndOther[1], "EditorGameBoards/Horse.txt");
     ReadFence(AnimalsAndOther[2], "EditorGameBoards/Pig.txt");
     ReadFence(AnimalsAndOther[3], "EditorGameBoards/Cow.txt");
-
+    ReadFence(AnimalsAndOther[4], "EditorGameBoards/Water.txt");
 }
 
 void DrawBoardGame()
@@ -492,6 +493,10 @@ void DrawBoardGame()
             else if (GameBoard[i][q] == '*')
             {
                 putimage(x, y, EmptyAnimalBuffer, COPY_PUT);
+            }
+            else if(GameBoard[i][q]=='W')
+            {
+                putimage(x,y,WaterBuffer,COPY_PUT);
             }
             else
                 putimage(x, y, GrassBuffer, COPY_PUT);
@@ -566,7 +571,7 @@ POINT MouseDraggingPiece(GamePieces &Fence)
     if (Fence.dragging)
     {
         POINT mouse;
-        if (IsKeyPressed('r'))
+        if (IsKeyPressed('r')||IsKeyPressed('r'))
         {
             RotateFence(Fence);
             Fence.isRotated = (Fence.isRotated + 1) % 2; // alterneaza intre 0 si 1 ( un bool pentru lenesi)
@@ -735,6 +740,10 @@ void UploadImages()
     EmptyAnimalBuffer = malloc(imagesize(1, 1, gbSideLength - 1, gbSideLength - 1));
     getimage(1, 1, gbSideLength - 1, gbSideLength - 1, EmptyAnimalBuffer);
 
+    readimagefile("Images/Water.jpg", 1, 1, gbSideLength - 1, gbSideLength - 1);
+    WaterBuffer = malloc(imagesize(1, 1, gbSideLength - 1, gbSideLength - 1));
+    getimage(1, 1, gbSideLength - 1, gbSideLength - 1, WaterBuffer);
+
     readimagefile("Images/fence.jpg", 1, 1, (gbSideLength - 1) / 2, (gbSideLength - 1) / 2);
     MiniFenceBuffer = malloc(imagesize(1, 1, (gbSideLength - 1) / 2, (gbSideLength - 1) / 2));
     getimage(1, 1, (gbSideLength - 1) / 2, (gbSideLength - 1) / 2, MiniFenceBuffer);
@@ -817,15 +826,38 @@ void drawAnimal(GamePieces animal, int x, int y)
     }
     if (a == 5)
     {
-        putimage(x, y, MiniFenceBuffer, COPY_PUT);
+        putimage(x, y, WaterBuffer, COPY_PUT);
     }
+}
+void addAnimal(POINT poz,int i)
+{
+    if(i==0)
+    {
+        GameBoard[poz.x][poz.y]='S';
+    }
+    if(i==1)
+    {
+        GameBoard[poz.x][poz.y]='H';
+    }
+    if(i==2)
+    {
+        GameBoard[poz.x][poz.y]='P';
+    }
+    if(i==3)
+    {
+        GameBoard[poz.x][poz.y]='C';
+    }
+    if(i==4)
+    {
+        GameBoard[poz.x][poz.y]='W';
+    }
+    
 }
 void LevelEditor()
 {
     int page1 = 0;
     cleardevice(); 
     ReadGameBoard("EditorGameBoards/GameBoardEditor.txt");
-
 
     for (int i = 0; i < 4; i++)
     {
@@ -866,6 +898,11 @@ void LevelEditor()
                     Draging = 1;
                     GB.y = (mouse.x - LeftBorder) / gbSideLength;
                     GB.x = (mouse.y - UpBorder) / gbSideLength;
+                    if(AnimalsAndOther[i].isPlaced)
+                    {
+                        AnimalsAndOther[i].isPlaced=0;
+                        GameBoard[GB.x][GB.y]='0';
+                    }
                 }
         }
         for (int i = 0; i < 4; i++)
@@ -873,6 +910,7 @@ void LevelEditor()
             {
                 POINT mouse;
                 GetCursorPos(&mouse);
+                
                 AnimalsAndOther[i].UpLeft.x = mouse.x - 40; // mutarea efectiva dupa mouse
                 AnimalsAndOther[i].UpLeft.y = mouse.y - 40;
                 AnimalsAndOther[i].DownRight.x =  AnimalsAndOther[i].UpLeft.x + gbSideLength;
@@ -887,10 +925,10 @@ void LevelEditor()
                     if (mouse.x < LeftBorder + gbWidth && mouse.y < UpBorder + gbHeight && mouse.x > LeftBorder && mouse.y > UpBorder) // verifica daca se afla in matricea GameBoard
                     {
                         Beep(100, 100);
+                        addAnimal(GB,i);
                         AnimalsAndOther[i].UpLeft.x = GB.y * gbSideLength + LeftBorder; // calculatre coordonate noi
                         AnimalsAndOther[i].UpLeft.y = GB.x * gbSideLength + UpBorder;
                         AnimalsAndOther[i].isPlaced = true;
-                        AnimalsAndOther[i].Side = gbSideLength; // aducerea la marimea normala
                     }
                     else {
                         AnimalsAndOther[i].UpLeft=AnimalsAndOther[i].InitialPositionOfFence;
