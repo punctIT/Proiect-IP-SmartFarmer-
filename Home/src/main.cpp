@@ -247,7 +247,6 @@ int CountAnimalInBoard(char Animal)
                 cnt++;
     return cnt;
 }
-
 bool AnimalsAreFenced()
 {
     char CopyGameBoard[7][9];
@@ -290,7 +289,7 @@ bool AnimalsAreFenced()
                         int jNext = column + jDir[k];
                         if (strchr("*0CPHSW", CopyGameBoard[iNext][jNext]))
                         {
-                            if (CopyGameBoard[iNext][jNext] != '0' && CopyGameBoard[iNext][jNext] != '*')
+                            if (strchr("*0W", CopyGameBoard[iNext][jNext]) == NULL)
                             {
                                 if (Animal == '0' || Animal == '*' || Animal == 'W')
                                     Animal = CopyGameBoard[iNext][jNext];
@@ -1008,9 +1007,21 @@ void LevelSave()
         for (int i = 0; i <= 6; i++)
             if (!AnimalsAndOther[i].dragging)
                 drawAnimal(AnimalsAndOther[i], AnimalsAndOther[i].UpLeft.x, AnimalsAndOther[i].UpLeft.y);
-       
 
-        bar(x, y, x + 700, y + 300);
+        setbkcolor(WHITE);
+        setcolor(WHITE);
+
+        //bar(x, y, x + 700, y + 300);
+         int aux = 1;
+         while (aux != x)
+         {
+             setcolor(WHITE);
+             rectangle(x+aux, y, x + 700-aux, y + 300);
+             aux++;
+         }
+        setcolor(BLACK);
+        rectangle(x, y, x + 700, y + 300);
+      
         if (kbhit())
         {
             char ch = getch(); // Așteaptă input de la utilizator
@@ -1032,7 +1043,7 @@ void LevelSave()
                 text[cursorPos] = '\0';
             }
         }
-        setbkcolor(WHITE);
+
         setcolor(BLACK);
         outtextxy(x + 5, y + 5, text);
         DrawButton(BtnSave[0], WHITE, BLACK);
