@@ -338,6 +338,7 @@ void LevelEditor();
 void LevelSave();
 void SaveButton();
 void CancelButton();
+void CustomLevels();
 
 void DrawButton(Buttons btn, int BackColor, int TextColor)
 {
@@ -419,7 +420,7 @@ void initialization()
     btnMenu[1] = {LeftBorder, UpBorder + 200, 150, 50, "EXIT", ExitButton};
 
     BtnLevelType[0] = {LeftBorder, UpBorder, 150, 50, "Main Levels", SelectLevel};
-    BtnLevelType[1] = {LeftBorder, UpBorder + 100, 150, 50, "Custom Levels", ExitButton};
+    BtnLevelType[1] = {LeftBorder, UpBorder + 100, 150, 50, "Custom Levels", CustomLevels};
     BtnLevelType[2] = {LeftBorder, UpBorder + 200, 150, 50, "Back", DrawMenu};
 
     BtnLevel[0] = {200, getmaxy() - 100, 150, 40, "Back", LevelType};
@@ -987,12 +988,14 @@ void LevelEditor()
         page1 = 1 - page1;
     }
 }
+char Savetext[100] = "Scrie aici..."; 
+
 void LevelSave()
 {
-    cleardevice();
+    int NumberOfCustomLevels=0;
     int x = getmaxx() / 4, y = getmaxy() / 2;
     int page1 = 0;
-    char text[100] = "";      // Buffer pentru text
+        // Buffer pentru text
     int cursorPos = 0;        // Poziția cursorului în text
     int maxChars = (700) / 8; // Estimează câte caractere încap pe lățimea chenarului
 
@@ -1021,7 +1024,6 @@ void LevelSave()
          }
         setcolor(BLACK);
         rectangle(x, y, x + 700, y + 300);
-      
         if (kbhit())
         {
             char ch = getch(); // Așteaptă input de la utilizator
@@ -1034,18 +1036,20 @@ void LevelSave()
                 if (cursorPos > 0)
                 {
                     cursorPos--;
-                    text[cursorPos] = '\0';
+                    Savetext[cursorPos] = '\0';
                 }
             }
             else if (cursorPos < maxChars - 1)
             { // Adaugă caracter nou
-                text[cursorPos++] = ch;
-                text[cursorPos] = '\0';
+                Savetext[cursorPos++] = ch;
+                Savetext[cursorPos] = '\0';
             }
         }
 
         setcolor(BLACK);
-        outtextxy(x + 5, y + 5, text);
+        char ceva[]="Nume Nivel:";
+        outtextxy(x +30 , y + 50,ceva);
+        outtextxy(x +120 , y + 50, Savetext);
         DrawButton(BtnSave[0], WHITE, BLACK);
         DrawButton(BtnSave[1], WHITE, BLACK);
         ActiveButton(BtnSave, 2);
@@ -1055,12 +1059,35 @@ void LevelSave()
 }
 void SaveButton()
 {
+    string FileName="CustomLevels/"; FileName+=Savetext;FileName+=".txt";
+    ofstream fout("CustomLevels/LevelNames.txt", ios_base::app);
+
+    ofstream fout1(FileName, ios_base::app);
+    fout<<Savetext<<endl;
+   
+    for(int i=0;i<width;i++)
+    {
+        for(int q=0;q<length;q++)
+            fout1<<GameBoard[i][q]<<" ";
+        fout1<<endl;
+    }
+    strcpy(Savetext,"");
     DrawMenu();
+    
 }
 void CancelButton()
 {
     CancelBtn = 1;
     LevelEditor();
+}
+void CustomLevels()
+{
+    Buttons CustomLevels[11];
+    int n=0;
+    for(int i=0;i<n;i++)
+    {   //ofstrea citire, adugare ;
+        //CustomLevels[i]= {LeftBorder, UpBorder, 150, 50, "Main Levels", DrawLevel()};
+    }
 }
 int main()
 {
