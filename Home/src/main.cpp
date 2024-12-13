@@ -5,8 +5,7 @@
 #include <cstdio>
 #include <algorithm>
 #include <functional>
-#include <cstdlib>
-#include <windows.h>
+
 using namespace std;
 
 const int length = 9, width = 7;
@@ -367,6 +366,8 @@ void DrawButton(Buttons btn, int BackColor, int TextColor)
 
     outtextxy((btn.x + btn.length / 2) - textwidth(c_text) / 2, (btn.y + btn.height / 2) - textheight(c_text) / 2, c_text);
     // floodfill(btn.x+2,btn.y+2,15);
+     setcolor(WHITE);
+     setbkcolor(BLACK);
 }
 
 void ActiveButton(Buttons btnGame[], int n)
@@ -1092,33 +1093,70 @@ void CancelButton()
     CancelBtn = 1;
     LevelEditor();
 }
-
+void deleteFile(const std::string& filename) {
+    // Adăugăm ghilimele pentru a proteja calea fișierului
+    std::string command = "del /f \"" + filename + "\"";
+    
+    // Executăm comanda
+    if (system(command.c_str()) != 0) {
+        std::cerr << "Eroare la ștergerea fișierului" << std::endl;
+    } else {
+        std::cout << "Fișierul a fost șters cu succes." << std::endl;
+    }
+}
+void deleteCustomLeveL(string LevelName)
+{
+     ifstream fin("CustomLevels/LevelNames.txt");
+     string customLV[11];
+     int i,p=-1;
+     for(i=0;fin>>customLV[i];i++)
+        if(LevelName==customLV[i])
+            {
+                p=i;
+                break;
+            }
+     fin.close();
+    if(p==-1)
+        return; 
+    string levelPath="CustomLevels\\"+customLV[p]+".txt";
+    ofstream fout("CustomLevels/LevelNames.txt");
+    deleteFile(levelPath);
+    for(int q=0;q<i;q++)
+        if(q!=p)
+            fout<<customLV[q]<<endl;
+    fout.close();
+    CustomLevels();
+     
+}
 void CustomLevels()
 {
     Buttons CustomLevels[22];
-
+    ifstream fin1("CustomLevels/LevelNames.txt");
     for (int i = 0; i < NumberOfLevel(); i++)
     { // ofstrea citire, adugare ;
-        ifstream fin("CustomLevels/LevelNames.txt");
         char LevelTitle[100];
-        fin >> LevelTitle;
+        fin1 >> LevelTitle;
         string LevelPath = "CustomLevels/";
         LevelPath += LevelTitle;
         LevelPath += ".txt";
         CustomLevels[i] = {LeftBorder, UpBorder + (i + 1) * 80, 150, 50, LevelTitle, [LevelPath]()
                            { StartLevel(LevelPath); }};
     }
+    fin1.close();
     int page1 = 0;
     CustomLevels[NumberOfLevel()] = {LeftBorder, UpBorder + (NumberOfLevel() + 1) * 80, 150, 50, "Back", LevelType};
+    const char *cv="ceva";
+    CustomLevels[NumberOfLevel()+1] = {LeftBorder, UpBorder + (NumberOfLevel() + 2) * 80, 150, 50, "STG", [cv]()
+                           { deleteCustomLeveL(cv) ;}};
 
     while (true)
     {
         setactivepage(page1);
         setvisualpage(1 - page1);
         putimage(0, 0, LevelBackgroundBuffer, COPY_PUT);
-        for (int i = 0; i <= NumberOfLevel(); i++)
+        for (int i = 0; i <= NumberOfLevel()+1; i++)
             DrawButton(CustomLevels[i], WHITE, BLACK);
-        ActiveButton(CustomLevels, NumberOfLevel() + 1);
+        ActiveButton(CustomLevels, NumberOfLevel() + 2);
         page1 = 1 - page1;
     }
 }
