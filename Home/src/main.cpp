@@ -5,7 +5,8 @@
 #include <cstdio>
 #include <algorithm>
 #include <functional>
-
+#include <cstdlib>
+#include <windows.h>
 using namespace std;
 
 const int length = 9, width = 7;
@@ -342,14 +343,20 @@ void CustomLevels();
 
 void DrawButton(Buttons btn, int BackColor, int TextColor)
 {
-    setcolor(BLACK);
-    rectangle(btn.x, btn.y, btn.x + btn.length, btn.y + btn.height);
+
     setcolor(BackColor);
-    int aux = 1;
+    setcolor(BLACK);
+    int aux = 0;
     while (aux != btn.height)
     {
-        setcolor(BackColor);
-        rectangle(btn.x + aux, btn.y + aux, btn.x + btn.length - aux, btn.y + btn.height - aux);
+        if (aux < 5)
+            rectangle(btn.x + aux, btn.y + aux, btn.x + btn.length - aux, btn.y + btn.height - aux);
+        else
+        {
+            setcolor(BackColor);
+            rectangle(btn.x + aux, btn.y + aux, btn.x + btn.length - aux, btn.y + btn.height - aux);
+        }
+
         aux++;
     }
 
@@ -721,41 +728,41 @@ void UploadImages()
 
     cleardevice();
 
-    readimagefile("Images/horse.jpg", 1, 1, gbSideLength - 1, gbSideLength - 1);
-    HorseBuffer = malloc(imagesize(1, 1, gbSideLength - 1, gbSideLength - 1));
-    getimage(1, 1, gbSideLength - 1, gbSideLength - 1, HorseBuffer);
+    readimagefile("Images/horse.jpg", 0, 0, gbSideLength, gbSideLength);
+    HorseBuffer = malloc(imagesize(0, 0, gbSideLength, gbSideLength));
+    getimage(0, 0, gbSideLength, gbSideLength, HorseBuffer);
 
-    readimagefile("Images/cow.jpg", 1, 1, gbSideLength - 1, gbSideLength - 1);
-    CowBuffer = malloc(imagesize(1, 1, gbSideLength - 1, gbSideLength - 1));
-    getimage(1, 1, gbSideLength - 1, gbSideLength - 1, CowBuffer);
+    readimagefile("Images/cow.jpg", 0, 0, gbSideLength, gbSideLength);
+    CowBuffer = malloc(imagesize(0, 0, gbSideLength, gbSideLength));
+    getimage(0, 0, gbSideLength, gbSideLength, CowBuffer);
 
-    readimagefile("Images/sheep.jpg", 1, 1, gbSideLength - 1, gbSideLength - 1);
-    SheepBuffer = malloc(imagesize(1, 1, gbSideLength - 1, gbSideLength - 1));
-    getimage(1, 1, gbSideLength - 1, gbSideLength - 1, SheepBuffer);
+    readimagefile("Images/sheep.jpg", 0, 0, gbSideLength, gbSideLength);
+    SheepBuffer = malloc(imagesize(0, 0, gbSideLength, gbSideLength));
+    getimage(0, 0, gbSideLength, gbSideLength, SheepBuffer);
 
-    readimagefile("Images/pig.jpg", 1, 1, gbSideLength - 1, gbSideLength - 1);
-    PigBuffer = malloc(imagesize(1, 1, gbSideLength - 1, gbSideLength - 1));
-    getimage(1, 1, gbSideLength - 1, gbSideLength - 1, PigBuffer);
+    readimagefile("Images/pig.jpg", 0, 0, gbSideLength, gbSideLength);
+    PigBuffer = malloc(imagesize(0, 0, gbSideLength, gbSideLength));
+    getimage(0, 0, gbSideLength, gbSideLength, PigBuffer);
 
-    readimagefile("Images/grass.jpg", 1, 1, gbSideLength - 1, gbSideLength - 1);
-    GrassBuffer = malloc(imagesize(1, 1, gbSideLength - 1, gbSideLength - 1));
-    getimage(1, 1, gbSideLength - 1, gbSideLength - 1, GrassBuffer);
+    readimagefile("Images/grass.jpg", 0, 0, gbSideLength, gbSideLength);
+    GrassBuffer = malloc(imagesize(0, 0, gbSideLength, gbSideLength));
+    getimage(0, 0, gbSideLength, gbSideLength, GrassBuffer);
 
-    readimagefile("Images/fence.jpg", 1, 1, gbSideLength - 1, gbSideLength - 1);
-    FenceBuffer = malloc(imagesize(1, 1, gbSideLength - 1, gbSideLength - 1));
-    getimage(1, 1, gbSideLength - 1, gbSideLength - 1, FenceBuffer);
+    readimagefile("Images/fence.jpg", 0, 0, gbSideLength, gbSideLength);
+    FenceBuffer = malloc(imagesize(0, 0, gbSideLength, gbSideLength));
+    getimage(0, 0, gbSideLength, gbSideLength, FenceBuffer);
 
-    readimagefile("Images/Rock.jpg", 1, 1, gbSideLength - 1, gbSideLength - 1);
-    EmptyAnimalBuffer = malloc(imagesize(1, 1, gbSideLength - 1, gbSideLength - 1));
-    getimage(1, 1, gbSideLength - 1, gbSideLength - 1, EmptyAnimalBuffer);
+    readimagefile("Images/Rock.jpg", 0, 0, gbSideLength, gbSideLength);
+    EmptyAnimalBuffer = malloc(imagesize(0, 0, gbSideLength, gbSideLength));
+    getimage(0, 0, gbSideLength, gbSideLength, EmptyAnimalBuffer);
 
-    readimagefile("Images/Water.jpg", 1, 1, gbSideLength - 1, gbSideLength - 1);
-    WaterBuffer = malloc(imagesize(1, 1, gbSideLength - 1, gbSideLength - 1));
-    getimage(1, 1, gbSideLength - 1, gbSideLength - 1, WaterBuffer);
+    readimagefile("Images/Water.jpg", 0, 0, gbSideLength, gbSideLength);
+    WaterBuffer = malloc(imagesize(0, 0, gbSideLength, gbSideLength));
+    getimage(0, 0, gbSideLength, gbSideLength, WaterBuffer);
 
-    readimagefile("Images/fence.jpg", 1, 1, (gbSideLength - 1) / 2, (gbSideLength - 1) / 2);
-    MiniFenceBuffer = malloc(imagesize(1, 1, (gbSideLength - 1) / 2, (gbSideLength - 1) / 2));
-    getimage(1, 1, (gbSideLength - 1) / 2, (gbSideLength - 1) / 2, MiniFenceBuffer);
+    readimagefile("Images/fence.jpg", 0, 0, (gbSideLength) / 2, (gbSideLength) / 2);
+    MiniFenceBuffer = malloc(imagesize(0, 0, (gbSideLength) / 2, (gbSideLength) / 2));
+    getimage(0, 0, (gbSideLength) / 2, (gbSideLength) / 2, MiniFenceBuffer);
 
     cleardevice();
     setvisualpage(0);
@@ -1098,11 +1105,11 @@ void CustomLevels()
         string LevelPath = "CustomLevels/";
         LevelPath += LevelTitle;
         LevelPath += ".txt";
-        CustomLevels[i] = {LeftBorder, UpBorder + (i+1) * 80, 150, 50, LevelTitle, [LevelPath]()
+        CustomLevels[i] = {LeftBorder, UpBorder + (i + 1) * 80, 150, 50, LevelTitle, [LevelPath]()
                            { StartLevel(LevelPath); }};
     }
     int page1 = 0;
-    CustomLevels[NumberOfLevel()] = {LeftBorder, UpBorder + (NumberOfLevel()+1) * 80, 150, 50, "Back", LevelType};
+    CustomLevels[NumberOfLevel()] = {LeftBorder, UpBorder + (NumberOfLevel() + 1) * 80, 150, 50, "Back", LevelType};
 
     while (true)
     {
