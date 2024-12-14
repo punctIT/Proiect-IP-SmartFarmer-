@@ -60,6 +60,7 @@ void ReadFence(GamePieces &fence, string FileName)
     for (int i = 0; i < width; i++)
         for (int q = 0; q < length; q++)
             fin >> fence.GB[i][q];
+    fin.close();
 }
 
 bool VerifyFenceExtremities(int i, int j, GamePieces fence)
@@ -236,6 +237,7 @@ void ReadGameBoard(string FileName)
     for (int i = 0; i < width; i++)
         for (int q = 0; q < length; q++)
             fin >> GameBoard[i][q];
+    fin.close();
 }
 
 int CountAnimalInBoard(char Animal)
@@ -869,11 +871,12 @@ int NumberOfLevel()
     while (fin >> levelTitle)
         nr++;
     return nr;
+    fin.close();
 }
 
 void LevelEditor()
 {
-    if (NumberOfLevel() < 10)
+    if (NumberOfLevel() < 6)
     {
         int page1 = 0;
         if (!CancelBtn)
@@ -1009,8 +1012,9 @@ void LevelSave()
         setvisualpage(1 - page1);
         putimage(0, 0, FarmBuffer, COPY_PUT);
         DrawButton(BtnEditor[0], WHITE, BLACK);
-        DrawBoardGame();
         DrawButton(BtnEditor[1], WHITE, BLACK);
+        DrawBoardGame();
+        
         for (int i = 0; i <= 6; i++)
             if (!AnimalsAndOther[i].dragging)
                 drawAnimal(AnimalsAndOther[i], AnimalsAndOther[i].UpLeft.x, AnimalsAndOther[i].UpLeft.y);
@@ -1031,10 +1035,8 @@ void LevelSave()
         if (kbhit())
         {
             char ch = getch(); // Așteaptă input de la utilizator
-            if (ch == 13)
-            {
+            if (ch == 13)//adica enter
                 SaveButton();
-            }
             else if (ch == 8)
             { // Backspace
                 if (cursorPos > 0)
@@ -1045,10 +1047,8 @@ void LevelSave()
             }
             else if (cursorPos < maxChars - 1)
             {
-                if (ch == ' ')
-                {
+                if (ch == ' ')//fisierle nu pot avea nume cu spatiu
                     ch = '-';
-                }
                 Savetext[cursorPos++] = ch;
                 Savetext[cursorPos] = '\0';
             }
@@ -1071,21 +1071,22 @@ void SaveButton()
 
     if (strcmp(Savetext, "Scrie aici...") == 0)
         strcpy(Savetext, "default");
-
     string FileName = "CustomLevels/";
     FileName += Savetext;
     FileName += ".txt";
     ofstream fout("CustomLevels/LevelNames.txt", ios_base::app);
-    ofstream fout1(FileName, ios_base::app);
     fout << Savetext << endl;
-
+    fout.close();
+    ofstream foutLV(FileName);
     for (int i = 0; i < width; i++)
     {
         for (int q = 0; q < length; q++)
-            fout1 << GameBoard[i][q] << " ";
-        fout1 << endl;
+            foutLV << GameBoard[i][q] << " ";
+        foutLV << endl;
     }
+    
     strcpy(Savetext, "");
+    foutLV.close();
     DrawMenu();
 }
 void CancelButton()
@@ -1093,70 +1094,84 @@ void CancelButton()
     CancelBtn = 1;
     LevelEditor();
 }
-void deleteFile(const std::string& filename) {
-    // Adăugăm ghilimele pentru a proteja calea fișierului
-    std::string command = "del /f \"" + filename + "\"";
-    
-    // Executăm comanda
-    if (system(command.c_str()) != 0) {
-        std::cerr << "Eroare la ștergerea fișierului" << std::endl;
-    } else {
-        std::cout << "Fișierul a fost șters cu succes." << std::endl;
-    }
-}
-void deleteCustomLeveL(string LevelName)
+
+#include <iostream>
+#include <fstream>
+#include <string>
+
+using namespace std;
+
+void deleteCustomLevel(string LevelName)
 {
-     ifstream fin("CustomLevels/LevelNames.txt");
-     string customLV[11];
-     int i,p=-1;
-     for(i=0;fin>>customLV[i];i++)
-        if(LevelName==customLV[i])
-            {
-                p=i;
-                break;
-            }
-     fin.close();
-    if(p==-1)
-        return; 
-    string levelPath="CustomLevels\\"+customLV[p]+".txt";
+    
+    string customLV[11]; 
+    int count = 0;              
+    int p = -1;               
+
+    ifstream fin("CustomLevels/LevelNames.txt");
+
+    while (fin >> customLV[count]) { 
+        if (customLV[count] == LevelName) {
+            p = count; 
+        }
+        count++;
+    }
+    fin.close();
+
+    if (p == -1) { 
+        cout << "Numele nivelului nu a fost găsit!" << endl;
+        return;
+    }
+
+    // Ștergem fișierul asociat nivelului
+    string levelPath = "CustomLevels/" + customLV[p] + ".txt";
+    const char* filePath = levelPath.c_str();
+
+    remove(filePath);
     ofstream fout("CustomLevels/LevelNames.txt");
-    deleteFile(levelPath);
-    for(int q=0;q<i;q++)
-        if(q!=p)
-            fout<<customLV[q]<<endl;
+    for (int i = 0; i < count; ++i) {
+        if (i != p) {
+            fout << customLV[i] << endl;
+        }
+    }
+
     fout.close();
-    CustomLevels();
-     
+    cout << "Fișierul LevelNames.txt a fost actualizat cu succes." << endl;
 }
+
 void CustomLevels()
 {
     Buttons CustomLevels[22];
-    ifstream fin1("CustomLevels/LevelNames.txt");
-    for (int i = 0; i < NumberOfLevel(); i++)
+    int NumberOfL=NumberOfLevel();
+    ifstream fin("CustomLevels/LevelNames.txt");
+    for (int i = 0; i < NumberOfL; i++)
     { // ofstrea citire, adugare ;
-        char LevelTitle[100];
-        fin1 >> LevelTitle;
-        string LevelPath = "CustomLevels/";
-        LevelPath += LevelTitle;
-        LevelPath += ".txt";
+        string LevelTitle; fin >> LevelTitle;
+        string LevelPath = "CustomLevels/"+LevelTitle+".txt";
         CustomLevels[i] = {LeftBorder, UpBorder + (i + 1) * 80, 150, 50, LevelTitle, [LevelPath]()
                            { StartLevel(LevelPath); }};
     }
-    fin1.close();
-    int page1 = 0;
-    CustomLevels[NumberOfLevel()] = {LeftBorder, UpBorder + (NumberOfLevel() + 1) * 80, 150, 50, "Back", LevelType};
-    const char *cv="ceva";
-    CustomLevels[NumberOfLevel()+1] = {LeftBorder, UpBorder + (NumberOfLevel() + 2) * 80, 150, 50, "STG", [cv]()
-                           { deleteCustomLeveL(cv) ;}};
+    fin.close();
+    fin.open("CustomLevels/LevelNames.txt");
+    for (int i = NumberOfL; i < 2*NumberOfL; i++)
+    { // ofstrea citire, adugare ;
+        string LevelTitle; fin >> LevelTitle;
+        string LevelPath = "CustomLevels/"+LevelTitle+".txt";
+        CustomLevels[i] = {LeftBorder+200, UpBorder +  (i-NumberOfL + 1) * 80, 150, 50, LevelTitle, [LevelTitle]()
+                           { deleteCustomLevel(LevelTitle); }};
+    }
+    
+    CustomLevels[2*NumberOfL] = {LeftBorder, UpBorder + (NumberOfL + 1) * 80, 150, 50, "Back", LevelType};
 
+    int page1 = 0;
     while (true)
     {
         setactivepage(page1);
         setvisualpage(1 - page1);
         putimage(0, 0, LevelBackgroundBuffer, COPY_PUT);
-        for (int i = 0; i <= NumberOfLevel()+1; i++)
+        for (int i = 0; i <=2*NumberOfLevel(); i++)
             DrawButton(CustomLevels[i], WHITE, BLACK);
-        ActiveButton(CustomLevels, NumberOfLevel() + 2);
+        ActiveButton(CustomLevels, 2*NumberOfLevel()+1);
         page1 = 1 - page1;
     }
 }
