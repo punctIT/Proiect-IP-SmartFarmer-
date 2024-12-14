@@ -420,18 +420,18 @@ void initialization()
     Fence[2].InitialPositionOfFence.x = LeftBorder + gbWidth + LeftBorder;
     Fence[2].InitialPositionOfFence.y = UpBorder + gbSideLength * 2;
     Fence[3].InitialPositionOfFence.x = LeftBorder + gbWidth + LeftBorder;
-    Fence[3].InitialPositionOfFence.y = UpBorder + gbSideLength * 5;
+    Fence[3].InitialPositionOfFence.y = UpBorder + gbSideLength * 4;
 
-    btnGame[0] = {0, getmaxy() - 100, 150, 40, "Exit Game ", ExitButton};
-    btnGame[2] = {200, getmaxy() - 100, 150, 40, "Back", LevelType};
+    btnGame[0] = {gbSideLength, getmaxy() - 100, 150, 40, "Exit Game ", ExitButton};
+    btnGame[2] = {200+gbSideLength, getmaxy() - 100, 150, 40, "Back", LevelType};
 
-    btnMenu[0] = {LeftBorder, UpBorder, 150, 50, "SELECT LEVEL", LevelType};
-    btnMenu[2] = {LeftBorder, UpBorder + 100, 150, 50, "LEVEL EDITOR", LevelEditor};
-    btnMenu[1] = {LeftBorder, UpBorder + 200, 150, 50, "EXIT", ExitButton};
+    btnMenu[0] = {getmaxx() / 2-75, getmaxy() / 2 + 50, 150, 50, "SELECT LEVEL", LevelType};
+    btnMenu[2] = {getmaxx() / 2-75, getmaxy() / 2 + 120, 150, 50, "LEVEL EDITOR", LevelEditor};
+    btnMenu[1] = {getmaxx() / 2-75, getmaxy() / 2 + 190, 150, 50, "EXIT", ExitButton};
 
-    BtnLevelType[0] = {LeftBorder, UpBorder, 150, 50, "Main Levels", SelectLevel};
-    BtnLevelType[1] = {LeftBorder, UpBorder + 100, 150, 50, "Custom Levels", CustomLevels};
-    BtnLevelType[2] = {LeftBorder, UpBorder + 200, 150, 50, "Back", DrawMenu};
+    BtnLevelType[0] = {getmaxx() / 2-75, getmaxy() / 2 + 50, 150, 50, "Main Levels", SelectLevel};
+    BtnLevelType[1] = {getmaxx() / 2-75, getmaxy() / 2 + 120, 150, 50, "Custom Levels", CustomLevels};
+    BtnLevelType[2] = {getmaxx() / 2-75, getmaxy() / 2 + 190, 150, 50, "Back", DrawMenu};
 
     BtnLevel[0] = {200, getmaxy() - 100, 150, 40, "Back", LevelType};
 
@@ -1088,6 +1088,7 @@ void SaveButton()
     strcpy(Savetext, "");
     foutLV.close();
     DrawMenu();
+    
 }
 void CancelButton()
 {
@@ -1109,7 +1110,6 @@ void deleteCustomLevel(string LevelName)
     int p = -1;               
 
     ifstream fin("CustomLevels/LevelNames.txt");
-
     while (fin >> customLV[count]) { 
         if (customLV[count] == LevelName) {
             p = count; 
@@ -1119,7 +1119,7 @@ void deleteCustomLevel(string LevelName)
     fin.close();
 
     if (p == -1) { 
-        cout << "Numele nivelului nu a fost găsit!" << endl;
+       
         return;
     }
 
@@ -1136,7 +1136,7 @@ void deleteCustomLevel(string LevelName)
     }
 
     fout.close();
-    cout << "Fișierul LevelNames.txt a fost actualizat cu succes." << endl;
+    CustomLevels();
 }
 
 void CustomLevels()
@@ -1145,7 +1145,7 @@ void CustomLevels()
     int NumberOfL=NumberOfLevel();
     ifstream fin("CustomLevels/LevelNames.txt");
     for (int i = 0; i < NumberOfL; i++)
-    { // ofstrea citire, adugare ;
+    { 
         string LevelTitle; fin >> LevelTitle;
         string LevelPath = "CustomLevels/"+LevelTitle+".txt";
         CustomLevels[i] = {LeftBorder, UpBorder + (i + 1) * 80, 150, 50, LevelTitle, [LevelPath]()
@@ -1154,10 +1154,10 @@ void CustomLevels()
     fin.close();
     fin.open("CustomLevels/LevelNames.txt");
     for (int i = NumberOfL; i < 2*NumberOfL; i++)
-    { // ofstrea citire, adugare ;
+    {
         string LevelTitle; fin >> LevelTitle;
         string LevelPath = "CustomLevels/"+LevelTitle+".txt";
-        CustomLevels[i] = {LeftBorder+200, UpBorder +  (i-NumberOfL + 1) * 80, 150, 50, LevelTitle, [LevelTitle]()
+        CustomLevels[i] = {LeftBorder+200, UpBorder +  (i-NumberOfL + 1) * 80, 150, 50, "Sterge "+LevelTitle, [LevelTitle]()
                            { deleteCustomLevel(LevelTitle); }};
     }
     
