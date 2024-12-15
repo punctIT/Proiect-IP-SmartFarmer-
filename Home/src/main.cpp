@@ -20,6 +20,8 @@ bool CancelBtn = 0; // folosit la editor,
 void *BackgroundBuffer, *HorseBuffer, *CowBuffer, *SheepBuffer, *PigBuffer, *FenceBuffer, *GrassBuffer, *EmptyAnimalBuffer, *MiniFenceBuffer, *MenuBackGroundBuffer;
 void *LevelBackgroundBuffer, *WaterBuffer,*BluredMenuBackGroundBuffer;
 
+int ButtonColor, ButtonHoverColor,ButtonTextColor,ButtonHoverTextColor;
+
 struct GamePieces
 {
     POINT UpLeft, DownRight, InitialPositionOfFence; // coordonatele piesei
@@ -376,19 +378,19 @@ void DrawButton(Buttons btn, int BackColor, int TextColor)
 void ActiveButton(Buttons btnGame[], int n)
 {
     POINT mouse;
-
+    
     GetCursorPos(&mouse);
     for (int i = 0; i < n; i++)
         if (mouse.x > btnGame[i].x && mouse.y > btnGame[i].y && mouse.x < btnGame[i].x + btnGame[i].length && mouse.y < btnGame[i].y + btnGame[i].height)
-            DrawButton(btnGame[i], BROWN, WHITE);
+            DrawButton(btnGame[i], ButtonHoverColor, ButtonHoverTextColor);
     if (ismouseclick(WM_LBUTTONDOWN))
     {
         clearmouseclick(WM_LBUTTONDOWN);
         for (int i = 0; i < n; i++)
             if (mouse.x > btnGame[i].x && mouse.y > btnGame[i].y && mouse.x < btnGame[i].x + btnGame[i].length && mouse.y < btnGame[i].y + btnGame[i].height)
             {
-                Beep(1000, 100);
-                DrawButton(btnGame[i], BROWN, WHITE);
+                Beep(900, 100);
+                DrawButton(btnGame[i], ButtonHoverColor, ButtonHoverColor);
                 btnGame[i].Function();
             }
     }
@@ -396,7 +398,7 @@ void ActiveButton(Buttons btnGame[], int n)
 
 void initialization()
 {
-
+   
     gbWidth = gbSideLength * length;
     gbHeight = gbSideLength * width;
     UpBorder = 0.17 * GetSystemMetrics(SM_CYSCREEN);
@@ -423,6 +425,10 @@ void initialization()
     Fence[3].InitialPositionOfFence.x = LeftBorder + gbWidth + LeftBorder;
     Fence[3].InitialPositionOfFence.y = UpBorder + gbSideLength * 4;
 
+    settextstyle(3, 0, 2);
+    ButtonColor=RGB(64, 224, 208);
+    ButtonHoverColor=RGB(152, 255, 152);
+    ButtonHoverTextColor=ButtonTextColor=BLACK;
     btnGame[0] = {gbSideLength, getmaxy() - 100, 150, 40, "Exit Game ", ExitButton};
     btnGame[2] = {200+gbSideLength, getmaxy() - 100, 150, 40, "Back", LevelType};
 
@@ -653,8 +659,8 @@ POINT MouseDraggingPiece(GamePieces &Fence)
     }
     putimage(0, 0, BackgroundBuffer, COPY_PUT);
     DrawBoardGame();
-    DrawButton(btnGame[0], WHITE, BLACK);
-    DrawButton(btnGame[2], WHITE, BLACK);
+    DrawButton(btnGame[0], ButtonColor, ButtonTextColor);
+    DrawButton(btnGame[2], ButtonColor, ButtonTextColor);
     for (int i = 1; i <= 3; i++)
         if (!::Fence[i].dragging)
             DrawFence(::Fence[i], ::Fence[i].UpLeft.x, ::Fence[i].UpLeft.y, ::Fence[i].Side); // cele care nu sunt in dragging trebuie afisate
@@ -684,7 +690,7 @@ void DrawLevel(string GameBoardFileName)
             char text[] = "FINAL";
             outtextxy(200, 200, text);
             gameIsFinised = true;
-            DrawButton(btnGame[0], WHITE, BLACK);
+            DrawButton(btnGame[0], ButtonColor, ButtonTextColor);
             ActiveButton(btnGame, 3);
         }
         bool SomethingHappend = false;
@@ -823,10 +829,10 @@ void DrawMenu()
         setactivepage(page1);
         setvisualpage(1 - page1);
         putimage(0, 0, MenuBackGroundBuffer, COPY_PUT);
-        DrawButton(btnMenu[0], WHITE, BLACK);
-        DrawButton(btnMenu[1], WHITE, BLACK);
-        DrawButton(btnMenu[2], WHITE, BLACK);
-        DrawButton(btnMenu[3], WHITE, BLACK);
+        DrawButton(btnMenu[0], ButtonColor, ButtonTextColor);
+        DrawButton(btnMenu[1], ButtonColor, ButtonTextColor);
+        DrawButton(btnMenu[2], ButtonColor, ButtonTextColor);
+        DrawButton(btnMenu[3], ButtonColor, ButtonTextColor);
         ActiveButton(btnMenu, 4);
         page1 = 1 - page1;
     }
@@ -842,7 +848,7 @@ void SelectLevel()
         putimage(0, 0, LevelBackgroundBuffer, COPY_PUT);
         for (int i = 0; i <= 30; i++)
         {
-            DrawButton(BtnLevel[i], WHITE, BLACK);
+            DrawButton(BtnLevel[i], ButtonColor, ButtonTextColor);
         }
         ActiveButton(BtnLevel, 31);
         page1 = 1 - page1;
@@ -857,9 +863,9 @@ void LevelType()
         setactivepage(page1);
         setvisualpage(1 - page1);
         putimage(0, 0, MenuBackGroundBuffer, COPY_PUT);
-        DrawButton(BtnLevelType[0], WHITE, BLACK);
-        DrawButton(BtnLevelType[1], WHITE, BLACK);
-        DrawButton(BtnLevelType[2], WHITE, BLACK);
+        DrawButton(BtnLevelType[0], ButtonColor, ButtonTextColor);
+        DrawButton(BtnLevelType[1], ButtonColor, ButtonTextColor);
+        DrawButton(BtnLevelType[2], ButtonColor, ButtonTextColor);
         ActiveButton(BtnLevelType, 3);
         page1 = 1 - page1;
     }
@@ -1011,8 +1017,8 @@ void LevelEditor()
                     }
                 }
             DrawBoardGame();
-            DrawButton(BtnEditor[0], WHITE, BLACK);
-            DrawButton(BtnEditor[1], WHITE, BLACK);
+            DrawButton(BtnEditor[0], ButtonColor, ButtonTextColor);
+            DrawButton(BtnEditor[1], ButtonColor, ButtonTextColor);
             for (int i = 0; i <= 6; i++)
                 if (!AnimalsAndOther[i].dragging)
                     drawAnimal(AnimalsAndOther[i], AnimalsAndOther[i].UpLeft.x, AnimalsAndOther[i].UpLeft.y);
@@ -1032,7 +1038,7 @@ void LevelEditor()
             setactivepage(page1);
             setvisualpage(1 - page1);
             cleardevice();
-            DrawButton(BtnEditor[0], WHITE, BLACK);
+            DrawButton(BtnEditor[0], ButtonColor,ButtonTextColor);
             ActiveButton(BtnEditor, 1);
             char txt[] = "Spatiu Insuficient, mai stergeti din nivele";
             outtextxy(200, 200, txt);
@@ -1055,8 +1061,8 @@ void LevelSave()
         setactivepage(page1);
         setvisualpage(1 - page1);
         putimage(0, 0, MenuBackGroundBuffer, COPY_PUT);
-        DrawButton(BtnEditor[0], WHITE, BLACK);
-        DrawButton(BtnEditor[1], WHITE, BLACK);
+        DrawButton(BtnEditor[0], ButtonColor, ButtonTextColor);
+        DrawButton(BtnEditor[1], ButtonColor, ButtonTextColor);
         DrawBoardGame();
         
         for (int i = 0; i <= 6; i++)
@@ -1080,7 +1086,7 @@ void LevelSave()
         {
             char ch = getch(); // Așteaptă input de la utilizator
             if (ch == 13)//adica enter
-                SaveButton();
+                 Beep(900, 100),SaveButton();
             else if (ch == 8)
             { // Backspace
                 if (cursorPos > 0)
@@ -1101,9 +1107,9 @@ void LevelSave()
         setcolor(BLACK);
         char ceva[] = "Nume Nivel:";
         outtextxy(x + 30, y + 50, ceva);
-        outtextxy(x + 120, y + 50, Savetext);
-        DrawButton(BtnSave[0], WHITE, BLACK);
-        DrawButton(BtnSave[1], WHITE, BLACK);
+        outtextxy(x + 140, y + 50, Savetext);
+        DrawButton(BtnSave[0], ButtonColor,ButtonTextColor);
+        DrawButton(BtnSave[1], ButtonColor, ButtonTextColor);
         ActiveButton(BtnSave, 2);
 
         page1 = 1 - page1;
@@ -1213,7 +1219,7 @@ void CustomLevels()
         setvisualpage(1 - page1);
         putimage(0, 0, LevelBackgroundBuffer, COPY_PUT);
         for (int i = 0; i <=2*NumberOfLevel(); i++)
-            DrawButton(CustomLevels[i], WHITE, BLACK);
+            DrawButton(CustomLevels[i], ButtonColor, ButtonTextColor);
         ActiveButton(CustomLevels, 2*NumberOfLevel()+1);
         page1 = 1 - page1;
     }
@@ -1228,7 +1234,7 @@ void GameRules()
         setactivepage(page1);
         setvisualpage(1 - page1);
         putimage(0,0,BluredMenuBackGroundBuffer,COPY_PUT);
-        DrawButton( BackBTN[0],WHITE,BLACK);
+        DrawButton( BackBTN[0],ButtonColor,ButtonTextColor);
         ActiveButton( BackBTN, 1);
         page1 = 1 - page1;
     }
@@ -1236,10 +1242,11 @@ void GameRules()
 int main()
 {
     initwindow(GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN), "", -3, -3);
-    UploadImages();
     initialization();
-    DrawMenu();
+    UploadImages();
+    
 
+    DrawMenu();
     getch();
     closegraph();
     return 0;
