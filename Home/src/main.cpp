@@ -691,6 +691,7 @@ void DrawLevel(string GameBoardFileName)
             outtextxy(200, 200, text);
             gameIsFinised = true;
             DrawButton(btnGame[0], ButtonColor, ButtonTextColor);
+            DrawButton(btnGame[2], ButtonColor, ButtonTextColor);
             ActiveButton(btnGame, 3);
         }
         bool SomethingHappend = false;
@@ -954,7 +955,7 @@ void LevelEditor()
         {
             setactivepage(page1);
             setvisualpage(1 - page1);
-            putimage(0, 0, MenuBackGroundBuffer, COPY_PUT);
+            putimage(0, 0, BackgroundBuffer, COPY_PUT);
             POINT GB;
 
             bool Something = 0;
@@ -1060,7 +1061,7 @@ void LevelSave()
     {
         setactivepage(page1);
         setvisualpage(1 - page1);
-        putimage(0, 0, MenuBackGroundBuffer, COPY_PUT);
+        putimage(0, 0, BackgroundBuffer, COPY_PUT);
         DrawButton(BtnEditor[0], ButtonColor, ButtonTextColor);
         DrawButton(BtnEditor[1], ButtonColor, ButtonTextColor);
         DrawBoardGame();
