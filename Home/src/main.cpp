@@ -380,7 +380,7 @@ void ActiveButton(Buttons btnGame[], int n)
     GetCursorPos(&mouse);
     for (int i = 0; i < n; i++)
         if (mouse.x > btnGame[i].x && mouse.y > btnGame[i].y && mouse.x < btnGame[i].x + btnGame[i].length && mouse.y < btnGame[i].y + btnGame[i].height)
-            DrawButton(btnGame[i], GREEN, WHITE);
+            DrawButton(btnGame[i], BROWN, WHITE);
     if (ismouseclick(WM_LBUTTONDOWN))
     {
         clearmouseclick(WM_LBUTTONDOWN);
@@ -388,7 +388,7 @@ void ActiveButton(Buttons btnGame[], int n)
             if (mouse.x > btnGame[i].x && mouse.y > btnGame[i].y && mouse.x < btnGame[i].x + btnGame[i].length && mouse.y < btnGame[i].y + btnGame[i].height)
             {
                 Beep(1000, 100);
-                DrawButton(btnGame[i], GREEN, WHITE);
+                DrawButton(btnGame[i], BROWN, WHITE);
                 btnGame[i].Function();
             }
     }
@@ -719,66 +719,97 @@ void LoadingScreen(int progress)
 {
     setvisualpage(0);
     cleardevice();
-    
+    char loading[]= "Loading...";
+    outtextxy(getmaxx() / 2 - 50, getmaxy() / 2 - 40,loading);
+    char percent[5]; // Buffer suficient pentru numere între 0 și 100 + '%'
+    sprintf(percent, "%d %%", progress); // Formatăm ca procentaj
+
+    outtextxy(getmaxx() / 2 - 25, getmaxy() / 2 ,percent);
+    delay(100);
     setvisualpage(1);
 }
 void UploadImages()
 {
-    setvisualpage(0); // evita efectul de incarcare a imagililor, nu apare fiecare pe rand , apare negru si dupa toate odata
+    int progress=0,percent=100/13;
     readimagefile("Images/background.jpg", 0, 0, getmaxx(), getmaxy());
     BackgroundBuffer = malloc(imagesize(0, 0, getmaxx(), getmaxy()));
     getimage(0, 0, getmaxx(), getmaxy(), BackgroundBuffer);
 
+    progress+=percent;
+    LoadingScreen(progress);
+
     readimagefile("Images/farm.jpg", 0, 0, getmaxx(), getmaxy());
     MenuBackGroundBuffer = malloc(imagesize(0, 0, getmaxx(), getmaxy()));
     getimage(0, 0, getmaxx(), getmaxy(), MenuBackGroundBuffer);
-
+    progress+=percent;
+    LoadingScreen(progress);
+    
     readimagefile("Images/farmBlur.jpg", 0, 0, getmaxx(), getmaxy());
     BluredMenuBackGroundBuffer = malloc(imagesize(0, 0, getmaxx(), getmaxy()));
     getimage(0, 0, getmaxx(), getmaxy(),  BluredMenuBackGroundBuffer);
-
+    progress+=percent;
+    LoadingScreen(progress);
+    
     readimagefile("Images/levelBackground.jpg", 0, 0, getmaxx(), getmaxy());
     LevelBackgroundBuffer = malloc(imagesize(0, 0, getmaxx(), getmaxy()));
     getimage(0, 0, getmaxx(), getmaxy(), LevelBackgroundBuffer);
-
-    cleardevice();
-
+    progress+=percent;
+    LoadingScreen(progress);
+    
     readimagefile("Images/horse.jpg", 0, 0, gbSideLength, gbSideLength);
     HorseBuffer = malloc(imagesize(0, 0, gbSideLength, gbSideLength));
     getimage(0, 0, gbSideLength, gbSideLength, HorseBuffer);
-
+    progress+=percent;
+    LoadingScreen(progress);
+    
     readimagefile("Images/cow.jpg", 0, 0, gbSideLength, gbSideLength);
     CowBuffer = malloc(imagesize(0, 0, gbSideLength, gbSideLength));
     getimage(0, 0, gbSideLength, gbSideLength, CowBuffer);
-
+    progress+=percent;
+    LoadingScreen(progress);
+    
     readimagefile("Images/sheep.jpg", 0, 0, gbSideLength, gbSideLength);
     SheepBuffer = malloc(imagesize(0, 0, gbSideLength, gbSideLength));
     getimage(0, 0, gbSideLength, gbSideLength, SheepBuffer);
-
+    progress+=percent;
+    LoadingScreen(progress);
+    
     readimagefile("Images/pig.jpg", 0, 0, gbSideLength, gbSideLength);
     PigBuffer = malloc(imagesize(0, 0, gbSideLength, gbSideLength));
     getimage(0, 0, gbSideLength, gbSideLength, PigBuffer);
-
+    progress+=percent;
+    LoadingScreen(progress);
+    
     readimagefile("Images/grass.jpg", 0, 0, gbSideLength, gbSideLength);
     GrassBuffer = malloc(imagesize(0, 0, gbSideLength, gbSideLength));
     getimage(0, 0, gbSideLength, gbSideLength, GrassBuffer);
-
+    progress+=percent;
+    LoadingScreen(progress);
+    
     readimagefile("Images/fence.jpg", 0, 0, gbSideLength, gbSideLength);
     FenceBuffer = malloc(imagesize(0, 0, gbSideLength, gbSideLength));
     getimage(0, 0, gbSideLength, gbSideLength, FenceBuffer);
-
+    progress+=percent;
+    LoadingScreen(progress);
+    
     readimagefile("Images/Rock.jpg", 0, 0, gbSideLength, gbSideLength);
     EmptyAnimalBuffer = malloc(imagesize(0, 0, gbSideLength, gbSideLength));
     getimage(0, 0, gbSideLength, gbSideLength, EmptyAnimalBuffer);
-
+    progress+=percent;
+    LoadingScreen(progress);
+    
     readimagefile("Images/Water.jpg", 0, 0, gbSideLength, gbSideLength);
     WaterBuffer = malloc(imagesize(0, 0, gbSideLength, gbSideLength));
     getimage(0, 0, gbSideLength, gbSideLength, WaterBuffer);
-
+    progress+=percent;
+    LoadingScreen(progress);
+    
     readimagefile("Images/fence.jpg", 0, 0, (gbSideLength) / 2, (gbSideLength) / 2);
     MiniFenceBuffer = malloc(imagesize(0, 0, (gbSideLength) / 2, (gbSideLength) / 2));
     getimage(0, 0, (gbSideLength) / 2, (gbSideLength) / 2, MiniFenceBuffer);
-
+    progress+=percent;
+    LoadingScreen(progress);
+    
     cleardevice();
     setvisualpage(0);
 }
@@ -795,7 +826,7 @@ void DrawMenu()
         DrawButton(btnMenu[0], WHITE, BLACK);
         DrawButton(btnMenu[1], WHITE, BLACK);
         DrawButton(btnMenu[2], WHITE, BLACK);
-         DrawButton(btnMenu[3], WHITE, BLACK);
+        DrawButton(btnMenu[3], WHITE, BLACK);
         ActiveButton(btnMenu, 4);
         page1 = 1 - page1;
     }
@@ -1087,7 +1118,15 @@ void SaveButton()
     string FileName = "CustomLevels/";
     FileName += Savetext;
     FileName += ".txt";
+    
+    ifstream fin("CustomLevels/LevelNames.txt", ios_base::app);
+    string names;bool isThere=false;
+    while (fin>>names)
+        if(names==Savetext)
+            isThere=true;
+    fin.close();
     ofstream fout("CustomLevels/LevelNames.txt", ios_base::app);
+     if(!isThere)  
     fout << Savetext << endl;
     fout.close();
     ofstream foutLV(FileName);
