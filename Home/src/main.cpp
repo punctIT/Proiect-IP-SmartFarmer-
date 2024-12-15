@@ -17,8 +17,8 @@ bool gameIsFinised;
 bool LevelFinished[60];
 bool CancelBtn = 0; // folosit la editor,
 
-void *BackgroundBuffer, *HorseBuffer, *CowBuffer, *SheepBuffer, *PigBuffer, *FenceBuffer, *GrassBuffer, *EmptyAnimalBuffer, *MiniFenceBuffer, *FarmBuffer;
-void *LevelBackgroundBuffer, *WaterBuffer;
+void *BackgroundBuffer, *HorseBuffer, *CowBuffer, *SheepBuffer, *PigBuffer, *FenceBuffer, *GrassBuffer, *EmptyAnimalBuffer, *MiniFenceBuffer, *MenuBackGroundBuffer;
+void *LevelBackgroundBuffer, *WaterBuffer,*BluredMenuBackGroundBuffer;
 
 struct GamePieces
 {
@@ -341,6 +341,7 @@ void LevelSave();
 void SaveButton();
 void CancelButton();
 void CustomLevels();
+void GameRules();
 
 void DrawButton(Buttons btn, int BackColor, int TextColor)
 {
@@ -427,11 +428,12 @@ void initialization()
 
     btnMenu[0] = {getmaxx() / 2-75, getmaxy() / 2 + 50, 150, 50, "SELECT LEVEL", LevelType};
     btnMenu[2] = {getmaxx() / 2-75, getmaxy() / 2 + 120, 150, 50, "LEVEL EDITOR", LevelEditor};
-    btnMenu[1] = {getmaxx() / 2-75, getmaxy() / 2 + 190, 150, 50, "EXIT", ExitButton};
+    btnMenu[3] = {getmaxx() / 2-75, getmaxy() / 2 + 190, 150, 50, "GAME RULES", GameRules};
+    btnMenu[1] = {getmaxx() / 2-75, getmaxy() / 2 + 260, 150, 50, "EXIT", ExitButton};
 
-    BtnLevelType[0] = {getmaxx() / 2-75, getmaxy() / 2 + 50, 150, 50, "Main Levels", SelectLevel};
+    BtnLevelType[2] = {getmaxx() / 2-75, getmaxy() / 2 + 50, 150, 50, "Main Levels", SelectLevel};
     BtnLevelType[1] = {getmaxx() / 2-75, getmaxy() / 2 + 120, 150, 50, "Custom Levels", CustomLevels};
-    BtnLevelType[2] = {getmaxx() / 2-75, getmaxy() / 2 + 190, 150, 50, "Back", DrawMenu};
+    BtnLevelType[0] = {getmaxx() / 2-75, getmaxy() / 2 + 190, 150, 50, "Back", DrawMenu};
 
     BtnLevel[0] = {200, getmaxy() - 100, 150, 40, "Back", LevelType};
 
@@ -713,7 +715,13 @@ void StartLevel(string FileName)
     DrawLevel(FileName);
     AnimalsAreFenced();
 }
-
+void LoadingScreen(int progress)
+{
+    setvisualpage(0);
+    cleardevice();
+    
+    setvisualpage(1);
+}
 void UploadImages()
 {
     setvisualpage(0); // evita efectul de incarcare a imagililor, nu apare fiecare pe rand , apare negru si dupa toate odata
@@ -722,8 +730,12 @@ void UploadImages()
     getimage(0, 0, getmaxx(), getmaxy(), BackgroundBuffer);
 
     readimagefile("Images/farm.jpg", 0, 0, getmaxx(), getmaxy());
-    FarmBuffer = malloc(imagesize(0, 0, getmaxx(), getmaxy()));
-    getimage(0, 0, getmaxx(), getmaxy(), FarmBuffer);
+    MenuBackGroundBuffer = malloc(imagesize(0, 0, getmaxx(), getmaxy()));
+    getimage(0, 0, getmaxx(), getmaxy(), MenuBackGroundBuffer);
+
+    readimagefile("Images/farmBlur.jpg", 0, 0, getmaxx(), getmaxy());
+    BluredMenuBackGroundBuffer = malloc(imagesize(0, 0, getmaxx(), getmaxy()));
+    getimage(0, 0, getmaxx(), getmaxy(),  BluredMenuBackGroundBuffer);
 
     readimagefile("Images/levelBackground.jpg", 0, 0, getmaxx(), getmaxy());
     LevelBackgroundBuffer = malloc(imagesize(0, 0, getmaxx(), getmaxy()));
@@ -779,11 +791,12 @@ void DrawMenu()
     {
         setactivepage(page1);
         setvisualpage(1 - page1);
-        putimage(0, 0, FarmBuffer, COPY_PUT);
+        putimage(0, 0, MenuBackGroundBuffer, COPY_PUT);
         DrawButton(btnMenu[0], WHITE, BLACK);
         DrawButton(btnMenu[1], WHITE, BLACK);
         DrawButton(btnMenu[2], WHITE, BLACK);
-        ActiveButton(btnMenu, 3);
+         DrawButton(btnMenu[3], WHITE, BLACK);
+        ActiveButton(btnMenu, 4);
         page1 = 1 - page1;
     }
 }
@@ -812,7 +825,7 @@ void LevelType()
     {
         setactivepage(page1);
         setvisualpage(1 - page1);
-        putimage(0, 0, FarmBuffer, COPY_PUT);
+        putimage(0, 0, MenuBackGroundBuffer, COPY_PUT);
         DrawButton(BtnLevelType[0], WHITE, BLACK);
         DrawButton(BtnLevelType[1], WHITE, BLACK);
         DrawButton(BtnLevelType[2], WHITE, BLACK);
@@ -904,7 +917,7 @@ void LevelEditor()
         {
             setactivepage(page1);
             setvisualpage(1 - page1);
-            putimage(0, 0, FarmBuffer, COPY_PUT);
+            putimage(0, 0, MenuBackGroundBuffer, COPY_PUT);
             POINT GB;
 
             bool Something = 0;
@@ -1010,7 +1023,7 @@ void LevelSave()
     {
         setactivepage(page1);
         setvisualpage(1 - page1);
-        putimage(0, 0, FarmBuffer, COPY_PUT);
+        putimage(0, 0, MenuBackGroundBuffer, COPY_PUT);
         DrawButton(BtnEditor[0], WHITE, BLACK);
         DrawButton(BtnEditor[1], WHITE, BLACK);
         DrawBoardGame();
@@ -1095,13 +1108,6 @@ void CancelButton()
     CancelBtn = 1;
     LevelEditor();
 }
-
-#include <iostream>
-#include <fstream>
-#include <string>
-
-using namespace std;
-
 void deleteCustomLevel(string LevelName)
 {
     
@@ -1122,8 +1128,6 @@ void deleteCustomLevel(string LevelName)
        
         return;
     }
-
-    // Ștergem fișierul asociat nivelului
     string levelPath = "CustomLevels/" + customLV[p] + ".txt";
     const char* filePath = levelPath.c_str();
 
@@ -1138,11 +1142,11 @@ void deleteCustomLevel(string LevelName)
     fout.close();
     CustomLevels();
 }
-
+int NumberOfL;
 void CustomLevels()
 {
     Buttons CustomLevels[22];
-    int NumberOfL=NumberOfLevel();
+    NumberOfL=NumberOfLevel();
     ifstream fin("CustomLevels/LevelNames.txt");
     for (int i = 0; i < NumberOfL; i++)
     { 
@@ -1172,6 +1176,21 @@ void CustomLevels()
         for (int i = 0; i <=2*NumberOfLevel(); i++)
             DrawButton(CustomLevels[i], WHITE, BLACK);
         ActiveButton(CustomLevels, 2*NumberOfLevel()+1);
+        page1 = 1 - page1;
+    }
+}
+void GameRules()
+{
+    Buttons BackBTN[1];
+     BackBTN[0]={100, getmaxy() - 100, 150, 40, "Back", DrawMenu};
+    int page1 = 0;
+    while (true)
+    {
+        setactivepage(page1);
+        setvisualpage(1 - page1);
+        putimage(0,0,BluredMenuBackGroundBuffer,COPY_PUT);
+        DrawButton( BackBTN[0],WHITE,BLACK);
+        ActiveButton( BackBTN, 1);
         page1 = 1 - page1;
     }
 }
