@@ -8,6 +8,8 @@
 
 using namespace std;
 
+#define ThemeNumber 1
+
 const int length = 9, width = 7;
 
 char GameBoard[width + 1][length + 1];
@@ -17,8 +19,10 @@ bool gameIsFinised;
 bool LevelFinished[60];
 bool CancelBtn = 0; // folosit la editor,
 
-void *BackgroundBuffer, *HorseBuffer, *CowBuffer, *SheepBuffer, *PigBuffer, *FenceBuffer, *GrassBuffer, *EmptyAnimalBuffer, *MiniFenceBuffer, *MenuBackGroundBuffer;
-void *LevelBackgroundBuffer, *WaterBuffer,*BluredMenuBackGroundBuffer;
+int theme=0;
+
+void *BackgroundBuffer[ThemeNumber], *HorseBuffer[ThemeNumber], *CowBuffer[ThemeNumber], *SheepBuffer[ThemeNumber], *PigBuffer[ThemeNumber], *FenceBuffer[ThemeNumber], *GrassBuffer[ThemeNumber], *EmptyAnimalBuffer[ThemeNumber], *MiniFenceBuffer[ThemeNumber], *MenuBackGroundBuffer[ThemeNumber];
+void *LevelBackgroundBuffer[ThemeNumber], *WaterBuffer[ThemeNumber],*GameRulesBuffer[ThemeNumber],*LevelCompleteBuffer[ThemeNumber];
 
 int ButtonColor, ButtonHoverColor,ButtonTextColor,ButtonHoverTextColor;
 
@@ -426,7 +430,7 @@ void initialization()
     Fence[3].InitialPositionOfFence.y = UpBorder + gbSideLength * 4;
 
     settextstyle(3, 0, 2);
-    ButtonColor=RGB(64, 224, 208);
+    ButtonColor=RGB(5, 231, 178);
     ButtonHoverColor=RGB(152, 255, 152);
     ButtonHoverTextColor=ButtonTextColor=BLACK;
     btnGame[0] = {gbSideLength, getmaxy() - 100, 150, 40, "Exit Game ", ExitButton};
@@ -499,34 +503,34 @@ void DrawBoardGame()
 
             if (GameBoard[i][q] == '#' || strchr("12345", GameBoard[i][q]))
             {
-                putimage(x, y, FenceBuffer, COPY_PUT);
+                putimage(x, y, FenceBuffer[theme], COPY_PUT);
             }
             else if (GameBoard[i][q] == 'C') // CPHS
             {
-                putimage(x, y, CowBuffer, COPY_PUT);
+                putimage(x, y, CowBuffer[theme], COPY_PUT);
             }
             else if (GameBoard[i][q] == 'P')
             {
-                putimage(x, y, PigBuffer, COPY_PUT);
+                putimage(x, y, PigBuffer[theme], COPY_PUT);
             }
             else if (GameBoard[i][q] == 'H')
             {
-                putimage(x, y, HorseBuffer, COPY_PUT);
+                putimage(x, y, HorseBuffer[theme], COPY_PUT);
             }
             else if (GameBoard[i][q] == 'S')
             {
-                putimage(x, y, SheepBuffer, COPY_PUT);
+                putimage(x, y, SheepBuffer[theme], COPY_PUT);
             }
             else if (GameBoard[i][q] == '*')
             {
-                putimage(x, y, EmptyAnimalBuffer, COPY_PUT);
+                putimage(x, y, EmptyAnimalBuffer[theme], COPY_PUT);
             }
             else if (GameBoard[i][q] == 'W')
             {
-                putimage(x, y, WaterBuffer, COPY_PUT);
+                putimage(x, y, WaterBuffer[theme], COPY_PUT);
             }
             else
-                putimage(x, y, GrassBuffer, COPY_PUT);
+                putimage(x, y, GrassBuffer[theme], COPY_PUT);
         }
 }
 
@@ -546,9 +550,9 @@ void DrawFence(GamePieces &fenceToDraw, int x, int y, int side)
                 setcolor(WHITE);
                 rectangle(x, y, x + side, y + side);
                 if (side != gbSideLength)
-                    putimage(x, y, MiniFenceBuffer, COPY_PUT);
+                    putimage(x, y, MiniFenceBuffer[theme], COPY_PUT);
                 else
-                    putimage(x, y, FenceBuffer, COPY_PUT);
+                    putimage(x, y, FenceBuffer[theme], COPY_PUT);
 
                 y -= side * (i);
                 x -= side * (q);
@@ -563,12 +567,6 @@ void DrawFence(GamePieces &fenceToDraw, int x, int y, int side)
                 LastX = i, LastY = q;
     fenceToDraw.DownRight.x = fenceToDraw.UpLeft.x + side * LastY + side;
     fenceToDraw.DownRight.y = fenceToDraw.UpLeft.y + side * LastX + side;
-    /*
-    ofstream fout("GameBoards/coordonate.txt", ios_base::app);
-    fout<<f.UpLeft.x<<" "<<f.UpLeft.y<<endl;
-    fout<<f.DownRight.x<<" "<<f.DownRight.y<<endl;
-    fout<<endl;
-    */
 }
 
 int page = 0;
@@ -657,7 +655,7 @@ POINT MouseDraggingPiece(GamePieces &Fence)
             }
         }
     }
-    putimage(0, 0, BackgroundBuffer, COPY_PUT);
+    putimage(0, 0, BackgroundBuffer[theme], COPY_PUT);
     DrawBoardGame();
     DrawButton(btnGame[0], ButtonColor, ButtonTextColor);
     DrawButton(btnGame[2], ButtonColor, ButtonTextColor);
@@ -686,7 +684,8 @@ void DrawLevel(string GameBoardFileName)
         if (AnimalsAreFenced())
         {
             cleardevice();
-            setcolor(BLACK); // Setează culoarea textului
+            setcolor(WHITE); // Setează culoarea textului
+            putimage(0,0,LevelCompleteBuffer[theme],COPY_PUT);
             char text[] = "FINAL";
             outtextxy(200, 200, text);
             gameIsFinised = true;
@@ -730,90 +729,96 @@ void LoadingScreen(int progress)
     outtextxy(getmaxx() / 2 - 50, getmaxy() / 2 - 40,loading);
     char percent[5]; // Buffer suficient pentru numere între 0 și 100 + '%'
     sprintf(percent, "%d %%", progress); // Formatăm ca procentaj
-
     outtextxy(getmaxx() / 2 - 25, getmaxy() / 2 ,percent);
-    delay(100);
+    //delay(100);
     setvisualpage(1);
 }
 void UploadImages()
 {
-    int progress=0,percent=100/13;
+    int progress=0,percent=100/14;
     readimagefile("Images/background.jpg", 0, 0, getmaxx(), getmaxy());
-    BackgroundBuffer = malloc(imagesize(0, 0, getmaxx(), getmaxy()));
-    getimage(0, 0, getmaxx(), getmaxy(), BackgroundBuffer);
+    BackgroundBuffer[0] = malloc(imagesize(0, 0, getmaxx(), getmaxy()));
+    getimage(0, 0, getmaxx(), getmaxy(), BackgroundBuffer[0]);
 
     progress+=percent;
     LoadingScreen(progress);
 
-    readimagefile("Images/farm.jpg", 0, 0, getmaxx(), getmaxy());
-    MenuBackGroundBuffer = malloc(imagesize(0, 0, getmaxx(), getmaxy()));
-    getimage(0, 0, getmaxx(), getmaxy(), MenuBackGroundBuffer);
+    readimagefile("Images/MenuBackground.jpg", 0, 0, getmaxx(), getmaxy());
+    MenuBackGroundBuffer[0] = malloc(imagesize(0, 0, getmaxx(), getmaxy()));
+    getimage(0, 0, getmaxx(), getmaxy(), MenuBackGroundBuffer[0]);
+    progress+=percent;
+    LoadingScreen(progress);
+
+    
+    readimagefile("Images/LevelComplite.jpg", 0, 0, getmaxx(), getmaxy());
+    LevelCompleteBuffer[0] = malloc(imagesize(0, 0, getmaxx(), getmaxy()));
+    getimage(0, 0, getmaxx(), getmaxy(), LevelCompleteBuffer[0]);
     progress+=percent;
     LoadingScreen(progress);
     
-    readimagefile("Images/farmBlur.jpg", 0, 0, getmaxx(), getmaxy());
-    BluredMenuBackGroundBuffer = malloc(imagesize(0, 0, getmaxx(), getmaxy()));
-    getimage(0, 0, getmaxx(), getmaxy(),  BluredMenuBackGroundBuffer);
+    readimagefile("Images/GameRules.jpg", 0, 0, getmaxx(), getmaxy());
+    GameRulesBuffer[0] = malloc(imagesize(0, 0, getmaxx(), getmaxy()));
+    getimage(0, 0, getmaxx(), getmaxy(),  GameRulesBuffer[0]);
     progress+=percent;
     LoadingScreen(progress);
     
     readimagefile("Images/levelBackground.jpg", 0, 0, getmaxx(), getmaxy());
-    LevelBackgroundBuffer = malloc(imagesize(0, 0, getmaxx(), getmaxy()));
-    getimage(0, 0, getmaxx(), getmaxy(), LevelBackgroundBuffer);
+    LevelBackgroundBuffer[0] = malloc(imagesize(0, 0, getmaxx(), getmaxy()));
+    getimage(0, 0, getmaxx(), getmaxy(), LevelBackgroundBuffer[0]);
     progress+=percent;
     LoadingScreen(progress);
     
     readimagefile("Images/horse.jpg", 0, 0, gbSideLength, gbSideLength);
-    HorseBuffer = malloc(imagesize(0, 0, gbSideLength, gbSideLength));
-    getimage(0, 0, gbSideLength, gbSideLength, HorseBuffer);
+    HorseBuffer[0] = malloc(imagesize(0, 0, gbSideLength, gbSideLength));
+    getimage(0, 0, gbSideLength, gbSideLength, HorseBuffer[0]);
     progress+=percent;
     LoadingScreen(progress);
     
     readimagefile("Images/cow.jpg", 0, 0, gbSideLength, gbSideLength);
-    CowBuffer = malloc(imagesize(0, 0, gbSideLength, gbSideLength));
-    getimage(0, 0, gbSideLength, gbSideLength, CowBuffer);
+    CowBuffer[0] = malloc(imagesize(0, 0, gbSideLength, gbSideLength));
+    getimage(0, 0, gbSideLength, gbSideLength, CowBuffer[0]);
     progress+=percent;
     LoadingScreen(progress);
     
     readimagefile("Images/sheep.jpg", 0, 0, gbSideLength, gbSideLength);
-    SheepBuffer = malloc(imagesize(0, 0, gbSideLength, gbSideLength));
-    getimage(0, 0, gbSideLength, gbSideLength, SheepBuffer);
+    SheepBuffer[0] = malloc(imagesize(0, 0, gbSideLength, gbSideLength));
+    getimage(0, 0, gbSideLength, gbSideLength, SheepBuffer[0]);
     progress+=percent;
     LoadingScreen(progress);
     
     readimagefile("Images/pig.jpg", 0, 0, gbSideLength, gbSideLength);
-    PigBuffer = malloc(imagesize(0, 0, gbSideLength, gbSideLength));
-    getimage(0, 0, gbSideLength, gbSideLength, PigBuffer);
+    PigBuffer[0] = malloc(imagesize(0, 0, gbSideLength, gbSideLength));
+    getimage(0, 0, gbSideLength, gbSideLength, PigBuffer[0]);
     progress+=percent;
     LoadingScreen(progress);
     
     readimagefile("Images/grass.jpg", 0, 0, gbSideLength, gbSideLength);
-    GrassBuffer = malloc(imagesize(0, 0, gbSideLength, gbSideLength));
-    getimage(0, 0, gbSideLength, gbSideLength, GrassBuffer);
+    GrassBuffer[0] = malloc(imagesize(0, 0, gbSideLength, gbSideLength));
+    getimage(0, 0, gbSideLength, gbSideLength, GrassBuffer[0]);
     progress+=percent;
     LoadingScreen(progress);
     
     readimagefile("Images/fence.jpg", 0, 0, gbSideLength, gbSideLength);
-    FenceBuffer = malloc(imagesize(0, 0, gbSideLength, gbSideLength));
-    getimage(0, 0, gbSideLength, gbSideLength, FenceBuffer);
+    FenceBuffer[0] = malloc(imagesize(0, 0, gbSideLength, gbSideLength));
+    getimage(0, 0, gbSideLength, gbSideLength, FenceBuffer[0]);
     progress+=percent;
     LoadingScreen(progress);
     
     readimagefile("Images/Rock.jpg", 0, 0, gbSideLength, gbSideLength);
-    EmptyAnimalBuffer = malloc(imagesize(0, 0, gbSideLength, gbSideLength));
-    getimage(0, 0, gbSideLength, gbSideLength, EmptyAnimalBuffer);
+    EmptyAnimalBuffer[0] = malloc(imagesize(0, 0, gbSideLength, gbSideLength));
+    getimage(0, 0, gbSideLength, gbSideLength, EmptyAnimalBuffer[0]);
     progress+=percent;
     LoadingScreen(progress);
     
     readimagefile("Images/Water.jpg", 0, 0, gbSideLength, gbSideLength);
-    WaterBuffer = malloc(imagesize(0, 0, gbSideLength, gbSideLength));
-    getimage(0, 0, gbSideLength, gbSideLength, WaterBuffer);
+    WaterBuffer[0] = malloc(imagesize(0, 0, gbSideLength, gbSideLength));
+    getimage(0, 0, gbSideLength, gbSideLength, WaterBuffer[0]);
     progress+=percent;
     LoadingScreen(progress);
     
     readimagefile("Images/fence.jpg", 0, 0, (gbSideLength) / 2, (gbSideLength) / 2);
-    MiniFenceBuffer = malloc(imagesize(0, 0, (gbSideLength) / 2, (gbSideLength) / 2));
-    getimage(0, 0, (gbSideLength) / 2, (gbSideLength) / 2, MiniFenceBuffer);
+    MiniFenceBuffer[0] = malloc(imagesize(0, 0, (gbSideLength) / 2, (gbSideLength) / 2));
+    getimage(0, 0, (gbSideLength) / 2, (gbSideLength) / 2, MiniFenceBuffer[0]);
     progress+=percent;
     LoadingScreen(progress);
     
@@ -829,7 +834,7 @@ void DrawMenu()
     {
         setactivepage(page1);
         setvisualpage(1 - page1);
-        putimage(0, 0, MenuBackGroundBuffer, COPY_PUT);
+        putimage(0, 0, MenuBackGroundBuffer[theme], COPY_PUT);
         DrawButton(btnMenu[0], ButtonColor, ButtonTextColor);
         DrawButton(btnMenu[1], ButtonColor, ButtonTextColor);
         DrawButton(btnMenu[2], ButtonColor, ButtonTextColor);
@@ -846,7 +851,7 @@ void SelectLevel()
     {
         setactivepage(page1);
         setvisualpage(1 - page1);
-        putimage(0, 0, LevelBackgroundBuffer, COPY_PUT);
+        putimage(0, 0, LevelBackgroundBuffer[theme], COPY_PUT);
         for (int i = 0; i <= 30; i++)
         {
             DrawButton(BtnLevel[i], ButtonColor, ButtonTextColor);
@@ -863,7 +868,7 @@ void LevelType()
     {
         setactivepage(page1);
         setvisualpage(1 - page1);
-        putimage(0, 0, MenuBackGroundBuffer, COPY_PUT);
+        putimage(0, 0, MenuBackGroundBuffer[theme], COPY_PUT);
         DrawButton(BtnLevelType[0], ButtonColor, ButtonTextColor);
         DrawButton(BtnLevelType[1], ButtonColor, ButtonTextColor);
         DrawButton(BtnLevelType[2], ButtonColor, ButtonTextColor);
@@ -879,19 +884,19 @@ void drawAnimal(GamePieces animal, int x, int y)
             if (animal.GB[i][q] != 0)
                 a = animal.GB[i][q], q = length, i = width;
     if (a == 1)
-        putimage(x, y, SheepBuffer, COPY_PUT);
+        putimage(x, y, SheepBuffer[theme], COPY_PUT);
     if (a == 2)
-        putimage(x, y, HorseBuffer, COPY_PUT);
+        putimage(x, y, HorseBuffer[theme], COPY_PUT);
     if (a == 3)
-        putimage(x, y, PigBuffer, COPY_PUT);
+        putimage(x, y, PigBuffer[theme], COPY_PUT);
     if (a == 4)
-        putimage(x, y, CowBuffer, COPY_PUT);
+        putimage(x, y, CowBuffer[theme], COPY_PUT);
     if (a == 5)
-        putimage(x, y, WaterBuffer, COPY_PUT);
+        putimage(x, y, WaterBuffer[theme], COPY_PUT);
     if (a == 6)
-        putimage(x, y, GrassBuffer, COPY_PUT);
+        putimage(x, y, GrassBuffer[theme], COPY_PUT);
     if (a == 7)
-        putimage(x, y, EmptyAnimalBuffer, COPY_PUT);
+        putimage(x, y, EmptyAnimalBuffer[theme], COPY_PUT);
 }
 void addAnimal(POINT poz, int i)
 {
@@ -955,7 +960,7 @@ void LevelEditor()
         {
             setactivepage(page1);
             setvisualpage(1 - page1);
-            putimage(0, 0, BackgroundBuffer, COPY_PUT);
+            putimage(0, 0, BackgroundBuffer[theme], COPY_PUT);
             POINT GB;
 
             bool Something = 0;
@@ -1041,17 +1046,19 @@ void LevelEditor()
             cleardevice();
             DrawButton(BtnEditor[0], ButtonColor,ButtonTextColor);
             ActiveButton(BtnEditor, 1);
-            char txt[] = "Spatiu Insuficient, mai stergeti din nivele";
+            char txt[] = "Insufficient space, delete some levels";
             outtextxy(200, 200, txt);
             page1 = 1 - page1;
         }
     }
 }
-char Savetext[100] = "Scrie aici...";
+char Savetext[100] = "Type here...";
+
 void LevelSave()
 {
     int NumberOfCustomLevels = 0;
     int x = getmaxx() / 4, y = getmaxy() / 2;
+    strcpy(Savetext, "Type here...");
     int page1 = 0;
     // Buffer pentru text
     int cursorPos = 0;        // Poziția cursorului în text
@@ -1061,7 +1068,7 @@ void LevelSave()
     {
         setactivepage(page1);
         setvisualpage(1 - page1);
-        putimage(0, 0, BackgroundBuffer, COPY_PUT);
+        putimage(0, 0, BackgroundBuffer[theme], COPY_PUT);
         DrawButton(BtnEditor[0], ButtonColor, ButtonTextColor);
         DrawButton(BtnEditor[1], ButtonColor, ButtonTextColor);
         DrawBoardGame();
@@ -1069,20 +1076,22 @@ void LevelSave()
         for (int i = 0; i <= 6; i++)
             if (!AnimalsAndOther[i].dragging)
                 drawAnimal(AnimalsAndOther[i], AnimalsAndOther[i].UpLeft.x, AnimalsAndOther[i].UpLeft.y);
-
-        setbkcolor(WHITE);
-        setcolor(WHITE);
+        int bgColor=RGB(220, 220, 220);
+        setbkcolor(bgColor);
+        setcolor(bgColor);
 
         // bar(x, y, x + 700, y + 300);
         int aux = 1;
         while (aux != x)
         {
-            setcolor(WHITE);
+            setcolor(bgColor);
             rectangle(x + aux, y, x + 700 - aux, y + 300);
             aux++;
         }
         setcolor(BLACK);
         rectangle(x, y, x + 700, y + 300);
+        setcolor(ButtonColor);
+        rectangle(x+1, y+1, x + 700-1, y + 300-1);
         if (kbhit())
         {
             char ch = getch(); // Așteaptă input de la utilizator
@@ -1106,7 +1115,7 @@ void LevelSave()
         }
 
         setcolor(BLACK);
-        char ceva[] = "Nume Nivel:";
+        char ceva[] = "Level Name:";
         outtextxy(x + 30, y + 50, ceva);
         outtextxy(x + 140, y + 50, Savetext);
         DrawButton(BtnSave[0], ButtonColor,ButtonTextColor);
@@ -1120,7 +1129,7 @@ void LevelSave()
 void SaveButton()
 {
 
-    if (strcmp(Savetext, "Scrie aici...") == 0)
+    if (strcmp(Savetext, "Type here...") == 0)
         strcpy(Savetext, "default");
     string FileName = "CustomLevels/";
     FileName += Savetext;
@@ -1207,7 +1216,7 @@ void CustomLevels()
     {
         string LevelTitle; fin >> LevelTitle;
         string LevelPath = "CustomLevels/"+LevelTitle+".txt";
-        CustomLevels[i] = {LeftBorder+200, UpBorder +  (i-NumberOfL + 1) * 80, 150, 50, "Sterge "+LevelTitle, [LevelTitle]()
+        CustomLevels[i] = {LeftBorder+200, UpBorder +  (i-NumberOfL + 1) * 80, 150, 50, "Delete "+LevelTitle, [LevelTitle]()
                            { deleteCustomLevel(LevelTitle); }};
     }
     
@@ -1218,7 +1227,7 @@ void CustomLevels()
     {
         setactivepage(page1);
         setvisualpage(1 - page1);
-        putimage(0, 0, LevelBackgroundBuffer, COPY_PUT);
+        putimage(0, 0, LevelBackgroundBuffer[theme], COPY_PUT);
         for (int i = 0; i <=2*NumberOfLevel(); i++)
             DrawButton(CustomLevels[i], ButtonColor, ButtonTextColor);
         ActiveButton(CustomLevels, 2*NumberOfLevel()+1);
@@ -1234,7 +1243,7 @@ void GameRules()
     {
         setactivepage(page1);
         setvisualpage(1 - page1);
-        putimage(0,0,BluredMenuBackGroundBuffer,COPY_PUT);
+        putimage(0,0,GameRulesBuffer[theme],COPY_PUT);
         DrawButton( BackBTN[0],ButtonColor,ButtonTextColor);
         ActiveButton( BackBTN, 1);
         page1 = 1 - page1;
