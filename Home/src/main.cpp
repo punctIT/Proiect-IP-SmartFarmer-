@@ -732,8 +732,9 @@ void DrawLevel(string GameBoardFileName)
             cleardevice();
             setcolor(WHITE); // Setează culoarea textului
             putimage(0, 0, LevelCompleteBuffer[theme], COPY_PUT);
-            char text[] = "FINAL";
-            outtextxy(200, 200, text);
+            int x=290,y=270;
+            bar(x,y,1250,630);
+            DrawTime(seconds,minutes,x+10,y+40);
             gameIsFinised = true;
             DrawButton(btnGame[0], ButtonColor, ButtonTextColor);
             DrawButton(btnGame[2], ButtonColor, ButtonTextColor);
