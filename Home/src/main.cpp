@@ -46,7 +46,7 @@ struct Buttons
     string text;
     function<void()> Function;
 
-} btnGame[10], btnMenu[10], BtnLevel[61], BtnLevelType[3], BtnEditor[3], BtnSave[3];
+} btnGame[10], btnMenu[10], BtnLevel[61], BtnLevelType[5], BtnEditor[3], BtnSave[3];
 struct LevelsStaus
 {
     int seconds,minutes;
@@ -333,9 +333,8 @@ bool AnimalsAreFenced()
     }
     return true;
 }
-void writeGameBoardFile(string name)
+void writeGameBoardFile()
 {
-    remove("CustomLevels/Random.txt");
     ofstream fout("CustomLevels/Random.txt");
     for (int i = 0; i < width; i++)
     {
@@ -433,7 +432,23 @@ void GenerateRandomGameboard()
             GameBoard[x][y] = 'W';
         }
     }
-    writeGameBoardFile("");
+    bool cow=0,pig=0,sheep=0,horse=0;
+    for(int i=0;i<width;i++)
+        for(int q=0;q<length;q++)
+            {
+                if(GameBoard[i][q]=='C')
+                    cow=1;
+                if(GameBoard[i][q]=='H')
+                    horse=1;
+                if(GameBoard[i][q]=='P')
+                    pig=1;
+                if(GameBoard[i][q]=='S')
+                    sheep=1;
+                    
+            }
+    if(cow+sheep+pig+horse<2)
+        GenerateRandomGameboard();
+    writeGameBoardFile();
 }
 // Partea de Grafica
 
@@ -512,13 +527,14 @@ void ActiveButton(Buttons btnGame[], int n)
 
 void initialization()
 {
-
+    gameIsFinised=false;
+    globalDragging=0;
     gbWidth = gbSideLength * length;
     gbHeight = gbSideLength * width;
     UpBorder = 0.17 * GetSystemMetrics(SM_CYSCREEN);
     LeftBorder = 0.1 * GetSystemMetrics(SM_CXSCREEN);
     RightBorder = 50;
-   
+    
     for (int i = 1; i <= 3; i++)
     {
         string FilePathAux = "GameBoards/";
@@ -550,10 +566,10 @@ void initialization()
     btnMenu[4] = {getmaxx() / 2 - 75, getmaxy() / 2 + 240, 150, 50, "THEME", ThemeMenu};
 
 
-
+    BtnLevelType[3]=  {getmaxx() / 2 - 75, getmaxy() / 2 + 190, 150, 50, "Random Levels", randombutton};
     BtnLevelType[2] = {getmaxx() / 2 - 75, getmaxy() / 2 + 50, 150, 50, "Main Levels", SelectLevel};
     BtnLevelType[1] = {getmaxx() / 2 - 75, getmaxy() / 2 + 120, 150, 50, "Custom Levels", CustomLevels};
-    BtnLevelType[0] = {getmaxx() / 2 - 75, getmaxy() / 2 + 190, 150, 50, "Back", DrawMenu};
+    BtnLevelType[0] = {getmaxx() / 2 - 75, getmaxy() / 2 + 260, 150, 50, "Back", DrawMenu};
 
     BtnLevel[0] = {200, getmaxy() - 100, 150, 40, "Back", LevelType};
 
@@ -890,7 +906,7 @@ void LoadingScreen(int progress)
     char percent[5];                     // Buffer suficient pentru numere între 0 și 100 + '%'
     sprintf(percent, "%d %%", progress); // Formatăm ca procentaj
     outtextxy(getmaxx() / 2 - 25, getmaxy() / 2, percent);
-    delay(100);
+    //delay(100);
     setvisualpage(1);
 }
 void UploadImages()
@@ -1117,7 +1133,8 @@ void LevelType()
         DrawButton(BtnLevelType[0], ButtonColor, ButtonTextColor);
         DrawButton(BtnLevelType[1], ButtonColor, ButtonTextColor);
         DrawButton(BtnLevelType[2], ButtonColor, ButtonTextColor);
-        ActiveButton(BtnLevelType, 3);
+        DrawButton(BtnLevelType[3], ButtonColor, ButtonTextColor);
+        ActiveButton(BtnLevelType, 4);
         page1 = 1 - page1;
     }
 }
@@ -1473,25 +1490,22 @@ void CustomLevels()
     }
 
     CustomLevels[2 * NumberOfL] = {LeftBorder, UpBorder + (NumberOfL + 1) * 80, 150, 50, "Back", LevelType};
-    CustomLevels[2 * NumberOfL+1] = {getmaxx()-300, UpBorder + (NumberOfL + 1) * 80, 150, 50, "Random", randombutton};
-
     int page1 = 0;
     while (true)
     {
         setactivepage(page1);
         setvisualpage(1 - page1);
         putimage(0, 0, LevelBackgroundBuffer[theme], COPY_PUT);
-        for (int i = 0; i <= 2 * NumberOfLevel()+1; i++)
+        for (int i = 0; i <= 2 * NumberOfLevel(); i++)
             DrawButton(CustomLevels[i], ButtonColor, ButtonTextColor);
-        ActiveButton(CustomLevels, 2 * NumberOfLevel() + 2.);
+        ActiveButton(CustomLevels, 2 * NumberOfLevel() + 1);
         page1 = 1 - page1;
     }
 }
 void randombutton()
 {
-    initialization();
+     initialization();
      GenerateRandomGameboard();
-     writeGameBoardFile("");
      DrawLevel("CustomLevels/nivel-custom.txt");
 }
 void GameRules()
