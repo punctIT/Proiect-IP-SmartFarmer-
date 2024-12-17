@@ -333,6 +333,50 @@ bool AnimalsAreFenced()
     }
     return true;
 }
+void writeGameBoardFile(string name)
+{
+    ofstream fout("CustomLevels/Random.txt");
+    for (int i = 0; i < width; i++)
+    {
+        for (int j = 0; j < length; j++)
+            fout << GameBoard[i][j] << ' ';
+     fout << '\n';
+    }
+    fout.close();
+}
+void GenerateRandomGameboard()
+{
+    srand(time(0));
+    ReadGameBoard("GameBoards/GameBoard.txt");
+    char Type[4] = {'C', 'P', 'S', 'H'};
+    bool HasWater = rand() % 2; // daca e nivel cu apa
+    for (int i = 0; i < 4; i++)
+        if (rand() % 2) // sanse 50% sa fie animalul respectiv
+        {
+            int HowMany = 1 + rand() % 2;
+            for (int j = 1; j <= HowMany; j++)
+            {
+                int x, y;
+                do
+                {
+                    x = 1 + rand() % (width - 2);
+                    y = 1 + rand() % (length - 2);
+                } while (GameBoard[x][y] != '*');
+                GameBoard[x][y] = Type[i]; // pune animalele
+            }
+            if (HasWater)
+            {
+                int x, y;
+                do
+                {
+                    x = 1 + rand() % (width - 2);
+                    y = 1 + rand() % (length - 2);
+                } while (GameBoard[x][y] != '*');
+                GameBoard[x][y] = 'W';
+            }
+        }
+    writeGameBoardFile("");
+}
 // Partea de Grafica
 
 int LeftBorder, UpBorder, gbWidth, gbHeight, gbSideLength = 80, DownBorder, RightBorder;
@@ -415,7 +459,7 @@ void initialization()
     UpBorder = 0.17 * GetSystemMetrics(SM_CYSCREEN);
     LeftBorder = 0.1 * GetSystemMetrics(SM_CXSCREEN);
     RightBorder = 50;
-
+    GenerateRandomGameboard();
     for (int i = 1; i <= 3; i++)
     {
         string FilePathAux = "GameBoards/";
