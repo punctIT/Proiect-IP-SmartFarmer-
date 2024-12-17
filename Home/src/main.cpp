@@ -335,6 +335,7 @@ bool AnimalsAreFenced()
 }
 void writeGameBoardFile(string name)
 {
+    remove("CustomLevels/Random.txt");
     ofstream fout("CustomLevels/Random.txt");
     for (int i = 0; i < width; i++)
     {
@@ -349,6 +350,7 @@ void GenerateRandomGameboard()
     srand(time(0));
     ReadGameBoard("GameBoards/GameBoard.txt");
     char Type[4] = {'C', 'P', 'S', 'H'};
+    char A1 = '0', A2 = '0'; // trebuie macar 2 tipuri de animale
     bool HasWater = rand() % 2; // daca e nivel cu apa
     for (int i = 0; i < 4; i++)
         if (rand() % 2) // sanse 50% sa fie animalul respectiv
@@ -359,22 +361,78 @@ void GenerateRandomGameboard()
                 int x, y;
                 do
                 {
-                    x = 1 + rand() % (width - 2);
-                    y = 1 + rand() % (length - 2);
+                    x = 1 + 2 * (rand() % 3);
+                    y = 1 + 2 * (rand() % 4);
                 } while (GameBoard[x][y] != '*');
                 GameBoard[x][y] = Type[i]; // pune animalele
+                if (A1 == '0')
+                    A1 = Type[i];
+                else if (A2 == '0')
+                    A2 = Type[i];
             }
             if (HasWater)
             {
                 int x, y;
                 do
                 {
-                    x = 1 + rand() % (width - 2);
-                    y = 1 + rand() % (length - 2);
+                    x = 1 + 2 * (rand() % 3);
+                    y = 1 + 2 * (rand() % 4);
                 } while (GameBoard[x][y] != '*');
                 GameBoard[x][y] = 'W';
             }
         }
+    if (A1 == '0')
+    {
+        int HowMany = 1 + rand() % 2;
+        for (int j = 1; j <= HowMany; j++)
+        {
+            int x, y;
+            do
+            {
+                x = 1 + 2 * (rand() % 3);
+                y = 1 + 2 * (rand() % 4);
+            } while (GameBoard[x][y] != '*');
+            A1 = Type[rand() % 4];
+            GameBoard[x][y] = A1;
+        }
+        if (HasWater)
+        {
+            int x, y;
+            do
+            {
+                x = 1 + 2 * (rand() % 3);
+                y = 1 + 2 * (rand() % 4);
+            } while (GameBoard[x][y] != '*');
+            GameBoard[x][y] = 'W';
+        }
+    }
+    if (A2 == '0')
+    {
+        int HowMany = 1 + rand() % 2;
+        for (int j = 1; j <= HowMany; j++)
+        {
+            int x, y;
+            do
+            {
+                x = 1 + 2 * (rand() % 3);
+                y = 1 + 2 * (rand() % 4);
+            } while (GameBoard[x][y] != '*');
+            A2 = Type[rand() % 4];
+            while (A1 == A2)
+                A2 = Type[rand() % 4];
+            GameBoard[x][y] = A2;
+        }
+        if (HasWater)
+        {
+            int x, y;
+            do
+            {
+                x = 1 + 2 * (rand() % 3);
+                y = 1 + 2 * (rand() % 4);
+            } while (GameBoard[x][y] != '*');
+            GameBoard[x][y] = 'W';
+        }
+    }
     writeGameBoardFile("");
 }
 // Partea de Grafica
@@ -399,6 +457,7 @@ void CancelButton();
 void CustomLevels();
 void GameRules();
 void ThemeMenu();
+void randombutton();
 
 void DrawButton(Buttons btn, int BackColor, int TextColor)
 {
@@ -459,7 +518,7 @@ void initialization()
     UpBorder = 0.17 * GetSystemMetrics(SM_CYSCREEN);
     LeftBorder = 0.1 * GetSystemMetrics(SM_CXSCREEN);
     RightBorder = 50;
-    GenerateRandomGameboard();
+   
     for (int i = 1; i <= 3; i++)
     {
         string FilePathAux = "GameBoards/";
@@ -483,12 +542,12 @@ void initialization()
     settextstyle(3, 0, 2);
     btnGame[0] = {gbSideLength, getmaxy() - 100, 150, 40, "Exit Game ", ExitButton};
     btnGame[2] = {200 + gbSideLength, getmaxy() - 100, 150, 40, "Back", LevelType};
-
-    btnMenu[0] = {getmaxx() / 2 - 75, getmaxy() / 2 + 50, 150, 50, "SELECT LEVEL", LevelType};
+    
+    btnMenu[0] = {getmaxx() / 2 - 75, getmaxy() / 2 + 60, 150, 50, "SELECT LEVEL", LevelType};
     btnMenu[2] = {getmaxx() / 2 - 75, getmaxy() / 2 + 120, 150, 50, "LEVEL EDITOR", LevelEditor};
-    btnMenu[3] = {getmaxx() / 2 - 75, getmaxy() / 2 + 190, 150, 50, "GAME RULES", GameRules};
-    btnMenu[1] = {getmaxx() / 2 - 75, getmaxy() / 2 + 340, 150, 50, "EXIT", ExitButton};
-    btnMenu[4] = {getmaxx() / 2 - 75, getmaxy() / 2 + 260, 150, 50, "THEME", ThemeMenu};
+    btnMenu[3] = {getmaxx() / 2 - 75, getmaxy() / 2 + 180, 150, 50, "GAME RULES", GameRules};
+    btnMenu[1] = {getmaxx() / 2 - 75, getmaxy() / 2 + 300, 150, 50, "EXIT", ExitButton};
+    btnMenu[4] = {getmaxx() / 2 - 75, getmaxy() / 2 + 240, 150, 50, "THEME", ThemeMenu};
 
 
 
@@ -1391,7 +1450,7 @@ void deleteCustomLevel(string LevelName)
 
 void CustomLevels()
 {
-    Buttons CustomLevels[22];
+    Buttons CustomLevels[24];
     int NumberOfL = NumberOfLevel();
     ifstream fin("CustomLevels/LevelNames.txt");
     for (int i = 0; i < NumberOfL; i++)
@@ -1414,6 +1473,7 @@ void CustomLevels()
     }
 
     CustomLevels[2 * NumberOfL] = {LeftBorder, UpBorder + (NumberOfL + 1) * 80, 150, 50, "Back", LevelType};
+    CustomLevels[2 * NumberOfL+1] = {LeftBorder+500, UpBorder + (NumberOfL + 1) * 80, 150, 50, "Random", randombutton};
 
     int page1 = 0;
     while (true)
@@ -1421,11 +1481,17 @@ void CustomLevels()
         setactivepage(page1);
         setvisualpage(1 - page1);
         putimage(0, 0, LevelBackgroundBuffer[theme], COPY_PUT);
-        for (int i = 0; i <= 2 * NumberOfLevel(); i++)
+        for (int i = 0; i <= 2 * NumberOfLevel()+1; i++)
             DrawButton(CustomLevels[i], ButtonColor, ButtonTextColor);
-        ActiveButton(CustomLevels, 2 * NumberOfLevel() + 1);
+        ActiveButton(CustomLevels, 2 * NumberOfLevel() + 2.);
         page1 = 1 - page1;
     }
+}
+void randombutton()
+{
+     GenerateRandomGameboard();
+     writeGameBoardFile("");
+     DrawLevel("CustomLevels/nivel-custom.txt");
 }
 void GameRules()
 {
