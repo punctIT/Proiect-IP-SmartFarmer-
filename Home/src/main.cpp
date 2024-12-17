@@ -890,7 +890,7 @@ void LoadingScreen(int progress)
     char percent[5];                     // Buffer suficient pentru numere între 0 și 100 + '%'
     sprintf(percent, "%d %%", progress); // Formatăm ca procentaj
     outtextxy(getmaxx() / 2 - 25, getmaxy() / 2, percent);
-    //delay(100);
+    delay(100);
     setvisualpage(1);
 }
 void UploadImages()
@@ -1473,7 +1473,7 @@ void CustomLevels()
     }
 
     CustomLevels[2 * NumberOfL] = {LeftBorder, UpBorder + (NumberOfL + 1) * 80, 150, 50, "Back", LevelType};
-    CustomLevels[2 * NumberOfL+1] = {LeftBorder+500, UpBorder + (NumberOfL + 1) * 80, 150, 50, "Random", randombutton};
+    CustomLevels[2 * NumberOfL+1] = {getmaxx()-300, UpBorder + (NumberOfL + 1) * 80, 150, 50, "Random", randombutton};
 
     int page1 = 0;
     while (true)
@@ -1489,6 +1489,7 @@ void CustomLevels()
 }
 void randombutton()
 {
+    initialization();
      GenerateRandomGameboard();
      writeGameBoardFile("");
      DrawLevel("CustomLevels/nivel-custom.txt");
