@@ -9,7 +9,7 @@
 
 using namespace std;
 
-#define ThemeNumber 1
+#define ThemeNumber 2
 
 const int length = 9, width = 7;
 
@@ -354,6 +354,7 @@ void SaveButton();
 void CancelButton();
 void CustomLevels();
 void GameRules();
+void ThemeMenu();
 
 void DrawButton(Buttons btn, int BackColor, int TextColor)
 {
@@ -436,16 +437,16 @@ void initialization()
     Fence[3].InitialPositionOfFence.y = UpBorder + gbSideLength * 4;
 
     settextstyle(3, 0, 2);
-    ButtonColor = RGB(5, 231, 178);
-    ButtonHoverColor = RGB(152, 255, 152);
-    ButtonHoverTextColor = ButtonTextColor = BLACK;
     btnGame[0] = {gbSideLength, getmaxy() - 100, 150, 40, "Exit Game ", ExitButton};
     btnGame[2] = {200 + gbSideLength, getmaxy() - 100, 150, 40, "Back", LevelType};
 
     btnMenu[0] = {getmaxx() / 2 - 75, getmaxy() / 2 + 50, 150, 50, "SELECT LEVEL", LevelType};
     btnMenu[2] = {getmaxx() / 2 - 75, getmaxy() / 2 + 120, 150, 50, "LEVEL EDITOR", LevelEditor};
     btnMenu[3] = {getmaxx() / 2 - 75, getmaxy() / 2 + 190, 150, 50, "GAME RULES", GameRules};
-    btnMenu[1] = {getmaxx() / 2 - 75, getmaxy() / 2 + 260, 150, 50, "EXIT", ExitButton};
+    btnMenu[1] = {getmaxx() / 2 - 75, getmaxy() / 2 + 340, 150, 50, "EXIT", ExitButton};
+    btnMenu[4] = {getmaxx() / 2 - 75, getmaxy() / 2 + 260, 150, 50, "THEME", ThemeMenu};
+
+
 
     BtnLevelType[2] = {getmaxx() / 2 - 75, getmaxy() / 2 + 50, 150, 50, "Main Levels", SelectLevel};
     BtnLevelType[1] = {getmaxx() / 2 - 75, getmaxy() / 2 + 120, 150, 50, "Custom Levels", CustomLevels};
@@ -737,7 +738,12 @@ void DrawLevel(string GameBoardFileName)
             putimage(0, 0, LevelCompleteBuffer[theme], COPY_PUT);
             int x=290,y=270;
             bar(x,y,1250,630);
-            DrawTime(seconds,minutes,x+10,y+40);
+            char text[]="Solve time:";
+            settextstyle(3, 0, 4);
+            outtextxy(x+20,y+40,text);
+            settextstyle(3, 0, 2);
+
+            DrawTime(seconds,minutes,x+250,y+40);
             gameIsFinised = true;
             DrawButton(btnGame[0], ButtonColor, ButtonTextColor);
             DrawButton(btnGame[2], ButtonColor, ButtonTextColor);
@@ -786,7 +792,7 @@ void LoadingScreen(int progress)
 }
 void UploadImages()
 {
-    int progress = 0, percent = 100 / 14;
+    int progress = 0, percent = 100 / 28;
     readimagefile("Images/background.jpg", 0, 0, getmaxx(), getmaxy());
     BackgroundBuffer[0] = malloc(imagesize(0, 0, getmaxx(), getmaxy()));
     getimage(0, 0, getmaxx(), getmaxy(), BackgroundBuffer[0]);
@@ -871,6 +877,91 @@ void UploadImages()
     getimage(0, 0, (gbSideLength) / 2, (gbSideLength) / 2, MiniFenceBuffer[0]);
     progress += percent;
     LoadingScreen(progress);
+    //Chritmas Theme
+    readimagefile("Images/Chritmasbackground.jpg", 0, 0, getmaxx(), getmaxy());
+    BackgroundBuffer[1] = malloc(imagesize(0, 0, getmaxx(), getmaxy()));
+    getimage(0, 0, getmaxx(), getmaxy(), BackgroundBuffer[1]);
+
+    progress += percent;
+    LoadingScreen(progress);
+
+    readimagefile("Images/ChritmasMenuBackground.jpg", 0, 0, getmaxx(), getmaxy());
+    MenuBackGroundBuffer[1] = malloc(imagesize(0, 0, getmaxx(), getmaxy()));
+    getimage(0, 0, getmaxx(), getmaxy(), MenuBackGroundBuffer[1]);
+    progress += percent;
+    LoadingScreen(progress);
+
+    readimagefile("Images/ChritmasLevelComplite.jpg", 0, 0, getmaxx(), getmaxy());
+    LevelCompleteBuffer[1] = malloc(imagesize(0, 0, getmaxx(), getmaxy()));
+    getimage(0, 0, getmaxx(), getmaxy(), LevelCompleteBuffer[1]);
+    progress += percent;
+    LoadingScreen(progress);
+
+    readimagefile("Images/ChritmasGameRules.jpg", 0, 0, getmaxx(), getmaxy());
+    GameRulesBuffer[1] = malloc(imagesize(0, 0, getmaxx(), getmaxy()));
+    getimage(0, 0, getmaxx(), getmaxy(), GameRulesBuffer[1]);
+    progress += percent;
+    LoadingScreen(progress);
+
+    readimagefile("Images/ChritmaslevelBackground.jpg", 0, 0, getmaxx(), getmaxy());
+    LevelBackgroundBuffer[1] = malloc(imagesize(0, 0, getmaxx(), getmaxy()));
+    getimage(0, 0, getmaxx(), getmaxy(), LevelBackgroundBuffer[1]);
+    progress += percent;
+    LoadingScreen(progress);
+
+    readimagefile("Images/Chritmashorse.jpg", 0, 0, gbSideLength, gbSideLength);
+    HorseBuffer[1] = malloc(imagesize(0, 0, gbSideLength, gbSideLength));
+    getimage(0, 0, gbSideLength, gbSideLength, HorseBuffer[1]);
+    progress += percent;
+    LoadingScreen(progress);
+
+    readimagefile("Images/Chritmascow.jpg", 0, 0, gbSideLength, gbSideLength);
+    CowBuffer[1] = malloc(imagesize(0, 0, gbSideLength, gbSideLength));
+    getimage(0, 0, gbSideLength, gbSideLength, CowBuffer[1]);
+    progress += percent;
+    LoadingScreen(progress);
+
+    readimagefile("Images/Chritmassheep.jpg", 0, 0, gbSideLength, gbSideLength);
+    SheepBuffer[1] = malloc(imagesize(0, 0, gbSideLength, gbSideLength));
+    getimage(0, 0, gbSideLength, gbSideLength, SheepBuffer[1]);
+    progress += percent;
+    LoadingScreen(progress);
+
+    readimagefile("Images/Chritmaspig.jpg", 0, 0, gbSideLength, gbSideLength);
+    PigBuffer[1]= malloc(imagesize(0, 0, gbSideLength, gbSideLength));
+    getimage(0, 0, gbSideLength, gbSideLength, PigBuffer[1]);
+    progress += percent;
+    LoadingScreen(progress);
+
+    readimagefile("Images/Chritmasgrass.jpg", 0, 0, gbSideLength, gbSideLength);
+    GrassBuffer[1] = malloc(imagesize(0, 0, gbSideLength, gbSideLength));
+    getimage(0, 0, gbSideLength, gbSideLength, GrassBuffer[1]);
+    progress += percent;
+    LoadingScreen(progress);
+
+    readimagefile("Images/Chritmasfence.jpg", 0, 0, gbSideLength, gbSideLength);
+    FenceBuffer[1] = malloc(imagesize(0, 0, gbSideLength, gbSideLength));
+    getimage(0, 0, gbSideLength, gbSideLength, FenceBuffer[1]);
+    progress += percent;
+    LoadingScreen(progress);
+
+    readimagefile("Images/ChritmasRock.jpg", 0, 0, gbSideLength, gbSideLength);
+    EmptyAnimalBuffer[1] = malloc(imagesize(0, 0, gbSideLength, gbSideLength));
+    getimage(0, 0, gbSideLength, gbSideLength, EmptyAnimalBuffer[1]);
+    progress += percent;
+    LoadingScreen(progress);
+
+    readimagefile("Images/ChritmasWater.jpg", 0, 0, gbSideLength, gbSideLength);
+    WaterBuffer[1] = malloc(imagesize(0, 0, gbSideLength, gbSideLength));
+    getimage(0, 0, gbSideLength, gbSideLength, WaterBuffer[1]);
+    progress += percent;
+    LoadingScreen(progress);
+
+    readimagefile("Images/Chritmasfence.jpg", 0, 0, (gbSideLength) / 2, (gbSideLength) / 2);
+    MiniFenceBuffer[1] = malloc(imagesize(0, 0, (gbSideLength) / 2, (gbSideLength) / 2));
+    getimage(0, 0, (gbSideLength) / 2, (gbSideLength) / 2, MiniFenceBuffer[1]);
+    progress += percent;
+    LoadingScreen(progress);
 
     cleardevice();
     setvisualpage(0);
@@ -889,7 +980,8 @@ void DrawMenu()
         DrawButton(btnMenu[1], ButtonColor, ButtonTextColor);
         DrawButton(btnMenu[2], ButtonColor, ButtonTextColor);
         DrawButton(btnMenu[3], ButtonColor, ButtonTextColor);
-        ActiveButton(btnMenu, 4);
+        DrawButton(btnMenu[4], ButtonColor, ButtonTextColor);
+        ActiveButton(btnMenu, 5);
         page1 = 1 - page1;
     }
 }
@@ -1306,13 +1398,52 @@ void GameRules()
         page1 = 1 - page1;
     }
 }
+void defaultTheme()
+{
+    theme=0;
+    ButtonColor = RGB(5, 231, 178);
+    ButtonHoverColor = RGB(152, 255, 152);
+    ButtonHoverTextColor = ButtonTextColor = BLACK;
+    DrawMenu();
+
+}
+void ChritmasTheme()
+{
+    theme=1;
+    ButtonColor = RGB(178, 34, 34);
+    ButtonHoverColor = RGB(34, 139, 34);
+    ButtonHoverTextColor = ButtonTextColor = WHITE;
+    DrawMenu();
+}
+void ThemeMenu()
+{
+    Buttons themeBtn[4];
+    themeBtn[0] = {LeftBorder, getmaxy() - 100, 150, 40, "Back", DrawMenu};
+    themeBtn[1] = {LeftBorder, UpBorder, 150, 40, "Default Theme", defaultTheme};
+    themeBtn[2] = {LeftBorder, UpBorder+60, 150, 40, "Christmas Theme", ChritmasTheme};
+    int page1=0;
+    while(true)
+    {
+        setactivepage(page1);
+        setvisualpage(1 - page1);
+        cleardevice();
+        DrawButton(themeBtn[0],ButtonColor,ButtonTextColor);
+         DrawButton(themeBtn[1],ButtonColor,ButtonTextColor);
+          DrawButton(themeBtn[2],ButtonColor,ButtonTextColor);
+        ActiveButton(themeBtn, 3);
+        page1 = 1 - page1;
+    }
+
+}
+
 int main()
 {
     initwindow(GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN), "", -3, -3);
     initialization();
+   
     UploadImages();
-
-    DrawMenu();
+    defaultTheme();
+    
     getch();
     closegraph();
     return 0;
