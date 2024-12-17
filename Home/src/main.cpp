@@ -49,7 +49,10 @@ struct Buttons
 } btnGame[10], btnMenu[10], BtnLevel[61], BtnLevelType[3], BtnEditor[3], BtnSave[3];
 struct LevelsStaus
 {
-};
+    int seconds,minutes;
+    bool isSolved;
+}level[100];
+
 bool IsKeyPressed(char key)
 {
     if (kbhit())
@@ -778,7 +781,7 @@ void LoadingScreen(int progress)
     char percent[5];                     // Buffer suficient pentru numere între 0 și 100 + '%'
     sprintf(percent, "%d %%", progress); // Formatăm ca procentaj
     outtextxy(getmaxx() / 2 - 25, getmaxy() / 2, percent);
-    // delay(100);
+    //delay(100);
     setvisualpage(1);
 }
 void UploadImages()
@@ -1152,7 +1155,7 @@ void LevelSave()
                     Savetext[cursorPos] = '\0';
                 }
             }
-            else if (cursorPos < maxChars - 1)
+            else if (cursorPos < maxChars - 1&&cursorPos<20)
             {
                 if (ch == ' ') // fisierle nu pot avea nume cu spatiu
                     ch = '-';
