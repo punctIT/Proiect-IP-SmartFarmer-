@@ -384,6 +384,7 @@ void GenerateRandomGameboard()
     if (A1 == '0')
     {
         int HowMany = 1 + rand() % 2;
+        A1 = Type[rand() % 4];
         for (int j = 1; j <= HowMany; j++)
         {
             int x, y;
@@ -392,7 +393,6 @@ void GenerateRandomGameboard()
                 x = 1 + 2 * (rand() % 3);
                 y = 1 + 2 * (rand() % 4);
             } while (GameBoard[x][y] != '*');
-            A1 = Type[rand() % 4];
             GameBoard[x][y] = A1;
         }
         if (HasWater)
@@ -409,6 +409,9 @@ void GenerateRandomGameboard()
     if (A2 == '0')
     {
         int HowMany = 1 + rand() % 2;
+        A2 = Type[rand() % 4];
+        while (A1 == A2)
+            A2 = Type[rand() % 4];
         for (int j = 1; j <= HowMany; j++)
         {
             int x, y;
@@ -417,9 +420,6 @@ void GenerateRandomGameboard()
                 x = 1 + 2 * (rand() % 3);
                 y = 1 + 2 * (rand() % 4);
             } while (GameBoard[x][y] != '*');
-            A2 = Type[rand() % 4];
-            while (A1 == A2)
-                A2 = Type[rand() % 4];
             GameBoard[x][y] = A2;
         }
         if (HasWater)
