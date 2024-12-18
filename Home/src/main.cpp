@@ -1528,6 +1528,7 @@ void GameRules()
 void defaultTheme()
 {
     theme=0;
+    PlaySound(TEXT("Sounds/music.wav"), NULL, SND_FILENAME | SND_ASYNC| SND_LOOP);
     ButtonColor = RGB(5, 231, 178);
     ButtonHoverColor = RGB(152, 255, 152);
     ButtonHoverTextColor = ButtonTextColor = BLACK;
@@ -1537,6 +1538,7 @@ void defaultTheme()
 void ChritmasTheme()
 {
     theme=1;
+    PlaySound(TEXT("Sounds/christmasmusic.wav"), NULL, SND_FILENAME | SND_ASYNC| SND_LOOP);
     ButtonColor = RGB(178, 34, 34);
     ButtonHoverColor = RGB(34, 139, 34);
     ButtonHoverTextColor = ButtonTextColor = WHITE;
@@ -1567,7 +1569,7 @@ int main()
 {
     initwindow(GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN), "", -3, -3);
     initialization();
-    PlaySound(TEXT("music.wav"), NULL, SND_FILENAME | SND_ASYNC);
+    
     UploadImages();
     defaultTheme();
     
