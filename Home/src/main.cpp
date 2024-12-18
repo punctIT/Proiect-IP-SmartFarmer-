@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <functional>
 #include <time.h>
+#include <mmsystem.h>
 
 using namespace std;
 
@@ -835,6 +836,7 @@ POINT MouseDraggingPiece(GamePieces &Fence)
 }
 void DrawLevel(string GameBoardFileName)
 {
+    
     ReadGameBoard(GameBoardFileName);
     initialization();
     DrawBoardGame();
@@ -1565,7 +1567,7 @@ int main()
 {
     initwindow(GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN), "", -3, -3);
     initialization();
-   
+    PlaySound(TEXT("music.wav"), NULL, SND_FILENAME | SND_ASYNC);
     UploadImages();
     defaultTheme();
     
