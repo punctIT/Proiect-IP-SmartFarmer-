@@ -47,7 +47,8 @@ struct Buttons
     string text;
     function<void()> Function;
 
-} btnGame[10], btnMenu[10], BtnLevel[65],BtnLevel1[32], BtnLevelType[5], BtnEditor[3], BtnSave[3];
+} btnGame[10], btnMenu[10], BtnLevel[65],BtnLevel1[33], BtnLevelType[5], BtnEditor[3], BtnSave[3];
+
 struct LevelsStatus
 {
     int seconds,minutes;
@@ -1208,7 +1209,7 @@ void SelectLevel2()
 {
     int page1 = 0;
     cleardevice();
-    //refreshLevelStatus();
+    refreshLevelStatus();
     BtnLevel1[31] = {getmaxx()-300, getmaxy() - 100, 150, 40, "NextPage", SelectLevel};
     while (true)
     {
@@ -1217,10 +1218,10 @@ void SelectLevel2()
         putimage(0, 0, LevelBackgroundBuffer[theme], COPY_PUT);
         for (int i = 0; i <= 31; i++)
         {
-            //if(level[i+30].isSolved==false)
-                 DrawButton(BtnLevel1[i+30], ButtonColor, ButtonTextColor);
-          //  else 
-                DrawButton(BtnLevel1[i+30], RED, ButtonTextColor);
+            if(level[i+30].isSolved==false)
+                 DrawButton(BtnLevel1[i], ButtonColor, ButtonTextColor);
+            else 
+                DrawButton(BtnLevel1[i], RED, ButtonTextColor);
         }
         ActiveButton(BtnLevel1, 0,32);
         page1 = 1 - page1;
