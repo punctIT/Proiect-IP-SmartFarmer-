@@ -47,11 +47,12 @@ struct Buttons
     string text;
     function<void()> Function;
 
-} btnGame[10], btnMenu[10], BtnLevel[61], BtnLevelType[5], BtnEditor[3], BtnSave[3];
-struct LevelsStaus
+} btnGame[10], btnMenu[10], BtnLevel[65],BtnLevel1[32], BtnLevelType[5], BtnEditor[3], BtnSave[3];
+struct LevelsStatus
 {
     int seconds,minutes;
     bool isSolved;
+
 }level[100];
 
 bool IsKeyPressed(char key)
@@ -451,6 +452,38 @@ void GenerateRandomGameboard()
         GenerateRandomGameboard();
     writeGameBoardFile();
 }
+
+void MarkFinisedLevel(int n,int minutes,int seconds)
+{
+    LevelsStatus newLevelST[100];
+    ifstream fin("GameBoards/LevelsStatus.txt");
+    for(int i=1;i<=60;i++){
+        fin>>newLevelST[i].isSolved>>newLevelST[i].minutes>>newLevelST[i].seconds;
+        if(i==n)
+        {
+            newLevelST[i].isSolved=true;    
+            newLevelST[i].minutes=minutes;
+            newLevelST[i].seconds=seconds;
+        }
+    }
+    fin.close();
+    ofstream fout("GameBoards/LevelsStatus.txt");
+    for(int i=1;i<=60;i++){
+        fout<<newLevelST[i].isSolved<<" "<<newLevelST[i].minutes<<" "<<newLevelST[i].seconds<<endl;
+    }
+    fout.close();
+}
+void refreshLevelStatus()
+{
+    LevelsStatus newLevelST[100];
+    ifstream fin("GameBoards/LevelsStatus.txt");
+    for(int i=1;i<=60;i++){
+        fin>>newLevelST[i].isSolved>>newLevelST[i].minutes>>newLevelST[i].seconds;
+        level[i]=newLevelST[i];
+    }
+    fin.close();
+}
+
 // Partea de Grafica
 
 int LeftBorder, UpBorder, gbWidth, gbHeight, gbSideLength = 80, DownBorder, RightBorder;
@@ -465,6 +498,7 @@ void ExitButton()
 void StartLevel(string FileName);
 void DrawMenu();
 void SelectLevel();
+void SelectLevel2();
 void LevelType();
 void LevelEditor();
 void LevelSave();
@@ -505,21 +539,21 @@ void DrawButton(Buttons btn, int BackColor, int TextColor)
     setbkcolor(BLACK);
 }
 
-void ActiveButton(Buttons btnGame[], int n)
+void ActiveButton(Buttons btnGame[],int st, int en)
 {
     POINT mouse;
 
     GetCursorPos(&mouse);
-    for (int i = 0; i < n; i++)
+    for (int i = st; i < en; i++)
         if (mouse.x > btnGame[i].x && mouse.y > btnGame[i].y && mouse.x < btnGame[i].x + btnGame[i].length && mouse.y < btnGame[i].y + btnGame[i].height)
             DrawButton(btnGame[i], ButtonHoverColor, ButtonHoverTextColor);
     if (ismouseclick(WM_LBUTTONDOWN))
     {
         clearmouseclick(WM_LBUTTONDOWN);
-        for (int i = 0; i < n; i++)
+        for (int i = st; i < en; i++)
             if (mouse.x > btnGame[i].x && mouse.y > btnGame[i].y && mouse.x < btnGame[i].x + btnGame[i].length && mouse.y < btnGame[i].y + btnGame[i].height)
             {
-                Beep(900, 100);
+                Beep(500, 100);
                 DrawButton(btnGame[i], ButtonHoverColor, ButtonHoverColor);
                 btnGame[i].Function();
             }
@@ -555,7 +589,7 @@ void initialization()
     Fence[2].InitialPositionOfFence.y = UpBorder + gbSideLength * 2;
     Fence[3].InitialPositionOfFence.x = LeftBorder + gbWidth + LeftBorder;
     Fence[3].InitialPositionOfFence.y = UpBorder + gbSideLength * 4;
-
+   
     settextstyle(3, 0, 2);
     btnGame[0] = {gbSideLength, getmaxy() - 100, 150, 40, "Exit Game ", ExitButton};
     btnGame[2] = {200 + gbSideLength, getmaxy() - 100, 150, 40, "Back", LevelType};
@@ -573,6 +607,7 @@ void initialization()
     BtnLevelType[0] = {getmaxx() / 2 - 75, getmaxy() / 2 + 260, 150, 50, "Back", DrawMenu};
 
     BtnLevel[0] = {200, getmaxy() - 100, 150, 40, "Back", LevelType};
+    BtnLevel1[0] = {200, getmaxy() - 100, 150, 40, "Back", LevelType};
 
     BtnEditor[0] = {LeftBorder, getmaxy() - 100, 150, 40, "Back", DrawMenu};
     BtnEditor[1] = {LeftBorder + 200, getmaxy() - 100, 150, 40, "Save Level", LevelSave};
@@ -606,7 +641,36 @@ void initialization()
         if (i % 6 == 0)
             height++;
     }
+    height=1;
 
+    for (int q = 1; q <= 30; q++)
+    {
+        int i=q+30;
+        string path = "GameBoards/GameBoard";
+        if (i < 10)
+            path += char(i + '0');
+        else
+        {
+            path += char(i / 10 + '0');
+            path += char(i % 10 + '0');
+        }
+        path += ".txt";
+        string text = "Level ";
+        if (i < 10)
+            text += (char)(i + '0');
+        else
+        {
+            text += char(i / 10 + '0');
+            text += char(i % 10 + '0');
+        }
+        BtnLevel1[q] = {LeftBorder + (width) * 200, UpBorder + height * 80, 150, 50, text, [path]()
+                       { StartLevel(path); }};
+        width = q % 6;
+        if (q % 6 == 0)
+            height++;
+ 
+    }
+    
     // editor
     ReadFence(AnimalsAndOther[0], "EditorGameBoards/Sheep.txt");
     ReadFence(AnimalsAndOther[1], "EditorGameBoards/Horse.txt");
@@ -723,6 +787,15 @@ int page = 0;
 time_t start, now;
 int seconds, minutes;
 bool stopTimer = 0;
+
+
+int NumberMainLevel(string path){
+    int nr=0;
+    for(int i=0;i<path.length();i++)
+        if(path[i]<'9'&&path[i]>'0')
+            nr=nr*10+(path[i]-'0');
+    return nr;
+}
 
 POINT MouseDraggingPiece(GamePieces &Fence)
 {
@@ -857,18 +930,19 @@ void DrawLevel(string GameBoardFileName)
             cleardevice();
             setcolor(WHITE); // Setează culoarea textului
             putimage(0, 0, LevelCompleteBuffer[theme], COPY_PUT);
+
             int x=290,y=270;
             bar(x,y,1250,630);
             char text[]="Solve time:";
             settextstyle(3, 0, 4);
             outtextxy(x+20,y+40,text);
             settextstyle(3, 0, 2);
-
             DrawTime(seconds,minutes,x+250,y+40);
             gameIsFinised = true;
+            MarkFinisedLevel(NumberMainLevel(GameBoardFileName),minutes,seconds);
             DrawButton(btnGame[0], ButtonColor, ButtonTextColor);
             DrawButton(btnGame[2], ButtonColor, ButtonTextColor);
-            ActiveButton(btnGame, 3);
+            ActiveButton(btnGame,0, 3);
             stopTimer=1;
         }
         bool SomethingHappend = false;
@@ -885,7 +959,7 @@ void DrawLevel(string GameBoardFileName)
         if (!SomethingHappend)
         {
             MouseDraggingPiece(Fence[0]);
-            ActiveButton(btnGame, 3);
+            ActiveButton(btnGame, 0,3);
         }
     }
 }
@@ -1102,7 +1176,7 @@ void DrawMenu()
         DrawButton(btnMenu[2], ButtonColor, ButtonTextColor);
         DrawButton(btnMenu[3], ButtonColor, ButtonTextColor);
         DrawButton(btnMenu[4], ButtonColor, ButtonTextColor);
-        ActiveButton(btnMenu, 5);
+        ActiveButton(btnMenu, 0,5);
         page1 = 1 - page1;
     }
 }
@@ -1110,16 +1184,45 @@ void SelectLevel()
 {
     int page1 = 0;
     cleardevice();
+    BtnLevel[31] = {getmaxx()-300, getmaxy() - 100, 150, 40, "NextPage", SelectLevel2};
+    refreshLevelStatus();
     while (true)
     {
         setactivepage(page1);
         setvisualpage(1 - page1);
         putimage(0, 0, LevelBackgroundBuffer[theme], COPY_PUT);
-        for (int i = 0; i <= 30; i++)
+        DrawButton(BtnLevel[61], ButtonColor, ButtonTextColor);
+        for (int i = 0; i <= 31; i++)
         {
-            DrawButton(BtnLevel[i], ButtonColor, ButtonTextColor);
+            if(level[i].isSolved==false)
+                 DrawButton(BtnLevel[i], ButtonColor, ButtonTextColor);
+            else 
+                DrawButton(BtnLevel[i], RED, ButtonTextColor);
         }
-        ActiveButton(BtnLevel, 31);
+        ActiveButton(BtnLevel, 0,32);
+        page1 = 1 - page1;
+    }
+
+}
+void SelectLevel2()
+{
+    int page1 = 0;
+    cleardevice();
+    //refreshLevelStatus();
+    BtnLevel1[31] = {getmaxx()-300, getmaxy() - 100, 150, 40, "NextPage", SelectLevel};
+    while (true)
+    {
+        setactivepage(page1);
+        setvisualpage(1 - page1);
+        putimage(0, 0, LevelBackgroundBuffer[theme], COPY_PUT);
+        for (int i = 0; i <= 31; i++)
+        {
+            //if(level[i+30].isSolved==false)
+                 DrawButton(BtnLevel1[i+30], ButtonColor, ButtonTextColor);
+          //  else 
+                DrawButton(BtnLevel1[i+30], RED, ButtonTextColor);
+        }
+        ActiveButton(BtnLevel1, 0,32);
         page1 = 1 - page1;
     }
 }
@@ -1136,7 +1239,7 @@ void LevelType()
         DrawButton(BtnLevelType[1], ButtonColor, ButtonTextColor);
         DrawButton(BtnLevelType[2], ButtonColor, ButtonTextColor);
         DrawButton(BtnLevelType[3], ButtonColor, ButtonTextColor);
-        ActiveButton(BtnLevelType, 4);
+        ActiveButton(BtnLevelType, 0,4);
         page1 = 1 - page1;
     }
 }
@@ -1296,7 +1399,7 @@ void LevelEditor()
                 if (AnimalsAndOther[i].dragging)
                     drawAnimal(AnimalsAndOther[i], AnimalsAndOther[i].UpLeft.x, AnimalsAndOther[i].UpLeft.y);
             if (!Something)
-                ActiveButton(BtnEditor, 2);
+                ActiveButton(BtnEditor,0, 2);
             page1 = 1 - page1;
         }
     }
@@ -1309,7 +1412,7 @@ void LevelEditor()
             setvisualpage(1 - page1);
             cleardevice();
             DrawButton(BtnEditor[0], ButtonColor, ButtonTextColor);
-            ActiveButton(BtnEditor, 1);
+            ActiveButton(BtnEditor,0, 1);
             char txt[] = "Insufficient space, delete some levels";
             outtextxy(200, 200, txt);
             page1 = 1 - page1;
@@ -1360,7 +1463,7 @@ void LevelSave()
         {
             char ch = getch(); // Așteaptă input de la utilizator
             if (ch == 13)      // adica enter
-                Beep(900, 100), SaveButton();
+                Beep(600, 100), SaveButton();
             else if (ch == 8)
             { // Backspace
                 if (cursorPos > 0)
@@ -1384,7 +1487,7 @@ void LevelSave()
         outtextxy(x + 140, y + 50, Savetext);
         DrawButton(BtnSave[0], ButtonColor, ButtonTextColor);
         DrawButton(BtnSave[1], ButtonColor, ButtonTextColor);
-        ActiveButton(BtnSave, 2);
+        ActiveButton(BtnSave,0, 2);
 
         page1 = 1 - page1;
     }
@@ -1500,7 +1603,7 @@ void CustomLevels()
         putimage(0, 0, LevelBackgroundBuffer[theme], COPY_PUT);
         for (int i = 0; i <= 2 * NumberOfLevel(); i++)
             DrawButton(CustomLevels[i], ButtonColor, ButtonTextColor);
-        ActiveButton(CustomLevels, 2 * NumberOfLevel() + 1);
+        ActiveButton(CustomLevels, 0,2 * NumberOfLevel() + 1);
         page1 = 1 - page1;
     }
 }
@@ -1521,7 +1624,7 @@ void GameRules()
         setvisualpage(1 - page1);
         putimage(0, 0, GameRulesBuffer[theme], COPY_PUT);
         DrawButton(BackBTN[0], ButtonColor, ButtonTextColor);
-        ActiveButton(BackBTN, 1);
+        ActiveButton(BackBTN,0, 1);
         page1 = 1 - page1;
     }
 }
@@ -1559,7 +1662,7 @@ void ThemeMenu()
         DrawButton(themeBtn[0],ButtonColor,ButtonTextColor);
          DrawButton(themeBtn[1],ButtonColor,ButtonTextColor);
           DrawButton(themeBtn[2],ButtonColor,ButtonTextColor);
-        ActiveButton(themeBtn, 3);
+        ActiveButton(themeBtn, 0,3);
         page1 = 1 - page1;
     }
 
