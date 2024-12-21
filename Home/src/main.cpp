@@ -525,7 +525,7 @@ void GameRulesMenu();
 void LevelEditorMenu();
 
 
-void StartLevel(string FileName);
+void StartLevel(string FileName,void back());
 void LevelSave();
 void SaveButton();
 void CancelButton();
@@ -612,7 +612,7 @@ void initialization()
 
     settextstyle(3, 0, 2);
     btnGame[0] = {gbSideLength, getmaxy() - 100, 150, 40, "Exit Game ", ExitButton};
-    btnGame[2] = {200 + gbSideLength, getmaxy() - 100, 150, 40, "Back", LevelTypeMenu};
+   
 
     BtnMenu[0] = {getmaxx() / 2 - 75, getmaxy() / 2 + 60, 150, 50, "SELECT LEVEL", LevelTypeMenu};
     BtnMenu[2] = {getmaxx() / 2 - 75, getmaxy() / 2 + 120, 150, 50, "LEVEL EDITOR", LevelEditorMenu};
@@ -655,7 +655,7 @@ void initialization()
             text += char(i % 10 + '0');
         }
         BtnLevel[i] = {LeftBorder + (width) * 200, UpBorder + height * 80, 150, 50, text, [path]()
-                       { StartLevel(path); }};
+                       { StartLevel(path,SelectLevelMenu); }};
         width = i % 6;
         if (i % 6 == 0)
             height++;
@@ -683,7 +683,7 @@ void initialization()
             text += char(i % 10 + '0');
         }
         BtnLevel1[q] = {LeftBorder + (width) * 200, UpBorder + height * 80, 150, 50, text, [path]()
-                        { StartLevel(path); }};
+                        { StartLevel(path,SelectLevel2Menu); }};
         width = q % 6;
         if (q % 6 == 0)
             height++;
@@ -806,6 +806,7 @@ void MouseDraggingPiece(GamePieces &Fence)
     setactivepage(page);
     setvisualpage(1 - page);
     setfillstyle(SOLID_FILL, BLACK);
+    
     if (!stopTimer)
     {
         now = time(NULL);
@@ -908,12 +909,9 @@ void MouseDraggingPiece(GamePieces &Fence)
     page = 1 - page;
    
 }
-void DrawLevel(string GameBoardFileName)
+void DrawLevel(string GameBoardFileName,void back())
 {
-    setvisualpage(1);
-    setactivepage(0);
-    cleardevice();
-
+    btnGame[2] = {200 + gbSideLength, getmaxy() - 100, 150, 40, "Back", back};
     ReadGameBoard(GameBoardFileName);
     initialization();
     
@@ -960,8 +958,10 @@ void DrawLevel(string GameBoardFileName)
             for (int i = 1; i <= 3; i++)
                 if (mouse.x >= Fence[i].UpLeft.x && mouse.x <= Fence[i].DownRight.x && mouse.y >= Fence[i].UpLeft.y && mouse.y <= Fence[i].DownRight.y || Fence[i].dragging)
                 {
-                    if (Fence[i].dragging || !globalDragging) // doar daca nu e nici o pisa in starea de dragging , sau doar una
+                    if (Fence[i].dragging || !globalDragging)
+                    { // doar daca nu e nici o pisa in starea de dragging , sau doar una
                         MouseDraggingPiece(Fence[i]);
+                    }
                     SomethingHappend = true;
                 }
         if (!SomethingHappend)
@@ -971,14 +971,15 @@ void DrawLevel(string GameBoardFileName)
         }
     }
 }
-void StartLevel(string FileName)
+void StartLevel(string FileName, void back())
 {
     GameIsFinised = false;
     globalDragging = false;
-
     setvisualpage(1);
+    setactivepage(0);
     cleardevice();
-    DrawLevel(FileName);
+
+    DrawLevel(FileName,back);
 }
 void LoadingScreen(int progress)
 {
@@ -992,6 +993,7 @@ void LoadingScreen(int progress)
     // delay(100);
     setvisualpage(1);
 }
+
 void UploadImages()
 {
     int progress = 0, percent = 100 / 28;
@@ -1172,6 +1174,10 @@ void UploadImages()
 void DrawMenu()
 {
     initialization();
+    setvisualpage(1);
+    setactivepage(0);
+    cleardevice();
+
     int page1 = 0;
     while (true)
     {
@@ -1464,8 +1470,7 @@ void LevelSave()
         int bgColor = RGB(220, 220, 220);
         setbkcolor(bgColor);
         setcolor(bgColor);
-
-        // bar(x, y, x + 700, y + 300);
+        
         int aux = 1;
         while (aux != x)
         {
@@ -1568,7 +1573,6 @@ void deleteCustomLevel(string LevelName)
 
     if (p == -1)
     {
-
         return;
     }
     string levelPath = "CustomLevels/" + customLV[p] + ".txt";
@@ -1599,7 +1603,7 @@ void CustomLevelsMenu()
         fin >> LevelTitle;
         string LevelPath = "CustomLevels/" + LevelTitle + ".txt";
         CustomLevels[i] = {LeftBorder, UpBorder + (i + 1) * 80, 150, 50, LevelTitle, [LevelPath]()
-                           { StartLevel(LevelPath); }};
+                           { StartLevel(LevelPath,CustomLevelsMenu); }};
     }
     fin.close();
     fin.open("CustomLevels/LevelNames.txt");
@@ -1632,7 +1636,7 @@ void randombutton()
 {
     initialization();
     GenerateRandomGameboard();
-    DrawLevel("CustomLevels/nivel-custom.txt");
+    DrawLevel("CustomLevels/nivel-custom.txt",LevelTypeMenu);
 }
 void GameRulesMenu()
 {
