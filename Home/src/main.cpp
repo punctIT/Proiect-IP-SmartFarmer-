@@ -778,27 +778,10 @@ void DrawFence(GamePieces &fenceToDraw, int x, int y, int side)
 
 void DrawTime(int seconds, int minutes, int x, int y)
 {
-    char Timer[6];
-    if (seconds < 10)
-        Timer[3] = '0';
-    else
-        Timer[3] = char(seconds / 10 + '0');
-    Timer[4] = char((seconds % 10) + '0');
-    Timer[2] = ':';
-
-    if (minutes < 10)
-        Timer[0] = '0';
-    else
-        Timer[0] = char((minutes / 10) + '0');
-    Timer[1] = char((minutes % 10) + '0');
-    Timer[5] = 0;
-    settextstyle(3, 0, 4);
-    setlinestyle(3, 0, 1);
+    char Timer[6]; 
+    snprintf(Timer, sizeof(Timer), "%02d:%02d", minutes, seconds); 
     outtextxy(x, y, Timer);
-    settextstyle(3, 0, 2);
-    setlinestyle(0, 0, 0);
 }
-
 
 void MouseDraggingPiece(GamePieces &Fence)
 {
@@ -944,8 +927,7 @@ void DrawLevel(string GameBoardFileName,void back())
             GameIsFinised = true;
 
             if (GameBoardFileName.find("GameBoards/Gameboard"))
-                ;
-            MarkFinisedLevel(NumberMainLevel(GameBoardFileName), minutes, seconds);
+                MarkFinisedLevel(NumberMainLevel(GameBoardFileName), minutes, seconds);
             DrawButton(btnGame[0], ButtonColor, ButtonTextColor);
             DrawButton(btnGame[2], ButtonColor, ButtonTextColor);
             ActiveButton(btnGame, 0, 3);
@@ -1190,6 +1172,17 @@ void DrawMenu()
         page1 = 1 - page1;
     }
 }
+void DrawButtonColorByTime(int i,Buttons btn)
+{
+    int time=level[i].minutes*60+level[i].seconds;
+    if(time>60)
+        DrawButton(btn,RED,ButtonTextColor);
+    if(time >30&&time<=60)
+        DrawButton(btn,RGB(255,99,71),ButtonTextColor);
+    if(time<=30)
+        DrawButton(btn,GREEN,ButtonTextColor);
+    
+}
 void SelectLevelMenu()
 {
     int page1 = 0;
@@ -1209,12 +1202,13 @@ void SelectLevelMenu()
             if (level[i].isSolved == false)
                 DrawButton(BtnLevel[i], ButtonColor, ButtonTextColor);
             else
-                DrawButton(BtnLevel[i], RED, ButtonTextColor);
+                DrawButtonColorByTime(i,BtnLevel[i]);
         }
         ActiveButton(BtnLevel, 0, 32);
         page1 = 1 - page1;
     }
 }
+
 void SelectLevel2Menu()
 {
     int page1 = 0;
