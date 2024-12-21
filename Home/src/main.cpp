@@ -17,14 +17,14 @@ const int length = 9, width = 7;
 char GameBoard[width + 1][length + 1];
 
 bool globalDragging = false; // evita palpairea si luarea simultata a mai multor piese
-bool gameIsFinised;
-bool LevelFinished[60];
+bool GameIsFinised;
+
 bool CancelBtn = 0; // folosit la editor,
 
 int theme = 0;
 
 void *BackgroundBuffer[ThemeNumber], *HorseBuffer[ThemeNumber], *CowBuffer[ThemeNumber], *SheepBuffer[ThemeNumber], *PigBuffer[ThemeNumber], *FenceBuffer[ThemeNumber], *GrassBuffer[ThemeNumber], *EmptyAnimalBuffer[ThemeNumber], *MiniFenceBuffer[ThemeNumber], *MenuBackGroundBuffer[ThemeNumber];
-void *LevelBackgroundBuffer[ThemeNumber], *WaterBuffer[ThemeNumber], *GameRulesBuffer[ThemeNumber], *LevelCompleteBuffer[ThemeNumber];
+void *LevelMenuBackgroundBuffer[ThemeNumber], *WaterBuffer[ThemeNumber], *GameRulesBuffer[ThemeNumber], *LevelCompleteBuffer[ThemeNumber];
 
 int ButtonColor, ButtonHoverColor, ButtonTextColor, ButtonHoverTextColor;
 
@@ -47,7 +47,7 @@ struct Buttons
     string text;
     function<void()> Function;
 
-} btnGame[10], btnMenu[10], BtnLevel[65],BtnLevel1[33], BtnLevelType[5], BtnEditor[3], BtnSave[3];
+} btnGame[10], BtnMenu[10], BtnLevel[65],BtnLevel1[33], BtnLevelType[5], BtnEditor[3], BtnSave[3];
 
 struct LevelsStatus
 {
@@ -563,7 +563,7 @@ void ActiveButton(Buttons btnGame[],int st, int en)
 
 void initialization()
 {
-    gameIsFinised=false;
+    GameIsFinised=false;
     globalDragging=0;
     gbWidth = gbSideLength * length;
     gbHeight = gbSideLength * width;
@@ -595,11 +595,11 @@ void initialization()
     btnGame[0] = {gbSideLength, getmaxy() - 100, 150, 40, "Exit Game ", ExitButton};
     btnGame[2] = {200 + gbSideLength, getmaxy() - 100, 150, 40, "Back", LevelType};
     
-    btnMenu[0] = {getmaxx() / 2 - 75, getmaxy() / 2 + 60, 150, 50, "SELECT LEVEL", LevelType};
-    btnMenu[2] = {getmaxx() / 2 - 75, getmaxy() / 2 + 120, 150, 50, "LEVEL EDITOR", LevelEditor};
-    btnMenu[3] = {getmaxx() / 2 - 75, getmaxy() / 2 + 180, 150, 50, "GAME RULES", GameRules};
-    btnMenu[1] = {getmaxx() / 2 - 75, getmaxy() / 2 + 300, 150, 50, "EXIT", ExitButton};
-    btnMenu[4] = {getmaxx() / 2 - 75, getmaxy() / 2 + 240, 150, 50, "THEME", ThemeMenu};
+    BtnMenu[0] = {getmaxx() / 2 - 75, getmaxy() / 2 + 60, 150, 50, "SELECT LEVEL", LevelType};
+    BtnMenu[2] = {getmaxx() / 2 - 75, getmaxy() / 2 + 120, 150, 50, "LEVEL EDITOR", LevelEditor};
+    BtnMenu[3] = {getmaxx() / 2 - 75, getmaxy() / 2 + 180, 150, 50, "GAME RULES", GameRules};
+    BtnMenu[1] = {getmaxx() / 2 - 75, getmaxy() / 2 + 300, 150, 50, "EXIT", ExitButton};
+    BtnMenu[4] = {getmaxx() / 2 - 75, getmaxy() / 2 + 240, 150, 50, "THEME", ThemeMenu};
 
 
     BtnLevelType[3]=  {getmaxx() / 2 - 75, getmaxy() / 2 + 190, 150, 50, "Random Levels", randombutton};
@@ -939,8 +939,10 @@ void DrawLevel(string GameBoardFileName)
             outtextxy(x+20,y+40,text);
             settextstyle(3, 0, 2);
             DrawTime(seconds,minutes,x+250,y+40);
-            gameIsFinised = true;
-            MarkFinisedLevel(NumberMainLevel(GameBoardFileName),minutes,seconds);
+            GameIsFinised = true;
+            
+            if(GameBoardFileName.find("GameBoards/Gameboard"));
+                MarkFinisedLevel(NumberMainLevel(GameBoardFileName),minutes,seconds);
             DrawButton(btnGame[0], ButtonColor, ButtonTextColor);
             DrawButton(btnGame[2], ButtonColor, ButtonTextColor);
             ActiveButton(btnGame,0, 3);
@@ -949,7 +951,7 @@ void DrawLevel(string GameBoardFileName)
         bool SomethingHappend = false;
         POINT mouse;
         GetCursorPos(&mouse);
-        if (!gameIsFinised)
+        if (!GameIsFinised)
             for (int i = 1; i <= 3; i++)
                 if (mouse.x >= Fence[i].UpLeft.x && mouse.x <= Fence[i].DownRight.x && mouse.y >= Fence[i].UpLeft.y && mouse.y <= Fence[i].DownRight.y || Fence[i].dragging)
                 {
@@ -966,7 +968,7 @@ void DrawLevel(string GameBoardFileName)
 }
 void StartLevel(string FileName)
 {
-    gameIsFinised = false;
+    GameIsFinised = false;
     globalDragging = false;
 
     setvisualpage(1);
@@ -1015,8 +1017,8 @@ void UploadImages()
     LoadingScreen(progress);
 
     readimagefile("Images/levelBackground.jpg", 0, 0, getmaxx(), getmaxy());
-    LevelBackgroundBuffer[0] = malloc(imagesize(0, 0, getmaxx(), getmaxy()));
-    getimage(0, 0, getmaxx(), getmaxy(), LevelBackgroundBuffer[0]);
+    LevelMenuBackgroundBuffer[0] = malloc(imagesize(0, 0, getmaxx(), getmaxy()));
+    getimage(0, 0, getmaxx(), getmaxy(), LevelMenuBackgroundBuffer[0]);
     progress += percent;
     LoadingScreen(progress);
 
@@ -1100,8 +1102,8 @@ void UploadImages()
     LoadingScreen(progress);
 
     readimagefile("Images/ChritmaslevelBackground.jpg", 0, 0, getmaxx(), getmaxy());
-    LevelBackgroundBuffer[1] = malloc(imagesize(0, 0, getmaxx(), getmaxy()));
-    getimage(0, 0, getmaxx(), getmaxy(), LevelBackgroundBuffer[1]);
+    LevelMenuBackgroundBuffer[1] = malloc(imagesize(0, 0, getmaxx(), getmaxy()));
+    getimage(0, 0, getmaxx(), getmaxy(), LevelMenuBackgroundBuffer[1]);
     progress += percent;
     LoadingScreen(progress);
 
@@ -1172,12 +1174,12 @@ void DrawMenu()
         setactivepage(page1);
         setvisualpage(1 - page1);
         putimage(0, 0, MenuBackGroundBuffer[theme], COPY_PUT);
-        DrawButton(btnMenu[0], ButtonColor, ButtonTextColor);
-        DrawButton(btnMenu[1], ButtonColor, ButtonTextColor);
-        DrawButton(btnMenu[2], ButtonColor, ButtonTextColor);
-        DrawButton(btnMenu[3], ButtonColor, ButtonTextColor);
-        DrawButton(btnMenu[4], ButtonColor, ButtonTextColor);
-        ActiveButton(btnMenu, 0,5);
+        DrawButton(BtnMenu[0], ButtonColor, ButtonTextColor);
+        DrawButton(BtnMenu[1], ButtonColor, ButtonTextColor);
+        DrawButton(BtnMenu[2], ButtonColor, ButtonTextColor);
+        DrawButton(BtnMenu[3], ButtonColor, ButtonTextColor);
+        DrawButton(BtnMenu[4], ButtonColor, ButtonTextColor);
+        ActiveButton(BtnMenu, 0,5);
         page1 = 1 - page1;
     }
 }
@@ -1191,7 +1193,7 @@ void SelectLevel()
     {
         setactivepage(page1);
         setvisualpage(1 - page1);
-        putimage(0, 0, LevelBackgroundBuffer[theme], COPY_PUT);
+        putimage(0, 0, LevelMenuBackgroundBuffer[theme], COPY_PUT);
         DrawButton(BtnLevel[61], ButtonColor, ButtonTextColor);
         for (int i = 0; i <= 31; i++)
         {
@@ -1215,7 +1217,7 @@ void SelectLevel2()
     {
         setactivepage(page1);
         setvisualpage(1 - page1);
-        putimage(0, 0, LevelBackgroundBuffer[theme], COPY_PUT);
+        putimage(0, 0, LevelMenuBackgroundBuffer[theme], COPY_PUT);
         for (int i = 0; i <= 31; i++)
         {
             if(level[i+30].isSolved==false)
@@ -1601,7 +1603,7 @@ void CustomLevels()
     {
         setactivepage(page1);
         setvisualpage(1 - page1);
-        putimage(0, 0, LevelBackgroundBuffer[theme], COPY_PUT);
+        putimage(0, 0, LevelMenuBackgroundBuffer[theme], COPY_PUT);
         for (int i = 0; i <= 2 * NumberOfLevel(); i++)
             DrawButton(CustomLevels[i], ButtonColor, ButtonTextColor);
         ActiveButton(CustomLevels, 0,2 * NumberOfLevel() + 1);
