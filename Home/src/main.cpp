@@ -54,7 +54,7 @@ struct Buttons
     string text;
     function<void()> Function;
 
-} btnGame[10], BtnMenu[10], BtnLevel[65], BtnLevel1[33], BtnLevelType[5], BtnEditor[3], BtnSave[3];
+} btnGame[10], BtnMenu[10], BtnLevel[65], BtnLevel1[33], BtnLevelType[5], BtnEditor[3], BtnSave[3],CustomLevels[24];
 
 struct LevelsStatus
 {
@@ -528,6 +528,7 @@ void LevelEditorMenu();
 
 void StartLevel(string FileName,void back());
 void LevelSave();
+void DeleteConfirmation(string levelName);
 void SaveButton();
 void CancelButton();
 void randombutton();
@@ -625,7 +626,7 @@ void initialization()
     Fence[3].InitialPosition.y = UpBorder + gbSideLength * 4;
 
     settextstyle(3, 0, 2);
-    btnGame[0] = {gbSideLength, getmaxy() - 100, 150, 40, "Exit Game ", ExitButton};
+    btnGame[0] = {getmaxx()-300, getmaxy() - 100, 150, 40, "Exit Game ", ExitButton};
    
 
     BtnMenu[0] = {getmaxx() / 2 - 75, getmaxy() / 2 + 60, 150, 50, "SELECT LEVEL", LevelTypeMenu};
@@ -639,13 +640,13 @@ void initialization()
     BtnLevelType[1] = {getmaxx() / 2 - 75, getmaxy() / 2 + 120, 150, 50, "Custom Levels", CustomLevelsMenu};
     BtnLevelType[0] = {getmaxx() / 2 - 75, getmaxy() / 2 + 260, 150, 50, "Back", DrawMenu};
 
-    BtnLevel[0] = {200, getmaxy() - 100, 150, 40, "Back", LevelTypeMenu};
+    BtnLevel[0] = { gbSideLength, getmaxy() - 100, 150, 40, "Back", LevelTypeMenu};
     BtnLevel[32] = {getmaxx() - 600, getmaxy() - 100, 150, 40, "Delete Progres", [](){ClearMainLevelsProgres(1);}};
-    BtnLevel1[0] = {200, getmaxy() - 100, 150, 40, "Back", LevelTypeMenu};
+    BtnLevel1[0] = { gbSideLength, getmaxy() - 100, 150, 40, "Back", LevelTypeMenu};
     BtnLevel1[32] = {getmaxx() - 600, getmaxy() - 100, 150, 40, "Delete Progres", [](){ClearMainLevelsProgres(2);}};
 
-    BtnEditor[0] = {LeftBorder, getmaxy() - 100, 150, 40, "Back", DrawMenu};
-    BtnEditor[1] = {LeftBorder + 200, getmaxy() - 100, 150, 40, "Save Level", LevelSave};
+    BtnEditor[0] = { gbSideLength, getmaxy() - 100, 150, 40, "Back", DrawMenu};
+    BtnEditor[1] = { gbSideLength + 200, getmaxy() - 100, 150, 40, "Save Level", LevelSave};
 
     BtnSave[0] = {getmaxx() / 2 - 200, getmaxy() / 2 + 200, 150, 40, "Cancel", CancelButton};
     BtnSave[1] = {getmaxx() / 2, getmaxy() / 2 + 200, 150, 40, "Save", SaveButton};
@@ -910,7 +911,7 @@ void MouseDraggingPiece(GamePieces &Fence)
 }
 void DrawLevel(string GameBoardFileName,void back())
 {
-    btnGame[2] = {200 + gbSideLength, getmaxy() - 100, 150, 40, "Back", back};
+    btnGame[2] = { gbSideLength, getmaxy() - 100, 150, 40, "Back", back};
     ReadGameBoard(GameBoardFileName);
     initialization();
     
@@ -1238,7 +1239,7 @@ void SelectLevel2Menu()
     setactivepage(0);
     cleardevice();
     refreshLevelStatus();
-    BtnLevel1[31] = {getmaxx() - 300, getmaxy() - 100, 150, 40, "NextPage", SelectLevelMenu};
+    BtnLevel1[31] = {getmaxx() - 300, getmaxy() - 100, 150, 40, "PreviousPage", SelectLevelMenu};
     while (true)
     {
         setactivepage(page1);
@@ -1469,7 +1470,7 @@ void LevelSave()
     int x = getmaxx() / 4, y = getmaxy() / 2;
     strcpy(Savetext, "Type here...");
     int page1 = 0;
-    // Buffer pentru text
+   
     int cursorPos = 0;        // Poziția cursorului în text
     int maxChars = (700) / 8; // Estimează câte caractere încap pe lățimea chenarului
     setvisualpage(1);
@@ -1614,7 +1615,6 @@ void deleteCustomLevel(string LevelName)
 
 void CustomLevelsMenu()
 {
-    Buttons CustomLevels[24];
     int NumberOfL = NumberOfLevel();
     ifstream fin("CustomLevels/LevelNames.txt");
     for (int i = 0; i < NumberOfL; i++)
@@ -1633,10 +1633,10 @@ void CustomLevelsMenu()
         fin >> LevelTitle;
         string LevelPath = "CustomLevels/" + LevelTitle + ".txt";
         CustomLevels[i] = {LeftBorder + 200, UpBorder + (i - NumberOfL + 1) * 80, 150, 50, "Delete " + LevelTitle, [LevelTitle]()
-                           { deleteCustomLevel(LevelTitle); }};
+                           { DeleteConfirmation(LevelTitle); }};
     }
 
-    CustomLevels[2 * NumberOfL] = {LeftBorder, UpBorder + (NumberOfL + 1) * 80, 150, 50, "Back", LevelTypeMenu};
+    CustomLevels[2 * NumberOfL] = { gbSideLength, getmaxy()-100, 150, 50, "Back", LevelTypeMenu};
     int page1 = 0;
     setvisualpage(1);
     setactivepage(0);
@@ -1649,6 +1649,53 @@ void CustomLevelsMenu()
         for (int i = 0; i <= 2 * NumberOfLevel(); i++)
             DrawButton(CustomLevels[i], ButtonColor, ButtonTextColor);
         ActiveButton(CustomLevels, 0, 2 * NumberOfLevel() + 1);
+        page1 = 1 - page1;
+    }
+}
+
+void DeleteConfirmation(string levelName)
+{
+    int NumberOfCustomLevels = 0;
+    int x = getmaxx() / 4, y = getmaxy() / 2;
+    int page1 = 0;
+    setvisualpage(1);
+    setactivepage(0);
+    cleardevice();
+
+    Buttons BtnConform[3];
+    BtnConform[0] = {getmaxx() / 2 - 200, getmaxy() / 2 + 200, 150, 40, "Cancel", CustomLevelsMenu};
+    BtnConform[1] = {getmaxx() / 2, getmaxy() / 2 + 200, 150, 40, "Confirm", [levelName](){deleteCustomLevel(levelName);}};
+
+    while (true)
+    {
+        setactivepage(page1);
+        setvisualpage(1 - page1);
+        //fundal
+        putimage(0, 0, LevelMenuBackgroundBuffer[theme], COPY_PUT);
+        for (int i = 0; i <= 2 * NumberOfLevel(); i++)
+            DrawButton(CustomLevels[i], ButtonColor, ButtonTextColor);
+        
+        int bgColor = RGB(220, 220, 220);
+        setbkcolor(bgColor);
+        setcolor(bgColor);
+        
+        int aux = 1;
+        while (aux != x)
+        {
+            setcolor(bgColor);
+            rectangle(x + aux, y, x + 700 - aux, y + 300);
+            aux++;
+        }
+        setcolor(BLACK);
+        rectangle(x, y, x + 700, y + 300);
+        setcolor(ButtonColor);
+        rectangle(x + 1, y + 1, x + 700 - 1, y + 300 - 1);
+        DrawButton(BtnConform[0],ButtonColor,ButtonHoverColor);
+        DrawButton(BtnConform[1],ButtonColor,ButtonHoverColor);
+        setcolor(BLACK);
+        char ceva[] = "Level Name:";
+        outtextxy(x + 30, y + 50, ceva);
+        ActiveButton(BtnConform,0,2);
         page1 = 1 - page1;
     }
 }
@@ -1697,7 +1744,7 @@ void ChritmasTheme()
 void ThemeMenu()
 {
     Buttons themeBtn[4];
-    themeBtn[0] = {LeftBorder, getmaxy() - 100, 150, 40, "Back", DrawMenu};
+    themeBtn[0] = {gbSideLength, getmaxy() - 100, 150, 40, "Back", DrawMenu};
     themeBtn[1] = {LeftBorder, UpBorder, 150, 40, "Default Theme", defaultTheme};
     themeBtn[2] = {LeftBorder, UpBorder + 60, 150, 40, "Christmas Theme", ChritmasTheme};
     int page1 = 0;
