@@ -503,6 +503,7 @@ int NumberMainLevel(string path)
 }
 
 
+
 // Partea de Grafica
 
 int LeftBorder, UpBorder, gbWidth, gbHeight, gbSideLength = 80, DownBorder, RightBorder;
@@ -530,6 +531,19 @@ void LevelSave();
 void SaveButton();
 void CancelButton();
 void randombutton();
+
+void ClearMainLevelsProgres(int i)
+{
+    ofstream fout("GameBoards/LevelsStatus.txt");
+    for(int i=1;i<=60;i++)
+        fout<<0<<" "<<-1<<" "<<-1<<endl;
+    fout.close();
+    if(i==1)
+        SelectLevelMenu();
+    if(i==2)
+        SelectLevel2Menu();
+    
+}
 
 void DrawButton(Buttons btn, int BackColor, int TextColor)
 {
@@ -626,7 +640,9 @@ void initialization()
     BtnLevelType[0] = {getmaxx() / 2 - 75, getmaxy() / 2 + 260, 150, 50, "Back", DrawMenu};
 
     BtnLevel[0] = {200, getmaxy() - 100, 150, 40, "Back", LevelTypeMenu};
+    BtnLevel[32] = {getmaxx() - 600, getmaxy() - 100, 150, 40, "Delete Progres", [](){ClearMainLevelsProgres(1);}};
     BtnLevel1[0] = {200, getmaxy() - 100, 150, 40, "Back", LevelTypeMenu};
+    BtnLevel1[32] = {getmaxx() - 600, getmaxy() - 100, 150, 40, "Delete Progres", [](){ClearMainLevelsProgres(2);}};
 
     BtnEditor[0] = {LeftBorder, getmaxy() - 100, 150, 40, "Back", DrawMenu};
     BtnEditor[1] = {LeftBorder + 200, getmaxy() - 100, 150, 40, "Save Level", LevelSave};
@@ -1190,6 +1206,7 @@ void SelectLevelMenu()
     setactivepage(0);
     cleardevice();
     BtnLevel[31] = {getmaxx() - 300, getmaxy() - 100, 150, 40, "NextPage", SelectLevel2Menu};
+
     refreshLevelStatus();
     while (true)
     {
@@ -1197,14 +1214,18 @@ void SelectLevelMenu()
         setvisualpage(1 - page1);
         putimage(0, 0, LevelMenuBackgroundBuffer[theme], COPY_PUT);
         DrawButton(BtnLevel[61], ButtonColor, ButtonTextColor);
-        for (int i = 0; i <= 31; i++)
+        for (int i = 0; i <= 32; i++)
         {
             if (level[i].isSolved == false)
                 DrawButton(BtnLevel[i], ButtonColor, ButtonTextColor);
-            else
+            else{
+                string saveText=BtnLevel[i].text;
+                BtnLevel[i].text="Complited";
                 DrawButtonColorByTime(i,BtnLevel[i]);
+                BtnLevel[i].text=saveText;
+            }
         }
-        ActiveButton(BtnLevel, 0, 32);
+        ActiveButton(BtnLevel, 0, 33);
         page1 = 1 - page1;
     }
 }
@@ -1223,14 +1244,19 @@ void SelectLevel2Menu()
         setactivepage(page1);
         setvisualpage(1 - page1);
         putimage(0, 0, LevelMenuBackgroundBuffer[theme], COPY_PUT);
-        for (int i = 0; i <= 31; i++)
+        for (int i = 0; i <= 32; i++)
         {
             if (level[i + 30].isSolved == false)
                 DrawButton(BtnLevel1[i], ButtonColor, ButtonTextColor);
-            else
-                DrawButton(BtnLevel1[i], RED, ButtonTextColor);
+            else{
+                 string saveText=BtnLevel1[i].text;
+                 BtnLevel1[i].text="Complited";
+                 DrawButtonColorByTime(i+30,BtnLevel1[i]);
+                 BtnLevel1[i].text=saveText;
+            }
+                
         }
-        ActiveButton(BtnLevel1, 0, 32);
+        ActiveButton(BtnLevel1, 0, 33);
         page1 = 1 - page1;
     }
 }
