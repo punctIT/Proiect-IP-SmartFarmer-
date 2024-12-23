@@ -7,6 +7,8 @@
 #include <functional>
 #include <time.h>
 #include <mmsystem.h>
+#include <windows.h>
+
 
 using namespace std;
 
@@ -588,7 +590,7 @@ void ActiveButton(Buttons btnGame[], int st, int en)
         for (int i = st; i < en; i++)
             if (mouse.x > btnGame[i].x && mouse.y > btnGame[i].y && mouse.x < btnGame[i].x + btnGame[i].length && mouse.y < btnGame[i].y + btnGame[i].height)
             {
-                Beep(500, 100);
+               // Beep(500, 100);
                 DrawButton(btnGame[i], ButtonHoverColor, ButtonHoverColor);
                 btnGame[i].Function();
             }
@@ -822,6 +824,7 @@ void MouseDraggingPiece(GamePieces &Fence)
     if (ismouseclick(WM_LBUTTONDOWN))
     {
         POINT mouse;
+    
         clearmouseclick(WM_LBUTTONDOWN);
         GetCursorPos(&mouse);
         GB.y = (mouse.x - LeftBorder) / gbSideLength;
@@ -833,7 +836,7 @@ void MouseDraggingPiece(GamePieces &Fence)
             Fence.Side = gbSideLength; // devine de dimenisune normala
         }
     }
-
+    
     if (Fence.dragging)
     {
         POINT mouse;
@@ -841,7 +844,6 @@ void MouseDraggingPiece(GamePieces &Fence)
         {
             RotateFence(Fence);
             Fence.isRotated = (Fence.isRotated + 1) % 2; // alterneaza intre 0 si 1 ( un bool pentru lenesi)
-          
         }
         if (Fence.isPlaced) // aici verifica daca piesa e plasata cumva , si se muta
             RemoveFence(Fence), Fence.isPlaced = false;
@@ -907,6 +909,7 @@ void MouseDraggingPiece(GamePieces &Fence)
             DrawFence(::Fence[i], ::Fence[i].UpLeft.x, ::Fence[i].UpLeft.y, ::Fence[i].Side); // cele care nu sunt in dragging trebuie afisate
     DrawFence(Fence, Fence.UpLeft.x, Fence.UpLeft.y, Fence.Side);                             // se evita efectul de palpaiala , libraria GRAPHICS.H e naspa.
     page = 1 - page;
+
    
 }
 void DrawLevel(string GameBoardFileName,void back())
@@ -967,6 +970,8 @@ void DrawLevel(string GameBoardFileName,void back())
         {
             MouseDraggingPiece(Fence[0]);
             ActiveButton(btnGame, 0, 3);
+            while(kbhit())//pe scurt rezolva CACATUL ala de bug de disparea gardul principal
+                getch();//ramanea pe buffer cacartere , un cacat
         }
     }
 }
@@ -1526,8 +1531,8 @@ void LevelSave()
         }
 
         setcolor(BLACK);
-        char ceva[] = "Level Name:";
-        outtextxy(x + 30, y + 50, ceva);
+        char confirmationTXT[] = "Level Name:";
+        outtextxy(x + 30, y + 50, confirmationTXT);
         outtextxy(x + 140, y + 50, Savetext);
         DrawButton(BtnSave[0], ButtonColor, ButtonTextColor);
         DrawButton(BtnSave[1], ButtonColor, ButtonTextColor);
@@ -1676,9 +1681,7 @@ void DeleteConfirmation(string levelName)
             DrawButton(CustomLevels[i], ButtonColor, ButtonTextColor);
         
         int bgColor = RGB(220, 220, 220);
-        setbkcolor(bgColor);
-        setcolor(bgColor);
-        
+  
         int aux = 1;
         while (aux != x)
         {
@@ -1690,11 +1693,16 @@ void DeleteConfirmation(string levelName)
         rectangle(x, y, x + 700, y + 300);
         setcolor(ButtonColor);
         rectangle(x + 1, y + 1, x + 700 - 1, y + 300 - 1);
-        DrawButton(BtnConform[0],ButtonColor,ButtonHoverColor);
-        DrawButton(BtnConform[1],ButtonColor,ButtonHoverColor);
+        DrawButton(BtnConform[0],ButtonColor,ButtonTextColor);
+        DrawButton(BtnConform[1],ButtonColor,ButtonTextColor);
+        setbkcolor(bgColor);
         setcolor(BLACK);
-        char ceva[] = "Level Name:";
-        outtextxy(x + 30, y + 50, ceva);
+        char confirmationTXT[] = "Are you sure you want to delete?";
+        outtextxy(x + 30, y + 50, confirmationTXT);
+        strcpy(confirmationTXT,"Level Name:");
+        outtextxy(x + 30, y + 90, confirmationTXT);
+        strcpy(confirmationTXT,levelName.c_str());
+        outtextxy(x + 150, y + 90, confirmationTXT);
         ActiveButton(BtnConform,0,2);
         page1 = 1 - page1;
     }
