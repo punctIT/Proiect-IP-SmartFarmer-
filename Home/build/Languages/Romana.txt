@@ -12,7 +12,7 @@ Pagina urmatoare
 Pagina anterioara  
 Tema  
 Muzica  
-Repornire nivel  
+Sterge progres
 Salveaza nivel  
 Salveaza text  
 Salveaza  

@@ -33,7 +33,7 @@ bool stopTimer = 0;
 
 void *BackgroundBuffer[ThemeNumber], *HorseBuffer[ThemeNumber], *CowBuffer[ThemeNumber], *SheepBuffer[ThemeNumber], *PigBuffer[ThemeNumber], *FenceBuffer[ThemeNumber], *GrassBuffer[ThemeNumber], *EmptyAnimalBuffer[ThemeNumber], *MiniFenceBuffer[ThemeNumber], *MenuBackGroundBuffer[ThemeNumber];
 void *LevelMenuBackgroundBuffer[ThemeNumber], *WaterBuffer[ThemeNumber], *GameRulesBuffer[ThemeNumber], *LevelCompleteBuffer[ThemeNumber];
-
+void *settingsBackgroundBuffer;
 int ButtonColor, ButtonHoverColor, ButtonTextColor, ButtonHoverTextColor;
 
 struct GamePieces
@@ -597,6 +597,7 @@ void GameRulesMenu();
 void LevelEditorMenu();
 void SettingsMenu();
 void SelectLanguageMenu();
+void CreditsMenu();
 
 void StartLevel(string FileName,void back());
 void LevelSave();
@@ -613,7 +614,7 @@ void ClearMainLevelsProgres()
     fout.close();
 }
 
-void DrawButton(Buttons btn, int BackColor, int TextColor)
+void DrawButton(Buttons &btn, int BackColor, int TextColor)
 {
 
     setcolor(BackColor);
@@ -629,8 +630,7 @@ void DrawButton(Buttons btn, int BackColor, int TextColor)
             rectangle(btn.x + aux, btn.y + aux, btn.x + btn.length - aux, btn.y + btn.height - aux);
         }
         aux++;
-    }
-
+    }   
     char c_text[btn.text.length()];
     strcpy(c_text, btn.text.c_str());
     setbkcolor(BackColor);
@@ -1064,7 +1064,15 @@ void LoadingScreen(int progress)
 
 void UploadImages()
 {
-    int progress = 0, percent = 100 / 28;
+    int progress = 0, percent = 100 / 29;
+
+    readimagefile("Images/SettingsBackGround.jpg", 0, 0, getmaxx(), getmaxy());
+    settingsBackgroundBuffer = malloc(imagesize(0, 0, getmaxx(), getmaxy()));
+    getimage(0, 0, getmaxx(), getmaxy(), settingsBackgroundBuffer);
+
+    progress += percent;
+    LoadingScreen(progress);
+
     readimagefile("Images/background.jpg", 0, 0, getmaxx(), getmaxy());
     BackgroundBuffer[0] = malloc(imagesize(0, 0, getmaxx(), getmaxy()));
     getimage(0, 0, getmaxx(), getmaxy(), BackgroundBuffer[0]);
@@ -1839,7 +1847,7 @@ void musicStatus()
          PlaySound(NULL, NULL, 0);
     }
 }
-Buttons SettingButtons[5];
+Buttons SettingButtons[6];
 void SettingsMenu()
 {
     setvisualpage(1);
@@ -1850,26 +1858,27 @@ void SettingsMenu()
     SettingButtons[2] = {LeftBorder, UpBorder+60, 150, 40, languageText[languageStatus].restartLevel, ClearMainLevelsProgres};
     SettingButtons[3] = {LeftBorder, UpBorder+120, 150, 40, languageText[languageStatus].musicOnOff, musicStatus};
     SettingButtons[4] = {LeftBorder, UpBorder+180, 150, 40, languageText[languageStatus].language, SelectLanguageMenu};
+    SettingButtons[5] = {LeftBorder, UpBorder+240, 150, 40, "Credits", CreditsMenu};
     int page1 = 0;
     while (true)
     {
         setactivepage(page1);
         setvisualpage(1 - page1);
-        cleardevice();
+        putimage(0,0,settingsBackgroundBuffer,COPY_PUT);
         if(musicOnOff)
             SettingButtons[3].text=languageText[languageStatus].musicOnOff+" ON";
         else
             SettingButtons[3].text=languageText[languageStatus].musicOnOff+" OFF";
         //putimage(0, 0, MenuBackGroundBuffer[theme], COPY_PUT);
-        for(int i=0;i<5;i++)
+        for(int i=0;i<6;i++)
         {
             if(i!=3||musicOnOff)
-               DrawButton(SettingButtons[i], ButtonColor, ButtonTextColor);
+               DrawButton(SettingButtons[i], RGB(50, 50, 50),WHITE);
             else {
-                DrawButton(SettingButtons[i], RED, ButtonTextColor);
+                DrawButton(SettingButtons[i], RED, WHITE);
             }
         }
-        ActiveButton(SettingButtons, 0, 5);
+        ActiveButton(SettingButtons, 0, 6);
         page1 = 1 - page1;
     }
 }
@@ -1894,18 +1903,17 @@ void SelectLanguageMenu()
     {
         setactivepage(page1);
         setvisualpage(1 - page1);
-        cleardevice();
-        for(int i=0;i<5;i++)
+          putimage(0,0,settingsBackgroundBuffer,COPY_PUT);
+          for(int i=0;i<6;i++)
         {
             if(i!=3||musicOnOff)
-               DrawButton(SettingButtons[i], ButtonColor, ButtonTextColor);
+               DrawButton(SettingButtons[i], RGB(50, 50, 50),WHITE);
             else {
-                DrawButton(SettingButtons[i], RED, ButtonTextColor);
+                DrawButton(SettingButtons[i], RED, WHITE);
             }
-        }
-             
+        }  
         for(int i=0;i<5;i++)
-        DrawButton(languageBtn[i], ButtonColor, ButtonTextColor);
+        DrawButton(languageBtn[i], RGB(50, 50, 50),WHITE);
         ActiveButton(languageBtn, 0, 5);
         page1 = 1 - page1;
     }
@@ -1924,19 +1932,56 @@ void ThemeMenu()
     {
         setactivepage(page1);
         setvisualpage(1 - page1);
-        cleardevice();
-        for(int i=0;i<5;i++)
-             {
+          putimage(0,0,settingsBackgroundBuffer,COPY_PUT);
+         for(int i=0;i<6;i++)
+        {
             if(i!=3||musicOnOff)
-               DrawButton(SettingButtons[i], ButtonColor, ButtonTextColor);
+               DrawButton(SettingButtons[i], RGB(50, 50, 50),WHITE);
             else {
-                DrawButton(SettingButtons[i], RED, ButtonTextColor);
+                DrawButton(SettingButtons[i], RED, WHITE);
             }
         }
-        DrawButton(themeBtn[0], ButtonColor, ButtonTextColor);
-        DrawButton(themeBtn[1], ButtonColor, ButtonTextColor);
-        DrawButton(themeBtn[2], ButtonColor, ButtonTextColor);
+        DrawButton(themeBtn[0], RGB(50, 50, 50),WHITE);
+        DrawButton(themeBtn[1], RGB(50, 50, 50),WHITE);
+        DrawButton(themeBtn[2],RGB(50, 50, 50),WHITE);
         ActiveButton(themeBtn, 0, 3);
+        page1 = 1 - page1;
+    }
+}
+void writeNameCredits(int x,int y)
+{
+    char text[100]="Eu";
+    
+    outtextxy(x,y,text);
+    strcpy(text,"Mos Craciun");
+    outtextxy(x-textwidth(text)/2,y-40,text);
+    strcpy(text,"Ajutor Magic:Harry Potter");
+    outtextxy(x-textwidth(text)/2,y-80,text);
+     strcpy(text,"zana Maseluta");
+    outtextxy(x-textwidth(text)/2,y-120,text);
+    strcpy(text,"LiViu Rebreanu si Riga Crypto");
+    outtextxy(x-textwidth(text)/2,y-160,text);
+    strcpy(text,"Muzica Michal Jackson");
+    outtextxy(x-textwidth(text)/2,y-200,text);
+}
+void CreditsMenu()
+{
+    int page1 = 0;
+    setvisualpage(1);
+    setactivepage(0);
+    cleardevice();
+    int x=getmaxx()/2;
+    int y=-1;
+    while (true)
+    {
+        setactivepage(page1);
+        setvisualpage(1 - page1);
+        cleardevice();
+        writeNameCredits(x,y);
+        delay(50);
+        y+=1;
+        if(y==getmaxy())
+            DrawMenu();
         page1 = 1 - page1;
     }
 }

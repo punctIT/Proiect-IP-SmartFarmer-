@@ -12,7 +12,7 @@ Next Page
 Previous Page
 Theme
 Music
-Restart Level
+Delete Progress
 Save Level
 Save Text
 Save
