@@ -1,0 +1,29 @@
+Zuruck  
+Level auswahlen  
+Level-Editor  
+Spielregeln  
+Einstellungen  
+Spiel beenden  
+Hauptlevel  
+Benutzerdefinierte Level  
+Zufallslevel  
+Level  
+Nachste Seite  
+Vorherige Seite  
+Thema  
+Musik  
+Level neu starten  
+Level speichern  
+Text speichern  
+Speichern  
+Bestatigen  
+Bist du sicher?  
+Abbrechen  
+Loschen  
+Hier eingeben...  
+Abgeschlossen  
+Nicht genugend Speicherplatz, loschen Sie einige Level  
+Levelname:  
+Sprache  
+Standardthema  
+Weihnachtsthema  

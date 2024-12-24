@@ -1,0 +1,29 @@
+Retour  
+Selectionner un niveau  
+Editeur de niveau  
+Regles du jeu  
+Parametres  
+Quitter le jeu  
+Niveaux principaux  
+Niveaux personalises  
+Niveaux aleatoires  
+Niveau  
+Page suivante  
+Page precedente  
+Theme  
+Musique  
+Redemarrer le niveau  
+Sauvegarder le niveau  
+Sauvegarder le texte  
+Sauvegarder  
+Confirmer  
+Etes-vous sur ?  
+Annuler  
+Supprimer  
+Tapez ici...  
+Termine  
+Espace insuffisant, supprimez quelques niveaux  
+Nom du niveau:  
+Langue  
+Theme par defaut  
+Theme de Noel  

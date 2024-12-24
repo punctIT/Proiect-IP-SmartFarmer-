@@ -1,0 +1,29 @@
+Back
+Select Level
+Level Editor
+Game Rules
+Settings
+Exit Game
+Main Levels
+Custom Levels
+Random Levels
+Level
+Next Page
+Previous Page
+Theme
+Music
+Restart Level
+Save Level
+Save Text
+Save
+Confirm
+Are You Sure
+Cancel
+Delete
+Type here...
+Complited
+Insufficient space, delete some levels
+Level name:
+Language
+Default Theme
+Christmas Theme

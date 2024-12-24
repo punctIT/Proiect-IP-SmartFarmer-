@@ -1,0 +1,29 @@
+Inapoi  
+Selecteaza nivelul  
+Editor nivel  
+Reguli joc  
+Setari  
+Iesi din joc  
+Nivele principale  
+Nivele personalizate  
+Nivele aleatorii  
+Nivel  
+Pagina urmatoare  
+Pagina anterioara  
+Tema  
+Muzica  
+Repornire nivel  
+Salveaza nivel  
+Salveaza text  
+Salveaza  
+Confirma  
+Esti sigur?  
+Anuleaza  
+Sterge  
+Tasteaza aici...  
+Completat  
+Spatiu insuficient, sterge cateva nivele  
+Numele nivelului:  
+Limba  
+Tema implicita  
+Tema de Craciun  
