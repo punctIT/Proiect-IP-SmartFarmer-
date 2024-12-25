@@ -598,6 +598,7 @@ void LevelEditorMenu();
 void SettingsMenu();
 void SelectLanguageMenu();
 void CreditsMenu();
+void DeleteProgressConfirmationMenu();
 
 void StartLevel(string FileName,void back());
 void LevelSave();
@@ -612,6 +613,7 @@ void ClearMainLevelsProgres()
     for(int i=1;i<=60;i++)
         fout<<0<<" "<<-1<<" "<<-1<<endl;
     fout.close();
+    SettingsMenu();
 }
 
 void DrawButton(Buttons &btn, int BackColor, int TextColor)
@@ -1855,7 +1857,7 @@ void SettingsMenu()
     cleardevice();  
     SettingButtons[0] = {gbSideLength, getmaxy() - 100, 150, 40, languageText[languageStatus].back, DrawMenu};
     SettingButtons[1] = {LeftBorder, UpBorder, 150, 40, languageText[languageStatus].theme, ThemeMenu};
-    SettingButtons[2] = {LeftBorder, UpBorder+60, 150, 40, languageText[languageStatus].restartLevel, ClearMainLevelsProgres};
+    SettingButtons[2] = {LeftBorder, UpBorder+60, 150, 40, languageText[languageStatus].restartLevel, DeleteProgressConfirmationMenu};
     SettingButtons[3] = {LeftBorder, UpBorder+120, 150, 40, languageText[languageStatus].musicOnOff, musicStatus};
     SettingButtons[4] = {LeftBorder, UpBorder+180, 150, 40, languageText[languageStatus].language, SelectLanguageMenu};
     SettingButtons[5] = {LeftBorder, UpBorder+240, 150, 40, "Credits", CreditsMenu};
@@ -1889,7 +1891,7 @@ void SelectLanguage(int i)
 }
 void SelectLanguageMenu()
 {
-      Buttons languageBtn[4];
+    Buttons languageBtn[4];
     languageBtn[0] = {gbSideLength, getmaxy() - 100, 150, 40, languageText[languageStatus].back, SettingsMenu};
     languageBtn[1] = {LeftBorder+200, UpBorder, 150, 40, "English", [](){SelectLanguage(0);}};
     languageBtn[2] = {LeftBorder+200, UpBorder + 60, 150, 40, "Romana", [](){SelectLanguage(1);}};
@@ -1950,19 +1952,13 @@ void ThemeMenu()
 }
 void writeNameCredits(int x,int y)
 {
-    char text[100]="Eu";
-    
-    outtextxy(x,y,text);
-    strcpy(text,"Mos Craciun");
-    outtextxy(x-textwidth(text)/2,y-40,text);
-    strcpy(text,"Ajutor Magic:Harry Potter");
-    outtextxy(x-textwidth(text)/2,y-80,text);
-     strcpy(text,"zana Maseluta");
-    outtextxy(x-textwidth(text)/2,y-120,text);
-    strcpy(text,"LiViu Rebreanu si Riga Crypto");
-    outtextxy(x-textwidth(text)/2,y-160,text);
-    strcpy(text,"Muzica Michal Jackson");
-    outtextxy(x-textwidth(text)/2,y-200,text);
+    char text[100];
+    int padding=0;
+    ifstream fin("Credits.txt");
+    while(fin.getline(text,100))
+        outtextxy(x-textwidth(text)/2,y-padding*30,text),++padding;
+    fin.close();
+       
 }
 void CreditsMenu()
 {
@@ -1970,6 +1966,7 @@ void CreditsMenu()
     setvisualpage(1);
     setactivepage(0);
     cleardevice();
+    PlaySound(TEXT("Sounds/creditsMusic.wav"), NULL, SND_FILENAME | SND_ASYNC | SND_LOOP);
     int x=getmaxx()/2;
     int y=-1;
     while (true)
@@ -1980,8 +1977,69 @@ void CreditsMenu()
         writeNameCredits(x,y);
         delay(50);
         y+=1;
-        if(y==getmaxy())
-            DrawMenu();
+        if(y-600==getmaxy())
+        {   
+            PlaySound(NULL,0,0);
+            if(theme==0)
+                defaultTheme();
+            if(theme==1)
+                ChritmasTheme();
+        }
+           
+        page1 = 1 - page1;
+    }
+}
+void DeleteProgressConfirmationMenu()
+{
+    int NumberOfCustomLevels = 0;
+    int x = getmaxx() / 4, y = getmaxy() / 2;
+    int page1 = 0;
+    setvisualpage(1);
+    setactivepage(0);
+    cleardevice();
+
+    Buttons BtnConform[3];
+    BtnConform[0] = {getmaxx() / 2 - 200, getmaxy() / 2 + 200, 150, 40,languageText[languageStatus].cancel, SettingsMenu};
+    BtnConform[1] = {getmaxx() / 2, getmaxy() / 2 + 200, 150, 40, languageText[languageStatus].confirm, ClearMainLevelsProgres};
+
+    while (true)
+    {
+        setactivepage(page1);
+        setvisualpage(1 - page1);
+        //fundal
+        putimage(0,0,settingsBackgroundBuffer,COPY_PUT);
+        for(int i=0;i<6;i++)
+        {
+            if(i!=3||musicOnOff)
+               DrawButton(SettingButtons[i], RGB(50, 50, 50),WHITE);
+            else {
+                DrawButton(SettingButtons[i], RED, WHITE);
+            }
+        }
+        
+        int bgColor = RGB(21, 21, 21);
+  
+        int aux = 1;
+        while (aux != x)
+        {
+            setcolor(bgColor);
+            rectangle(x + aux, y, x + 700 - aux, y + 300);
+            aux++;
+        }
+        setcolor(BLACK);
+        rectangle(x, y, x + 700, y + 300);
+        setcolor(RGB(50, 50, 50));
+        rectangle(x + 1, y + 1, x + 700 - 1, y + 300 - 1);
+        DrawButton(BtnConform[0], RGB(50, 50, 50),WHITE);
+        DrawButton(BtnConform[1], RGB(50, 50, 50),WHITE);
+        setbkcolor(bgColor);
+        setcolor(WHITE);
+        
+        char confirmationTXT[100];
+        strcpy(confirmationTXT,languageText[languageStatus].areYouSure.c_str());
+        outtextxy(x + 30, y + 50, confirmationTXT);
+
+        ActiveButton(BtnConform,0,2);
         page1 = 1 - page1;
     }
 }

@@ -1,0 +1,44 @@
+Copyright [Year] [Your Name & Partner's Name]. All Rights Reserved.
+
+
+- [Sound Tools, e.g., Audacity, FL Studio]
+- [Art Tools, e.g., Photoshop, Blender]
+- [Game Engine Name, e.g., Unity/Unreal Engine/Godot]
+Tools Used:
+- [Optional: Any individuals or entities you'd like to thank]
+Special Thanks To:
+
+[Your Partner's Name] - Artist, Sound Designer
+[Your Name] - Game Designer, Programmer
+Developed By:
+Game Title: [Your Game's Title Here]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+FIN.
