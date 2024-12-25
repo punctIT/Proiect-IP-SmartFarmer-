@@ -7,7 +7,7 @@ Iesi din joc
 Nivele principale  
 Nivele personalizate  
 Nivele aleatorii  
-Nivel  
+Nivel
 Pagina urmatoare  
 Pagina anterioara  
 Tema  
@@ -19,7 +19,7 @@ Salveaza
 Confirma  
 Esti sigur?  
 Anuleaza  
-Sterge  
+Sterge 
 Tasteaza aici...  
 Completat  
 Spatiu insuficient, sterge cateva nivele  
@@ -27,3 +27,4 @@ Numele nivelului:
 Limba  
 Tema implicita  
 Tema de Craciun  
+Credite

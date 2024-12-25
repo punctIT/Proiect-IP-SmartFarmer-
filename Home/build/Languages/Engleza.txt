@@ -27,3 +27,4 @@ Level name:
 Language
 Default Theme
 Christmas Theme
+Credits

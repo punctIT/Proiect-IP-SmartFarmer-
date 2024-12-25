@@ -94,6 +94,7 @@ struct language{
     string language;
     string defaultTheme;
     string chritmasTheme;
+    string credits;
 }languageText[10];
 void readLanguage()
 {
@@ -131,6 +132,7 @@ void readLanguage()
         getline(fin,languageText[i].language);
         getline(fin,languageText[i].defaultTheme);
         getline(fin,languageText[i].chritmasTheme);
+        getline(fin,languageText[i].credits);
         fin.close();
     }
 }
@@ -568,7 +570,7 @@ int NumberMainLevel(string path)
 {
     int nr = 0;
     for (int i = 0; i < path.length(); i++)
-        if (path[i] < '9' && path[i] > '0')
+        if (path[i] <= '9' && path[i] >= '0')
             nr = nr * 10 + (path[i] - '0');
     return nr;
 }
@@ -606,7 +608,6 @@ void DeleteConfirmation(string levelName);
 void SaveButton();
 void CancelButton();
 void randombutton();
-
 void ClearMainLevelsProgres()
 {
     ofstream fout("GameBoards/LevelsStatus.txt");
@@ -697,6 +698,7 @@ void initialization()
     settextstyle(3, 0, 2);
     btnGame[0] = {getmaxx()-300, getmaxy() - 100, 150, 40, languageText[languageStatus].exit, ExitButton};
    
+   
 
     BtnMenu[0] = {getmaxx() / 2 - 75, getmaxy() / 2 + 60, 150, 50, languageText[languageStatus].selectLevel, LevelTypeMenu};
     BtnMenu[2] = {getmaxx() / 2 - 75, getmaxy() / 2 + 120, 150, 50, languageText[languageStatus].levelEditor, LevelEditorMenu};
@@ -760,6 +762,7 @@ void initialization()
         }
         path += ".txt";
         string text = languageText[languageStatus].level;
+        text+=' ';
         if (i < 10)
             text += (char)(i + '0');
         else
@@ -783,7 +786,31 @@ void initialization()
     ReadFence(AnimalsAndOther[5], "EditorGameBoards/Grass.txt");
     ReadFence(AnimalsAndOther[6], "EditorGameBoards/StoneGrass.txt");
 }
+void NextLevel (int i)
+{
 
+    ++i;
+    while (level[i].isSolved)
+        ++i;
+    if(i>60)
+        SelectLevelMenu();
+    else {
+        string path="GameBoards/GameBoard";
+         if (i < 10)
+            path += (char)(i + '0');
+        else
+        {
+           path += char(i / 10 + '0');
+            path += char(i % 10 + '0');
+        }
+        path+=".txt";
+        if(i<=30)
+            StartLevel(path,SelectLevelMenu);
+        else StartLevel(path,SelectLevel2Menu);
+    }
+    
+
+}
 void DrawBoardGame()
 {
     for (int i = 1; i <= length; i++)
@@ -968,7 +995,7 @@ void MouseDraggingPiece(GamePieces &Fence)
     putimage(0, 0, BackgroundBuffer[theme], COPY_PUT);
     DrawTime(seconds, minutes, getmaxx() / 2 - 30, 60);
     DrawBoardGame();
-    DrawButton(btnGame[0], ButtonColor, ButtonTextColor);
+   // DrawButton(btnGame[0], ButtonColor, ButtonTextColor);
     DrawButton(btnGame[2], ButtonColor, ButtonTextColor);
     for (int i = 1; i <= 3; i++)
         if (!::Fence[i].dragging)
@@ -977,6 +1004,46 @@ void MouseDraggingPiece(GamePieces &Fence)
     page = 1 - page;
 
    
+}
+void CompleteMenu(string GameBoardFileName)
+{
+
+    int page1 = 0;
+    setvisualpage(1);
+    setactivepage(0);
+    cleardevice();
+    while (true)
+    {
+        setactivepage(page1);
+        setvisualpage(1 - page1);
+        cleardevice();
+        setcolor(WHITE); // Setează culoarea textului
+        putimage(0, 0, LevelCompleteBuffer[theme], COPY_PUT);
+        if (GameBoardFileName[0] == 'G')
+            btnGame[3] = {getmaxx() - 300, getmaxy() - 100, 150, 40, "Next Level", [GameBoardFileName]()
+                          { NextLevel(NumberMainLevel(GameBoardFileName)); }};
+        int x = 290, y = 270;
+        bar(x, y, 1250, 630);
+        char text[] = "Solve time:";
+        settextstyle(3, 0, 4);
+        outtextxy(x + 20, y + 40, text);
+        settextstyle(3, 0, 2);
+        DrawTime(seconds, minutes, x + 250, y + 40);
+
+        if (GameBoardFileName[0] == 'G')
+            MarkFinisedLevel(NumberMainLevel(GameBoardFileName), minutes, seconds);
+
+        DrawButton(btnGame[2], ButtonColor, ButtonTextColor);
+
+        if (GameBoardFileName[0] == 'G')
+        {
+            DrawButton(btnGame[3], ButtonColor, ButtonTextColor);
+            ActiveButton(btnGame, 1, 4);
+        }
+        else
+            ActiveButton(btnGame, 1, 3);
+        page1 = 1 - page1;
+    }
 }
 void DrawLevel(string GameBoardFileName,void back())
 {
@@ -996,30 +1063,15 @@ void DrawLevel(string GameBoardFileName,void back())
     
     while (true)
     {
-
+        bool SomethingHappend = false;
         if (AnimalsAreFenced())
         {
-            cleardevice();
-            setcolor(WHITE); // Setează culoarea textului
-            putimage(0, 0, LevelCompleteBuffer[theme], COPY_PUT);
-
-            int x = 290, y = 270;
-            bar(x, y, 1250, 630);
-            char text[] = "Solve time:";
-            settextstyle(3, 0, 4);
-            outtextxy(x + 20, y + 40, text);
-            settextstyle(3, 0, 2);
-            DrawTime(seconds, minutes, x + 250, y + 40);
-            GameIsFinised = true;
-
-            if (GameBoardFileName.find("GameBoards/Gameboard"))
-                MarkFinisedLevel(NumberMainLevel(GameBoardFileName), minutes, seconds);
-            DrawButton(btnGame[0], ButtonColor, ButtonTextColor);
-            DrawButton(btnGame[2], ButtonColor, ButtonTextColor);
-            ActiveButton(btnGame, 0, 3);
             stopTimer = 1;
+            GameIsFinised = true;
+           
+            CompleteMenu(GameBoardFileName);
         }
-        bool SomethingHappend = false;
+        
         POINT mouse;
         GetCursorPos(&mouse);
         if (!GameIsFinised)
@@ -1035,7 +1087,7 @@ void DrawLevel(string GameBoardFileName,void back())
         if (!SomethingHappend)
         {
             MouseDraggingPiece(Fence[0]);
-            ActiveButton(btnGame, 0, 3);
+            ActiveButton(btnGame, 1, 3);
             while(kbhit())//pe scurt rezolva CACATUL ala de bug de disparea gardul principal
                 getch();//ramanea pe buffer cacartere , un cacat
         }
@@ -1860,7 +1912,7 @@ void SettingsMenu()
     SettingButtons[2] = {LeftBorder, UpBorder+60, 150, 40, languageText[languageStatus].restartLevel, DeleteProgressConfirmationMenu};
     SettingButtons[3] = {LeftBorder, UpBorder+120, 150, 40, languageText[languageStatus].musicOnOff, musicStatus};
     SettingButtons[4] = {LeftBorder, UpBorder+180, 150, 40, languageText[languageStatus].language, SelectLanguageMenu};
-    SettingButtons[5] = {LeftBorder, UpBorder+240, 150, 40, "Credits", CreditsMenu};
+    SettingButtons[5] = {LeftBorder, UpBorder+240, 150, 40,languageText[languageStatus].credits, CreditsMenu};
     int page1 = 0;
     while (true)
     {
@@ -1953,7 +2005,7 @@ void ThemeMenu()
 void writeNameCredits(int x,int y)
 {
     char text[100];
-    int padding=0;
+    int padding=1;
     ifstream fin("Credits.txt");
     while(fin.getline(text,100))
         outtextxy(x-textwidth(text)/2,y-padding*30,text),++padding;
