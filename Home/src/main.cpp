@@ -12,7 +12,7 @@
 
 using namespace std;
 
-#define ThemeNumber 2
+#define ThemeNumber 3
 
 const unsigned length = 9, width = 7;
 
@@ -95,6 +95,7 @@ struct language{
     string defaultTheme;
     string chritmasTheme;
     string credits;
+    string NextLevel;
 }languageText[10];
 void readLanguage()
 {
@@ -133,6 +134,7 @@ void readLanguage()
         getline(fin,languageText[i].defaultTheme);
         getline(fin,languageText[i].chritmasTheme);
         getline(fin,languageText[i].credits);
+        getline(fin,languageText[i].NextLevel);
         fin.close();
     }
 }
@@ -1020,7 +1022,7 @@ void CompleteMenu(string GameBoardFileName)
         setcolor(WHITE); // Setează culoarea textului
         putimage(0, 0, LevelCompleteBuffer[theme], COPY_PUT);
         if (GameBoardFileName[0] == 'G')
-            btnGame[3] = {getmaxx() - 300, getmaxy() - 100, 150, 40, "Next Level", [GameBoardFileName]()
+            btnGame[3] = {getmaxx() - 300, getmaxy() - 100, 150, 40, languageText[languageStatus].NextLevel, [GameBoardFileName]()
                           { NextLevel(NumberMainLevel(GameBoardFileName)); }};
         int x = 290, y = 270;
         bar(x, y, 1250, 630);
@@ -1112,13 +1114,13 @@ void LoadingScreen(int progress)
     char percent[5];                     // Buffer suficient pentru numere între 0 și 100 + '%'
     sprintf(percent, "%d %%", progress); // Formatăm ca procentaj
     outtextxy(getmaxx() / 2 - 25, getmaxy() / 2, percent);
-    // delay(100);
+    delay(100);
     setvisualpage(1);
 }
 
 void UploadImages()
 {
-    int progress = 0, percent = 100 / 29;
+    int progress = 0, percent = 100 / 40;
 
     readimagefile("Images/SettingsBackGround.jpg", 0, 0, getmaxx(), getmaxy());
     settingsBackgroundBuffer = malloc(imagesize(0, 0, getmaxx(), getmaxy()));
@@ -1297,6 +1299,92 @@ void UploadImages()
     progress += percent;
     LoadingScreen(progress);
 
+    //dark souls
+    readimagefile("Images/background.jpg", 0, 0, getmaxx(), getmaxy());
+    BackgroundBuffer[2] = malloc(imagesize(0, 0, getmaxx(), getmaxy()));
+    getimage(0, 0, getmaxx(), getmaxy(), BackgroundBuffer[2]);
+
+    progress += percent;
+    LoadingScreen(progress);
+
+    readimagefile("Images/DarkMenuBackground.jpg", 0, 0, getmaxx(), getmaxy());
+    MenuBackGroundBuffer[2] = malloc(imagesize(0, 0, getmaxx(), getmaxy()));
+    getimage(0, 0, getmaxx(), getmaxy(), MenuBackGroundBuffer[2]);
+    progress += percent;
+    LoadingScreen(progress);
+
+    readimagefile("Images/LevelComplite.jpg", 0, 0, getmaxx(), getmaxy());
+    LevelCompleteBuffer[2] = malloc(imagesize(0, 0, getmaxx(), getmaxy()));
+    getimage(0, 0, getmaxx(), getmaxy(), LevelCompleteBuffer[2]);
+    progress += percent;
+    LoadingScreen(progress);
+
+    readimagefile("Images/GameRules.jpg", 0, 0, getmaxx(), getmaxy());
+    GameRulesBuffer[2] = malloc(imagesize(0, 0, getmaxx(), getmaxy()));
+    getimage(0, 0, getmaxx(), getmaxy(), GameRulesBuffer[2]);
+    progress += percent;
+    LoadingScreen(progress);
+
+    readimagefile("Images/levelBackground.jpg", 0, 0, getmaxx(), getmaxy());
+    LevelMenuBackgroundBuffer[2] = malloc(imagesize(0, 0, getmaxx(), getmaxy()));
+    getimage(0, 0, getmaxx(), getmaxy(), LevelMenuBackgroundBuffer[2]);
+    progress += percent;
+    LoadingScreen(progress);
+
+    readimagefile("Images/horse.jpg", 0, 0, gbSideLength, gbSideLength);
+    HorseBuffer[2] = malloc(imagesize(0, 0, gbSideLength, gbSideLength));
+    getimage(0, 0, gbSideLength, gbSideLength, HorseBuffer[2]);
+    progress += percent;
+    LoadingScreen(progress);
+
+    readimagefile("Images/cow.jpg", 0, 0, gbSideLength, gbSideLength);
+    CowBuffer[2] = malloc(imagesize(0, 0, gbSideLength, gbSideLength));
+    getimage(0, 0, gbSideLength, gbSideLength, CowBuffer[2]);
+    progress += percent;
+    LoadingScreen(progress);
+
+    readimagefile("Images/sheep.jpg", 0, 0, gbSideLength, gbSideLength);
+    SheepBuffer[2] = malloc(imagesize(0, 0, gbSideLength, gbSideLength));
+    getimage(0, 0, gbSideLength, gbSideLength, SheepBuffer[2]);
+    progress += percent;
+    LoadingScreen(progress);
+
+    readimagefile("Images/pig.jpg", 0, 0, gbSideLength, gbSideLength);
+    PigBuffer[2] = malloc(imagesize(0, 0, gbSideLength, gbSideLength));
+    getimage(0, 0, gbSideLength, gbSideLength, PigBuffer[2]);
+    progress += percent;
+    LoadingScreen(progress);
+
+    readimagefile("Images/grass.jpg", 0, 0, gbSideLength, gbSideLength);
+    GrassBuffer[2] = malloc(imagesize(0, 0, gbSideLength, gbSideLength));
+    getimage(0, 0, gbSideLength, gbSideLength, GrassBuffer[2]);
+    progress += percent;
+    LoadingScreen(progress);
+
+    readimagefile("Images/fence.jpg", 0, 0, gbSideLength, gbSideLength);
+    FenceBuffer[2] = malloc(imagesize(0, 0, gbSideLength, gbSideLength));
+    getimage(0, 0, gbSideLength, gbSideLength, FenceBuffer[2]);
+    progress += percent;
+    LoadingScreen(progress);
+
+    readimagefile("Images/Rock.jpg", 0, 0, gbSideLength, gbSideLength);
+    EmptyAnimalBuffer[2] = malloc(imagesize(0, 0, gbSideLength, gbSideLength));
+    getimage(0, 0, gbSideLength, gbSideLength, EmptyAnimalBuffer[2]);
+    progress += percent;
+    LoadingScreen(progress);
+
+    readimagefile("Images/Water.jpg", 0, 0, gbSideLength, gbSideLength);
+    WaterBuffer[2] = malloc(imagesize(0, 0, gbSideLength, gbSideLength));
+    getimage(0, 0, gbSideLength, gbSideLength, WaterBuffer[2]);
+    progress += percent;
+    LoadingScreen(progress);
+
+    readimagefile("Images/fence.jpg", 0, 0, (gbSideLength) / 2, (gbSideLength) / 2);
+    MiniFenceBuffer[2] = malloc(imagesize(0, 0, (gbSideLength) / 2, (gbSideLength) / 2));
+    getimage(0, 0, (gbSideLength) / 2, (gbSideLength) / 2, MiniFenceBuffer[2]);
+    progress += percent;
+    LoadingScreen(progress);
+
     cleardevice();
     setvisualpage(0);
 }
@@ -1348,7 +1436,7 @@ void SelectLevelMenu()
         DrawButton(BtnLevel[61], ButtonColor, ButtonTextColor);
         for (int i = 0; i <= 31; i++)
         {
-            if (level[i].isSolved == false)
+            if (level[i].isSolved == false||i==31||i==0)
                 DrawButton(BtnLevel[i], ButtonColor, ButtonTextColor);
             else{
                 string saveText=BtnLevel[i].text;
@@ -1378,7 +1466,7 @@ void SelectLevel2Menu()
         putimage(0, 0, LevelMenuBackgroundBuffer[theme], COPY_PUT);
         for (int i = 0; i <= 31; i++)
         {
-            if (level[i + 30].isSolved == false)
+            if (level[i + 30].isSolved == false||i==31||i==0)
                 DrawButton(BtnLevel1[i], ButtonColor, ButtonTextColor);
             else{
                  string saveText=BtnLevel1[i].text;
@@ -1882,7 +1970,16 @@ void ChritmasTheme()
     ButtonHoverTextColor = ButtonTextColor = WHITE;
     DrawMenu();
 }
-
+void DarkSoulsTheme()
+{
+    theme = 2;
+    if(musicOnOff)
+    PlaySound(TEXT("Sounds/christmasmusic.wav"), NULL, SND_FILENAME | SND_ASYNC | SND_LOOP);
+    ButtonColor = RGB(50, 50, 50);
+    ButtonHoverColor = RGB(25, 25, 25);
+    ButtonHoverTextColor = ButtonTextColor = WHITE;
+    DrawMenu();
+}
 void musicStatus()
 {
     musicOnOff= int(musicOnOff+1)%2;
@@ -1893,6 +1990,10 @@ void musicStatus()
              PlaySound(TEXT("Sounds/christmasmusic.wav"), NULL, SND_FILENAME | SND_ASYNC | SND_LOOP);
         }
         if(theme==0)
+        {
+             PlaySound(TEXT("Sounds/music.wav"), NULL, SND_FILENAME | SND_ASYNC | SND_LOOP);
+        }
+         if(theme==2)
         {
              PlaySound(TEXT("Sounds/music.wav"), NULL, SND_FILENAME | SND_ASYNC | SND_LOOP);
         }
@@ -1978,6 +2079,7 @@ void ThemeMenu()
     themeBtn[0] = {gbSideLength, getmaxy() - 100, 150, 40, languageText[languageStatus].back, SettingsMenu};
     themeBtn[1] = {LeftBorder+200, UpBorder, 150, 40, languageText[languageStatus].defaultTheme, defaultTheme};
     themeBtn[2] = {LeftBorder+200, UpBorder + 60, 150, 40,languageText[languageStatus].chritmasTheme, ChritmasTheme};
+    themeBtn[3] = {LeftBorder+200, UpBorder + 120, 150, 40,"Dark Souls", DarkSoulsTheme};
     int page1 = 0;
     setvisualpage(1);
     setactivepage(0);
@@ -1998,7 +2100,8 @@ void ThemeMenu()
         DrawButton(themeBtn[0], RGB(50, 50, 50),WHITE);
         DrawButton(themeBtn[1], RGB(50, 50, 50),WHITE);
         DrawButton(themeBtn[2],RGB(50, 50, 50),WHITE);
-        ActiveButton(themeBtn, 0, 3);
+        DrawButton(themeBtn[3],RGB(50, 50, 50),WHITE);
+        ActiveButton(themeBtn, 0, 4);
         page1 = 1 - page1;
     }
 }
@@ -2036,6 +2139,8 @@ void CreditsMenu()
                 defaultTheme();
             if(theme==1)
                 ChritmasTheme();
+             if(theme==2)
+                DarkSoulsTheme();
         }
            
         page1 = 1 - page1;
