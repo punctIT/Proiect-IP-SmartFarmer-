@@ -1300,7 +1300,7 @@ void UploadImages()
     LoadingScreen(progress);
 
     //dark souls
-    readimagefile("Images/background.jpg", 0, 0, getmaxx(), getmaxy());
+    readimagefile("Images/Darkbackground.jpg", 0, 0, getmaxx(), getmaxy());
     BackgroundBuffer[2] = malloc(imagesize(0, 0, getmaxx(), getmaxy()));
     getimage(0, 0, getmaxx(), getmaxy(), BackgroundBuffer[2]);
 
@@ -1313,7 +1313,7 @@ void UploadImages()
     progress += percent;
     LoadingScreen(progress);
 
-    readimagefile("Images/LevelComplite.jpg", 0, 0, getmaxx(), getmaxy());
+    readimagefile("Images/DarkLevelComplite.jpg", 0, 0, getmaxx(), getmaxy());
     LevelCompleteBuffer[2] = malloc(imagesize(0, 0, getmaxx(), getmaxy()));
     getimage(0, 0, getmaxx(), getmaxy(), LevelCompleteBuffer[2]);
     progress += percent;
@@ -1325,61 +1325,61 @@ void UploadImages()
     progress += percent;
     LoadingScreen(progress);
 
-    readimagefile("Images/levelBackground.jpg", 0, 0, getmaxx(), getmaxy());
+    readimagefile("Images/DarklevelBackground.jpg", 0, 0, getmaxx(), getmaxy());
     LevelMenuBackgroundBuffer[2] = malloc(imagesize(0, 0, getmaxx(), getmaxy()));
     getimage(0, 0, getmaxx(), getmaxy(), LevelMenuBackgroundBuffer[2]);
     progress += percent;
     LoadingScreen(progress);
 
-    readimagefile("Images/horse.jpg", 0, 0, gbSideLength, gbSideLength);
+    readimagefile("Images/Darkhorse.jpg", 0, 0, gbSideLength, gbSideLength);
     HorseBuffer[2] = malloc(imagesize(0, 0, gbSideLength, gbSideLength));
     getimage(0, 0, gbSideLength, gbSideLength, HorseBuffer[2]);
     progress += percent;
     LoadingScreen(progress);
 
-    readimagefile("Images/cow.jpg", 0, 0, gbSideLength, gbSideLength);
+    readimagefile("Images/Darkcow.jpg", 0, 0, gbSideLength, gbSideLength);
     CowBuffer[2] = malloc(imagesize(0, 0, gbSideLength, gbSideLength));
     getimage(0, 0, gbSideLength, gbSideLength, CowBuffer[2]);
     progress += percent;
     LoadingScreen(progress);
 
-    readimagefile("Images/sheep.jpg", 0, 0, gbSideLength, gbSideLength);
+    readimagefile("Images/Darksheep.jpg", 0, 0, gbSideLength, gbSideLength);
     SheepBuffer[2] = malloc(imagesize(0, 0, gbSideLength, gbSideLength));
     getimage(0, 0, gbSideLength, gbSideLength, SheepBuffer[2]);
     progress += percent;
     LoadingScreen(progress);
 
-    readimagefile("Images/pig.jpg", 0, 0, gbSideLength, gbSideLength);
+    readimagefile("Images/Darkpig.jpg", 0, 0, gbSideLength, gbSideLength);
     PigBuffer[2] = malloc(imagesize(0, 0, gbSideLength, gbSideLength));
     getimage(0, 0, gbSideLength, gbSideLength, PigBuffer[2]);
     progress += percent;
     LoadingScreen(progress);
 
-    readimagefile("Images/grass.jpg", 0, 0, gbSideLength, gbSideLength);
+    readimagefile("Images/Darkgrass.jpg", 0, 0, gbSideLength, gbSideLength);
     GrassBuffer[2] = malloc(imagesize(0, 0, gbSideLength, gbSideLength));
     getimage(0, 0, gbSideLength, gbSideLength, GrassBuffer[2]);
     progress += percent;
     LoadingScreen(progress);
 
-    readimagefile("Images/fence.jpg", 0, 0, gbSideLength, gbSideLength);
+    readimagefile("Images/Darkfence.jpg", 0, 0, gbSideLength, gbSideLength);
     FenceBuffer[2] = malloc(imagesize(0, 0, gbSideLength, gbSideLength));
     getimage(0, 0, gbSideLength, gbSideLength, FenceBuffer[2]);
     progress += percent;
     LoadingScreen(progress);
 
-    readimagefile("Images/Rock.jpg", 0, 0, gbSideLength, gbSideLength);
+    readimagefile("Images/DarkRock.jpg", 0, 0, gbSideLength, gbSideLength);
     EmptyAnimalBuffer[2] = malloc(imagesize(0, 0, gbSideLength, gbSideLength));
     getimage(0, 0, gbSideLength, gbSideLength, EmptyAnimalBuffer[2]);
     progress += percent;
     LoadingScreen(progress);
 
-    readimagefile("Images/Water.jpg", 0, 0, gbSideLength, gbSideLength);
+    readimagefile("Images/Darkwater.jpg", 0, 0, gbSideLength, gbSideLength);
     WaterBuffer[2] = malloc(imagesize(0, 0, gbSideLength, gbSideLength));
     getimage(0, 0, gbSideLength, gbSideLength, WaterBuffer[2]);
     progress += percent;
     LoadingScreen(progress);
 
-    readimagefile("Images/fence.jpg", 0, 0, (gbSideLength) / 2, (gbSideLength) / 2);
+    readimagefile("Images/Darkfence.jpg", 0, 0, (gbSideLength) / 2, (gbSideLength) / 2);
     MiniFenceBuffer[2] = malloc(imagesize(0, 0, (gbSideLength) / 2, (gbSideLength) / 2));
     getimage(0, 0, (gbSideLength) / 2, (gbSideLength) / 2, MiniFenceBuffer[2]);
     progress += percent;
@@ -1974,7 +1974,7 @@ void DarkSoulsTheme()
 {
     theme = 2;
     if(musicOnOff)
-    PlaySound(TEXT("Sounds/christmasmusic.wav"), NULL, SND_FILENAME | SND_ASYNC | SND_LOOP);
+    PlaySound(NULL,0,0);
     ButtonColor = RGB(50, 50, 50);
     ButtonHoverColor = RGB(25, 25, 25);
     ButtonHoverTextColor = ButtonTextColor = WHITE;
@@ -1995,7 +1995,7 @@ void musicStatus()
         }
          if(theme==2)
         {
-             PlaySound(TEXT("Sounds/music.wav"), NULL, SND_FILENAME | SND_ASYNC | SND_LOOP);
+            PlaySound(NULL,0,0);
         }
     }
     else {
