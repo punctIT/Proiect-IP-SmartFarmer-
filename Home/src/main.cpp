@@ -8,6 +8,8 @@
 #include <time.h>
 #include <mmsystem.h>
 #include <windows.h>
+#include <queue>
+#include <vector>
 
 
 using namespace std;
@@ -417,7 +419,7 @@ bool AnimalsAreFenced()
     }
     return true;
 }
-void WriteRandomGbFIle()
+void WriteRandomGbFile()
 {
     ofstream fout("CustomLevels/Random.txt");
     for (int i = 0; i < width; i++)
@@ -428,110 +430,140 @@ void WriteRandomGbFIle()
     }
     fout.close();
 }
+
+void RotatePiece(std::vector<std::vector<int>>& piece)
+{
+    int n = piece.size();
+    std::vector<std::vector<int>> rotated(n, std::vector<int>(n));
+    for (int i = 0; i < n; ++i)
+        for (int j = 0; j < n; ++j)
+            rotated[j][n - 1 - i] = piece[i][j];
+    piece = rotated;
+}
+
+bool IsSolvable()
+{
+    std::vector<std::pair<int, int>> animals;
+    for (int i = 1; i < width - 1; i++)
+        for (int j = 1; j < length - 1; j++)
+            if (GameBoard[i][j] != '0' && GameBoard[i][j] != '#' && GameBoard[i][j] != '*')
+                animals.push_back({i, j});
+
+    if (animals.size() < 2)
+        return false;
+
+    for (size_t a = 0; a < animals.size(); ++a)
+    {
+        for (size_t b = a + 1; b < animals.size(); ++b)
+        {
+            int x1 = animals[a].first;
+            int y1 = animals[a].second;
+            int x2 = animals[b].first;
+            int y2 = animals[b].second;
+
+            if (GameBoard[x1][y1] == GameBoard[x2][y2])
+                continue;
+
+            std::queue<std::pair<int, int>> q;
+            bool visited[width][length] = {};
+            q.push({x1, y1});
+            visited[x1][y1] = true;
+
+            while (!q.empty())
+            {
+                int x = q.front().first;
+                int y = q.front().second;
+                q.pop();
+
+                const int dx[] = {-1, 1, 0, 0};
+                const int dy[] = {0, 0, -1, 1};
+
+                for (int d = 0; d < 4; ++d)
+                {
+                    int nx = x + dx[d], ny = y + dy[d];
+                    if (nx >= 0 && nx < width && ny >= 0 && ny < length && !visited[nx][ny])
+                    {
+                        if (GameBoard[nx][ny] == '0' || GameBoard[nx][ny] == '*')
+                        {
+                            visited[nx][ny] = true;
+                            q.push({nx, ny});
+                        }
+                        else if (nx == x2 && ny == y2)
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return true;
+}
+
+void PlaceAnimalsAndWater()
+{
+    char Type[4] = {'C', 'P', 'S', 'H'};
+    bool placedAnimals[4] = {false};
+    int numAnimals = 0;
+
+    srand(time(0));
+
+    for (int i = 0; i < width; i++)
+        for (int j = 0; j < length; j++)
+            GameBoard[i][j] = (i == 0 || i == width - 1 || j == 0 || j == length - 1) ? '#' : ((i % 2 == 1 && j % 2 == 1) ? '*' : '0');
+
+    while (numAnimals < 2)
+    {
+        int animalIndex = rand() % 4;
+        if (!placedAnimals[animalIndex])
+        {
+            placedAnimals[animalIndex] = true;
+            numAnimals++;
+            int howMany = 1 + rand() % 2;
+            for (int k = 0; k < howMany; k++)
+            {
+                int x, y;
+                do
+                {
+                    x = 1 + 2 * (rand() % 3);
+                    y = 1 + 2 * (rand() % 4);
+                } while (GameBoard[x][y] != '*');
+                GameBoard[x][y] = Type[animalIndex];
+            }
+        }
+    }
+
+    for (int i = 0; i < 4; ++i)
+    {
+        if (placedAnimals[i])
+        {
+            int x, y;
+            do
+            {
+                x = 1 + 2 * (rand() % 3);
+                y = 1 + 2 * (rand() % 4);
+            } while (GameBoard[x][y] != '*');
+            GameBoard[x][y] = 'W';
+        }
+    }
+}
+
+
 void GenerateRandomGameboard()
 {
-    srand(time(0));
-    ReadGameBoard("GameBoards/GameBoard.txt");
-    char Type[4] = {'C', 'P', 'S', 'H'};
-    char A1 = '0', A2 = '0';    // trebuie macar 2 tipuri de animale
-    bool HasWater = rand() % 2; // daca e nivel cu apa
-    for (int i = 0; i < 4; i++)
-        if (rand() % 2) // sanse 50% sa fie animalul respectiv
-        {
-            int HowMany = 1 + rand() % 2;
-            for (int j = 1; j <= HowMany; j++)
-            {
-                int x, y;
-                do
-                {
-                    x = 1 + 2 * (rand() % 3);
-                    y = 1 + 2 * (rand() % 4);
-                } while (GameBoard[x][y] != '*');
-                GameBoard[x][y] = Type[i]; // pune animalele
-                if (A1 == '0')
-                    A1 = Type[i];
-                else if (A2 == '0')
-                    A2 = Type[i];
-            }
-            if (HasWater)
-            {
-                int x, y;
-                do
-                {
-                    x = 1 + 2 * (rand() % 3);
-                    y = 1 + 2 * (rand() % 4);
-                } while (GameBoard[x][y] != '*');
-                GameBoard[x][y] = 'W';
-            }
-        }
-    if (A1 == '0')
+    int attempts = 0;
+    const int maxAttempts = 1000; // Previne blocarea
+    do
     {
-        int HowMany = 1 + rand() % 2;
-        A1 = Type[rand() % 4];
-        for (int j = 1; j <= HowMany; j++)
+        PlaceAnimalsAndWater();
+        attempts++;
+        if (attempts > maxAttempts)
         {
-            int x, y;
-            do
-            {
-                x = 1 + 2 * (rand() % 3);
-                y = 1 + 2 * (rand() % 4);
-            } while (GameBoard[x][y] != '*');
-            GameBoard[x][y] = A1;
+            return;
         }
-        if (HasWater)
-        {
-            int x, y;
-            do
-            {
-                x = 1 + 2 * (rand() % 3);
-                y = 1 + 2 * (rand() % 4);
-            } while (GameBoard[x][y] != '*');
-            GameBoard[x][y] = 'W';
-        }
-    }
-    if (A2 == '0')
-    {
-        int HowMany = 1 + rand() % 2;
-        A2 = Type[rand() % 4];
-        while (A1 == A2)
-            A2 = Type[rand() % 4];
-        for (int j = 1; j <= HowMany; j++)
-        {
-            int x, y;
-            do
-            {
-                x = 1 + 2 * (rand() % 3);
-                y = 1 + 2 * (rand() % 4);
-            } while (GameBoard[x][y] != '*');
-            GameBoard[x][y] = A2;
-        }
-        if (HasWater)
-        {
-            int x, y;
-            do
-            {
-                x = 1 + 2 * (rand() % 3);
-                y = 1 + 2 * (rand() % 4);
-            } while (GameBoard[x][y] != '*');
-            GameBoard[x][y] = 'W';
-        }
-    }
-    bool cow = 0, pig = 0, sheep = 0, horse = 0;
-    for (int i = 0; i < width; i++)
-        for (int q = 0; q < length; q++)
-        {
-            if (GameBoard[i][q] == 'C')
-                cow = 1;
-            if (GameBoard[i][q] == 'H')
-                horse = 1;
-            if (GameBoard[i][q] == 'P')
-                pig = 1;
-            if (GameBoard[i][q] == 'S')
-                sheep = 1;
-        }
-    if (cow + sheep + pig + horse < 2)
-        GenerateRandomGameboard();
-    WriteRandomGbFIle();
+    } while (!IsSolvable() || !AnimalsAreFenced());
+
+    WriteRandomGbFile();
 }
 
 void MarkFinisedLevel(int n, int minutes, int seconds)
@@ -1690,6 +1722,7 @@ void LevelSave()
     int NumberOfCustomLevels = 0;
     int x = getmaxx() / 4, y = getmaxy() / 2;
     strcpy(Savetext, languageText[languageStatus].typeHere.c_str());
+ 
     int page1 = 0;
    
     int cursorPos = 0;        // Poziția cursorului în text
