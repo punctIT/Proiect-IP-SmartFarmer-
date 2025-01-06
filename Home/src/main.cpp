@@ -495,37 +495,53 @@ bool TryPlaceFenceCombination(GamePieces Fence[4], int index)
         }
     return false;
 }
-
+void copyCharMatrix(char a[width+1][length+1],char b[width+1][length+1])
+{
+    for(int i=0;i<width;i++)
+        for(int q=0;q<length;q++)
+            a[i][q]=b[i][q];
+}
 bool IsSolvable()
 {
-    bool isSol = false;
     GamePieces fence[4];
-    fence[1] = Fence[3];    if(isSol==1)
-        return 1;
-    fence[2] = Fence[2];
-    fence[3] = Fence[1];
-    if (TryPlaceFenceCombination(fence, 1))
-        ;
-    isSol = 1;
-
-    if (isSol == 1)
-        return 1;
-    fence[1] = Fence[2];
-    fence[2] = Fence[3];
-    fence[3] = Fence[1];
-
-    if (TryPlaceFenceCombination(fence, 1))
-        ;
-    isSol = 1;
-    if (isSol == 1)
-        return 1;
-    fence[1] = Fence[1];
-    fence[2] = Fence[2];
-    fence[3] = Fence[3];
-    if (TryPlaceFenceCombination(fence, 1))
-        ;
-    isSol = 1;
-    return isSol;
+    char aux[width+1][length+1];
+    copyCharMatrix(aux,GameBoard);
+    fence[1]=Fence[1];
+    fence[2]=fence[2];
+    fence[3]=fence[3];
+    if(TryPlaceFenceCombination(fence,1))
+        return true;
+    copyCharMatrix(GameBoard,aux);
+    fence[1]=Fence[1];
+    fence[2]=fence[3];
+    fence[3]=fence[2];
+    if(TryPlaceFenceCombination(fence,1))
+          return true;
+    copyCharMatrix(GameBoard,aux);
+    fence[1]=Fence[2];
+    fence[2]=fence[1];
+    fence[3]=fence[3];
+    if(TryPlaceFenceCombination(fence,1))
+          return true;
+     copyCharMatrix(GameBoard,aux);
+    fence[1]=Fence[2];
+    fence[2]=fence[3];
+    fence[3]=fence[1];
+    if(TryPlaceFenceCombination(fence,1))
+          return true;
+     copyCharMatrix(GameBoard,aux);
+    fence[1]=Fence[3];
+    fence[2]=fence[1];
+    fence[3]=fence[2];
+    if(TryPlaceFenceCombination(fence,1))
+          return true;
+    copyCharMatrix(GameBoard,aux);
+    fence[1]=Fence[3];
+    fence[2]=fence[2];
+    fence[3]=fence[1];
+    if(TryPlaceFenceCombination(fence,1))
+          return true;
+    return false;
 }
 void PlaceAnimalsAndWater()
 {
@@ -580,19 +596,16 @@ void GenerateRandomGameboard()
     redo:
     PlaceAnimalsAndWater();
     char newGB[width+1][length+1];
-    for(int i=0;i<width;i++)
-        for(int q=0;q<length;q++)
-            newGB[i][q]=GameBoard[i][q];
+    copyCharMatrix(newGB,GameBoard);
     if(IsSolvable())
     {
-        for(int i=0;i<width;i++)
-        for(int q=0;q<length;q++)
-            GameBoard[i][q]=newGB[i][q];
+        copyCharMatrix(GameBoard,newGB);
         WriteRandomGbFile();
     }
         
     else goto redo;
 }
+
 
 void MarkFinisedLevel(int n, int minutes, int seconds)
 {
@@ -720,7 +733,7 @@ void ActiveButton(Buttons btnGame[], int st, int en)
         for (int i = st; i < en; i++)
             if (mouse.x > btnGame[i].x && mouse.y > btnGame[i].y && mouse.x < btnGame[i].x + btnGame[i].length && mouse.y < btnGame[i].y + btnGame[i].height)
             {
-               // Beep(500, 100);
+                // Beep(500, 100);
                 DrawButton(btnGame[i], ButtonHoverColor, ButtonHoverColor);
                 btnGame[i].Function();
             }
@@ -1749,11 +1762,13 @@ void LevelSave()
     
     int NumberOfCustomLevels = 0;
     int x = getmaxx() / 4, y = getmaxy() / 2;
+    char newGB[width+1][length+1];
+    copyCharMatrix(newGB,GameBoard);
     if(IsSolvable())
-    strcpy(Savetext, languageText[languageStatus].typeHere.c_str());
+        strcpy(Savetext, languageText[languageStatus].typeHere.c_str());
     else strcpy(Savetext,"IMPOSIBIL");
+     copyCharMatrix(GameBoard,newGB);
     int page1 = 0;
-   
     int cursorPos = 0;        // Poziția cursorului în text
     int maxChars = (700) / 8; // Estimează câte caractere încap pe lățimea chenarului
     setvisualpage(1);
