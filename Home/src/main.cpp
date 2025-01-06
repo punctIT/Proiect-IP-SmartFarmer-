@@ -1187,7 +1187,7 @@ void LoadingScreen(int progress)
     char percent[5];                     // Buffer suficient pentru numere între 0 și 100 + '%'
     sprintf(percent, "%d %%", progress); // Formatăm ca procentaj
     outtextxy(getmaxx() / 2 - 25, getmaxy() / 2, percent);
-  //  delay(100);
+    delay(100);
     setvisualpage(1);
 }
 
