@@ -430,76 +430,103 @@ void WriteRandomGbFile()
     }
     fout.close();
 }
-
-void RotatePiece(std::vector<std::vector<int>>& piece)
+bool TryPlaceFenceCombination(GamePieces Fence[4], int index)
 {
-    int n = piece.size();
-    std::vector<std::vector<int>> rotated(n, std::vector<int>(n));
-    for (int i = 0; i < n; ++i)
-        for (int j = 0; j < n; ++j)
-            rotated[j][n - 1 - i] = piece[i][j];
-    piece = rotated;
+    for (int i = 0; i < width; i++)
+        for (int j = 0; j < length; j++)
+        {
+            NormalizeFence(Fence[index]);
+            GamePieces newFence = Fence[index];
+            for (int q = 0; q <= 3; q++)
+            {
+                MoveFence(newFence, i, j); 
+                if (VerifyFencePosition(newFence))
+                {
+                    AddFence(newFence);
+                    if (AnimalsAreFenced())
+                        return true;
+                    for (int i1 = 0; i1 < width; i1++)
+                        for (int j1 = 0; j1 < length; j1++)
+                        {
+                            NormalizeFence(Fence[index + 1]); 
+                            GamePieces newFence1 = Fence[index + 1];
+                            for (int q1 = 0; q1 <= 3; q1++)
+                            {
+                                MoveFence(newFence1, i1, j1); 
+                                if (VerifyFencePosition(newFence1))
+                                {
+                                    AddFence(newFence1);
+                                    if (AnimalsAreFenced())
+                                        return true;
+                                    for (int i2 = 0; i2 < width; i2++)
+                                        for (int j2 = 0; j2 < length; j2++)
+                                        {
+                                            NormalizeFence(Fence[index + 2]); 
+                                            GamePieces newFence2 = Fence[index + 2];
+                                            for (int q2 = 0; q2 <= 3; q2++)
+                                            {
+                                                MoveFence(newFence2, i2, j2);
+                                                if (VerifyFencePosition(newFence2))
+                                                {
+                                                    AddFence(newFence2);
+
+                                                    RemoveFence(newFence2);
+                                                }
+                                                newFence2 = Fence[index + 2];
+                                                for (int r2 = 0; r2 < q2; r2++)
+                                                    RotateFence(newFence2);
+                                            }
+                                        }
+
+                                    RemoveFence(newFence1);
+                                }
+                                newFence1 = Fence[index + 1];
+                                for (int r1 = 0; r1 < q1; r1++)
+                                    RotateFence(newFence1);
+                            }
+                        }
+
+                    RemoveFence(newFence);
+                }
+                newFence = Fence[index];
+                for (int r = 0; r < q; r++)
+                    RotateFence(newFence);
+            }
+        }
+    return false;
 }
 
 bool IsSolvable()
 {
-    std::vector<std::pair<int, int>> animals;
-    for (int i = 1; i < width - 1; i++)
-        for (int j = 1; j < length - 1; j++)
-            if (GameBoard[i][j] != '0' && GameBoard[i][j] != '#' && GameBoard[i][j] != '*')
-                animals.push_back({i, j});
+    bool isSol = false;
+    GamePieces fence[4];
+    fence[1] = Fence[3];    if(isSol==1)
+        return 1;
+    fence[2] = Fence[2];
+    fence[3] = Fence[1];
+    if (TryPlaceFenceCombination(fence, 1))
+        ;
+    isSol = 1;
 
-    if (animals.size() < 2)
-        return false;
+    if (isSol == 1)
+        return 1;
+    fence[1] = Fence[2];
+    fence[2] = Fence[3];
+    fence[3] = Fence[1];
 
-    for (size_t a = 0; a < animals.size(); ++a)
-    {
-        for (size_t b = a + 1; b < animals.size(); ++b)
-        {
-            int x1 = animals[a].first;
-            int y1 = animals[a].second;
-            int x2 = animals[b].first;
-            int y2 = animals[b].second;
-
-            if (GameBoard[x1][y1] == GameBoard[x2][y2])
-                continue;
-
-            std::queue<std::pair<int, int>> q;
-            bool visited[width][length] = {};
-            q.push({x1, y1});
-            visited[x1][y1] = true;
-
-            while (!q.empty())
-            {
-                int x = q.front().first;
-                int y = q.front().second;
-                q.pop();
-
-                const int dx[] = {-1, 1, 0, 0};
-                const int dy[] = {0, 0, -1, 1};
-
-                for (int d = 0; d < 4; ++d)
-                {
-                    int nx = x + dx[d], ny = y + dy[d];
-                    if (nx >= 0 && nx < width && ny >= 0 && ny < length && !visited[nx][ny])
-                    {
-                        if (GameBoard[nx][ny] == '0' || GameBoard[nx][ny] == '*')
-                        {
-                            visited[nx][ny] = true;
-                            q.push({nx, ny});
-                        }
-                        else if (nx == x2 && ny == y2)
-                        {
-                            return false;
-                        }
-                    }
-                }
-            }
-        }
-    }
-    return true;
+    if (TryPlaceFenceCombination(fence, 1))
+        ;
+    isSol = 1;
+    if (isSol == 1)
+        return 1;
+    fence[1] = Fence[1];
+    fence[2] = Fence[2];
+    fence[3] = Fence[3];
+    if (TryPlaceFenceCombination(fence, 1))
+        ;
+    isSol = 1;
+    return isSol;
 }
-
 void PlaceAnimalsAndWater()
 {
     char Type[4] = {'C', 'P', 'S', 'H'};
@@ -548,22 +575,23 @@ void PlaceAnimalsAndWater()
     }
 }
 
-
 void GenerateRandomGameboard()
 {
-    int attempts = 0;
-    const int maxAttempts = 1000; // Previne blocarea
-    do
+    redo:
+    PlaceAnimalsAndWater();
+    char newGB[width+1][length+1];
+    for(int i=0;i<width;i++)
+        for(int q=0;q<length;q++)
+            newGB[i][q]=GameBoard[i][q];
+    if(IsSolvable())
     {
-        PlaceAnimalsAndWater();
-        attempts++;
-        if (attempts > maxAttempts)
-        {
-            return;
-        }
-    } while (!IsSolvable() || !AnimalsAreFenced());
-
-    WriteRandomGbFile();
+        for(int i=0;i<width;i++)
+        for(int q=0;q<length;q++)
+            GameBoard[i][q]=newGB[i][q];
+        WriteRandomGbFile();
+    }
+        
+    else goto redo;
 }
 
 void MarkFinisedLevel(int n, int minutes, int seconds)
@@ -1146,7 +1174,7 @@ void LoadingScreen(int progress)
     char percent[5];                     // Buffer suficient pentru numere între 0 și 100 + '%'
     sprintf(percent, "%d %%", progress); // Formatăm ca procentaj
     outtextxy(getmaxx() / 2 - 25, getmaxy() / 2, percent);
-    delay(100);
+  //  delay(100);
     setvisualpage(1);
 }
 
@@ -1721,8 +1749,9 @@ void LevelSave()
     
     int NumberOfCustomLevels = 0;
     int x = getmaxx() / 4, y = getmaxy() / 2;
+    if(IsSolvable())
     strcpy(Savetext, languageText[languageStatus].typeHere.c_str());
- 
+    else strcpy(Savetext,"IMPOSIBIL");
     int page1 = 0;
    
     int cursorPos = 0;        // Poziția cursorului în text
