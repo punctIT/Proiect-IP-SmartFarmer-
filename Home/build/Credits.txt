@@ -1,26 +1,35 @@
-Copyright [Year] [Your Name & Partner's Name]. All Rights Reserved.
+Copyright 2024. All Rights Reserved.
 
-
-- [Sound Tools, e.g., Audacity, FL Studio]
-- [Art Tools, e.g., Photoshop, Blender]
-- [Game Engine Name, e.g., Unity/Unreal Engine/Godot]
 Tools Used:
-- [Optional: Any individuals or entities you'd like to thank]
+
+- Canva (for video and photo editing)
+- Visual Studio Code
+- Code::Blocks
+- Graphics Libraries: winbgim.h, graphics.h
+
 Special Thanks To:
 
-[Your Partner's Name] - Artist, Sound Designer
-[Your Name] - Game Designer, Programmer
+- "Jingle Bell Rock" by Bobby Helms
+- "Stardew Valley" Soundtrack by ConcernedApe
+
 Developed By:
-Game Title: [Your Game's Title Here]
+[Your Partner's Name]
+Game Designer, Programmer
+[Your Name]
+Game Designer, Programmer
 
+Contributions:
 
+- Game Design:
+  [Your Name]
+- Programming (Front-End & Back-End):
+  [Your Name]
+- Art & Visual Assets:
+  [Your Partner's Name]
+- Sound Design:
+  [Your Partner's Name]
 
-
-
-
-
-
-
+Game Title: SMART FARMER
 
 
 
@@ -42,3 +51,4 @@ Game Title: [Your Game's Title Here]
 
 
 FIN.
+

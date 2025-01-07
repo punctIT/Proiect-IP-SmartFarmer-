@@ -8,8 +8,7 @@
 #include <time.h>
 #include <mmsystem.h>
 #include <windows.h>
-#include <queue>
-#include <vector>
+
 
 
 using namespace std;
@@ -2277,7 +2276,7 @@ void DeleteProgressConfirmationMenu()
         page1 = 1 - page1;
     }
 }
-// de facut :: SETTONG   THEME < MUSIC OFF/ON // DELETE PROGRESS
+
 int main()
 {
     initwindow(GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN), "", -3, -3);
